@@ -38,12 +38,12 @@ class App extends Component {
   refreshView = async () => {
     const { accounts, contract } = this.state;
     const response = await contract.methods.get().call();
-    this.setState({ storageValue: response });
+    this.setState({ storageValue: parseInt(response) });
   };
 
   clickButton = async () => {
-    const { accounts, contract } = this.state;
-    await contract.methods.set(42).send({ from: accounts[0] });
+    const { accounts, contract, storageValue } = this.state;
+    await contract.methods.set(storageValue + 1).send({ from: accounts[0] });
 
     this.refreshView();
   };
