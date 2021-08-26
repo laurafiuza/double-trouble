@@ -42,17 +42,24 @@ contract DoubleTrouble is ERC721 {
   }
 
   // sets currentForSalePrice to price
-  function putUpForSale(address _from, address _collection, uint256 _tokenId, uint256 price) external {
+  function putUpForSale(address _from, address _collection, uint256 _tokenId, uint256 _price) external {
     address currentOwner = _NFTs[_collection][_tokenId].owner;
     require(msg.sender == currentOwner, "msg.sender should be current owner of NFT");
     require(_from == currentOwner, "from address should be current owner of NFT");
-    _NFTs[_collection][_tokenId].currentForSalePrice = price; 
+    _NFTs[_collection][_tokenId].currentForSalePrice = _price; 
   }
 
   // Transfers ownership of the NFT to the _newOwner
-  // as long as price >= currentForSalePrice or price >= lastPurchasePrice * 2
-  // Moves price ether from _newOwner to the current owner
+  // as long as _price >= currentForSalePrice or _price >= lastPurchasePrice * 2
+  // Moves _price ether from _newOwner to the current owner
   // sets lastPurchasePrice = price
-  function buy(address _newOwner, address _collection, uint256 _tokenId, uint256 price) external {
+  function buy(address _newOwner, address _collection, uint256 _tokenId, uint256 _price) external {
+    // TODO: is this the right way to transfer? what about collections?
+    address currentOwner = _NFTs[_collection][_tokenId].owner;
+    require(msg.sender == currentOwner, "msg.sender should be current owner of NFT");
+    require(_newOwner != 0, "newOwner address can't be zero");
+    require((_price >= currentForSalePrice) || (_price >= lastPurchasePrice * 2)), "price should be greater than or equal to currentForSalePrice OR double the lastPurchasePrice");
+    _NFTs[_collection][_tokenId].owner = _newOwner;
+    _NFTs[_collection][_tokenId].lastPurchasePrice = _price;
   }
 }
