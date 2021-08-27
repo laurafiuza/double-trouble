@@ -1,7 +1,5 @@
-var SimpleStorage = artifacts.require("./SimpleStorage.sol");
-var SimpleCaller = artifacts.require("./SimpleCaller.sol");
+var DoubleTrouble = artifacts.require("./DoubleTrouble.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(SimpleStorage);
-  deployer.deploy(SimpleCaller);
+  deployer.deploy(DoubleTrouble);
 };
