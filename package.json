@@ -1,0 +1,26 @@
+{
+  "name": "double-trouble",
+  "version": "1.0.0",
+  "description": "Double Trouble is a protocol that allows anyone to create fun NFT-like collections with different incentive schemes.",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gablg1/double-trouble.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gablg1/double-trouble/issues"
+  },
+  "homepage": "https://github.com/gablg1/double-trouble#readme",
+  "devDependencies": {
+    "@openzeppelin/contracts": "^4.3.1",
+    "truffle": "^5.4.7"
+  }
+}
