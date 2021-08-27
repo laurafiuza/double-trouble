@@ -103,6 +103,14 @@ contract("DoubleTrouble", accounts => {
     return true;
   });
 
+  it("TO IMPLEMENT: forSalePrice should revert if we pass in a non present NFT", async () => {
+    return true;
+  });
+
+  it("TO IMPLEMENT: forPurchasePrice should revert if we pass in a non present NFT", async () => {
+    return true;
+  });
+
   it("should put NFT up for sale", async () => {
     const forSalePrice = await dt.forSalePrice(cp.address, tokenId);
     assert.equal(forSalePrice, 0, "Initial for sale price should be  0");
