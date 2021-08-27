@@ -42,12 +42,14 @@ contract("DoubleTrouble", accounts => {
   });
      
   it("should not allow to return owner of a zero address collection", async () => {
+    let owner;
     try {
-      const owner = await dt.ownerOf(ZERO_ADDR, 0);
+      owner = await dt.ownerOf(ZERO_ADDR, 0);
     } catch (err) {
       assert(err, "Expected ownerOf to revert transaction due to an error, but it did not.");
-      console.log(err.message.includes("revert collection address cannot be zero"));
+      assert(err.message.includes("revert collection address cannot be zero"), "expected different error message.");
     }
+    assert.equal(owner, undefined, "Expected owner to be undefined"); 
   });   
 
   it("DT should own the NFT after makeDTable", async () => {
@@ -58,6 +60,17 @@ contract("DoubleTrouble", accounts => {
   it("accounts[0] should own the NFT within DT", async () => {
     const ownerAfter = await dt.ownerOf(cp.address, tokenId);
     assert.equal(ownerAfter, accounts[0], "ownerAfter making DTable does not equal accounts[0].");
+  });
+
+  it("should not allow a non-NFT to be DTable", async () => {
+    let ret;
+    try {
+      ret = await dt.makeDTable(accounts[0], 0);
+    } catch (err) {
+      assert(err, "Expected ownerOf to revert transaction due to an error, but it did not.");
+      assert(err.data.name == 'RuntimeError', "Expected different error name");
+    }
+    assert.equal(ret, undefined, "expected it to be undefined");
   });
 
   it("should transfer NFTs within DT", async () => {
@@ -72,12 +85,22 @@ contract("DoubleTrouble", accounts => {
   });
 
   it("should not transfer NFTs that someone doesn't own", async () => {
+    let ret;
     try {
-      const ret = await dt.transferFrom(accounts[2], accounts[1], cp.address, tokenId);
+      ret = await dt.transferFrom(accounts[2], accounts[1], cp.address, tokenId);
     } catch (err) {
       assert(err, "Expected transferFrom to revert transaction due to an error, but it did not.");
       assert(err.message.includes("from address should be current owner of NFT"), "expected different error message.");
     }
+    assert.equal(ret, undefined, "expected return value to be undefined");
+  });
+
+  it("TO IMPLEMENT: should not transfer if the NFT is not DTable", async () => {
+    return true;
+  });
+
+  it("TO IMPLEMENT: should not transfer if the to address is the zero address", async () => {
+    return true;
   });
 
   it("should put NFT up for sale", async () => {
@@ -90,6 +113,4 @@ contract("DoubleTrouble", accounts => {
     const newForSalePrice = await dt.forSalePrice(cp.address, tokenId);
     assert.equal(newForSalePrice, 3456, "New for sale price should be 3456");
   });
-
-  // TODO: Test the non-happy paths. I.e. that someone else cannot transfer NFTs unless they own it
 });
