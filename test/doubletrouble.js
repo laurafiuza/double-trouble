@@ -24,6 +24,12 @@ contract("DoubleTrouble", accounts => {
 
     const retMakeDTable = await dt.makeDTable(cp.address, CP_TOKEN_ID);
     assert.notEqual(retMakeDTable, undefined, "makeDTable failed (undefined return value).");
+
+    const forSalePrice = await dt.forSalePrice(cp.address, CP_TOKEN_ID);
+    assert.equal(forSalePrice, 0, "Initial for sale price should be  0");
+
+    const lastPurchasePrice = await dt.lastPurchasePrice(cp.address, CP_TOKEN_ID);
+    assert.equal(lastPurchasePrice, 0, "Initial last purchase should be 0");
   });
 
   it("DT should own the NFT after makeDTable", async () => {

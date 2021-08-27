@@ -44,8 +44,8 @@ contract DoubleTrouble {
     // Moving forward, we record the true owner in the DoubleTrouble contract
     _NFTs[collection][tokenId] = NftState({
       owner: owner,
-      currentForSalePrice: 9999, //FIXME
-      lastPurchasePrice: 99999 //FIXME
+      currentForSalePrice: 0,
+      lastPurchasePrice: 0
     });
   }
 
@@ -62,6 +62,14 @@ contract DoubleTrouble {
   // FIXME: Delete
   function debug(address collection) external view returns (bool) {
     return IERC721(collection).supportsInterface(0x80ac58cd);
+  }
+
+  function forSalePrice(address collection, uint256 tokenId) external view returns (uint256) {
+    return _NFTs[collection][tokenId].currentForSalePrice;
+  }
+
+  function lastPurchasePrice(address collection, uint256 tokenId) external view returns (uint256) {
+    return _NFTs[collection][tokenId].lastPurchasePrice;
   }
 
 
