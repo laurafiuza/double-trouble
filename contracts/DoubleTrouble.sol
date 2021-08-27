@@ -72,16 +72,15 @@ contract DoubleTrouble {
     return _NFTs[collection][tokenId].lastPurchasePrice;
   }
 
+  // sets currentForSalePrice to price
+  function putUpForSale(address collection, uint256 tokenId, uint256 price) external {
+    address currentOwner = _NFTs[collection][tokenId].owner;
+    require(msg.sender == currentOwner, "msg.sender should be current owner of NFT");
+    _NFTs[collection][tokenId].currentForSalePrice = price;
+  }
 
   /*
 
-  // sets currentForSalePrice to price
-  function putUpForSale(address _from, address _collection, uint256 _tokenId, uint256 _price) external {
-    address currentOwner = _NFTs[_collection][_tokenId].owner;
-    require(msg.sender == currentOwner, "msg.sender should be current owner of NFT");
-    require(_from == currentOwner, "from address should be current owner of NFT");
-    _NFTs[_collection][_tokenId].currentForSalePrice = _price;
-  }
 
   // Transfers ownership of the NFT to the _newOwner
   // as long as _price >= currentForSalePrice or _price >= lastPurchasePrice * 2

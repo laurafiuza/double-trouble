@@ -54,5 +54,16 @@ contract("DoubleTrouble", accounts => {
 
   });
 
+  it("should put NFT up for sale", async () => {
+    const forSalePrice = await dt.forSalePrice(cp.address, CP_TOKEN_ID);
+    assert.equal(forSalePrice, 0, "Initial for sale price should be  0");
+
+    const ret = await dt.putUpForSale(cp.address, CP_TOKEN_ID, 3456);
+    assert(ret.receipt.status, true, "Transaction processing failed");
+
+    const newForSalePrice = await dt.forSalePrice(cp.address, CP_TOKEN_ID);
+    assert.equal(newForSalePrice, 3456, "New for sale price should be 3456");
+  });
+
   // TODO: Test the non-happy paths. I.e. that someone else cannot transfer NFTs unless they own it
 });
