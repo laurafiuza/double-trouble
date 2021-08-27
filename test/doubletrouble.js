@@ -95,19 +95,50 @@ contract("DoubleTrouble", accounts => {
     assert.equal(ret, undefined, "expected return value to be undefined");
   });
 
-  it("TO IMPLEMENT: should not transfer if the NFT is not DTable", async () => {
+  it("should not transfer if the NFT is not DTable", async () => {
+    let ret;
+    try {
+      ret = await dt.transferFrom(accounts[0], accounts[1], accounts[2], 0);
+    } catch (err) {
+      assert(err, "Expected transferFrom to revert transaction due to an error, but it did not.");
+      assert(err.message.includes("collection and tokenId combination is not present in DT"), "expected different error message.");
+    } 
+    assert.equal(ret, undefined, "expected return value to be undefined");
+  });
+
+  it("should not transfer if the to address is the zero address", async () => {
+    let ret;
+    try {
+      ret = await dt.transferFrom(accounts[0], ZERO_ADDR, cp.address, tokenId);
+    } catch (err) {
+      assert(err, "Expected transferFrom to revert transaction due to an error, but it did not.");
+      assert(err.message.includes("to address cannot be zero"), "expected different error message.");
+    }
+    assert.equal(ret, undefined, "expected return value to be undefined");
     return true;
   });
 
-  it("TO IMPLEMENT: should not transfer if the to address is the zero address", async () => {
+  it("forSalePrice should revert if we pass in a non present NFT", async () => {
+    let ret;
+    try {
+      ret = await dt.forSalePrice(accounts[0], 0);
+    } catch (err) {
+      assert(err, "Expected forSalePrice to revert transaction due to an error, but it did not.");
+      assert(err.message.includes("collection and tokenId combination is not present in DT"), "expected different error message.");
+    }
+    assert.equal(ret, undefined, "expected return value to be undefined");
     return true;
   });
 
-  it("TO IMPLEMENT: forSalePrice should revert if we pass in a non present NFT", async () => {
-    return true;
-  });
-
-  it("TO IMPLEMENT: forPurchasePrice should revert if we pass in a non present NFT", async () => {
+  it("forPurchasePrice should revert if we pass in a non present NFT", async () => {
+    let ret;
+    try {
+      ret = await dt.lastPurchasePrice(accounts[0], 0);
+    } catch (err) {
+      assert(err, "Expected lastPurchasePrice to revert transaction due to an error, but it did not.");
+      assert(err.message.includes("collection and tokenId combination is not present in DT"), "expected different error message.");
+    }
+    assert.equal(ret, undefined, "expected return value to be undefined");
     return true;
   });
 

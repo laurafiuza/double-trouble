@@ -78,6 +78,8 @@ contract DoubleTrouble {
   // sets currentForSalePrice to price
   function putUpForSale(address collection, uint256 tokenId, uint256 price) external {
     address currentOwner = _NFTs[collection][tokenId].owner;
+    // TODO: do we need to check whether currentOwner == address(0)? Or can we
+    // rely on the fact that msg.sender will never be address(0)?
     require(msg.sender == currentOwner, "msg.sender should be current owner of NFT");
     _NFTs[collection][tokenId].currentForSalePrice = price;
   }
