@@ -5,15 +5,19 @@ const CP_TOKEN_ID = 42;
 const ZERO_ADDR = '0x0000000000000000000000000000000000000000';
 
 contract("DoubleTrouble", accounts => {
-  it("should make an NFT DTable", async () => {
-    const cp = await CryptoPunks.deployed();
+  var cp, dt, nft;
+
+  before(async () => {
+    cp = await CryptoPunks.deployed();
     assert.notEqual(cp, undefined, "CryptoPunks contract instance is undefined.");
-    const dt = await DoubleTrouble.deployed();
+    dt = await DoubleTrouble.deployed();
     assert.notEqual(dt, undefined, "DoubleTrouble contract instance is undefined.");
 
-    const nft = await cp.createNft(accounts[0]);
+    nft = await cp.createNft(accounts[0]);
     assert.notEqual(nft, undefined, "createNft failed (undefined return value).");
+  });
 
+  it("should make an NFT DTable", async () => {
     const ownerBefore = await dt.ownerOf(cp.address, CP_TOKEN_ID);
     assert.equal(ownerBefore, ZERO_ADDR, "There should be no owner of this NFT soon after the blockchain is created.");
 
@@ -28,5 +32,9 @@ contract("DoubleTrouble", accounts => {
 
     const cpOwnerAfter = await cp.ownerOf(CP_TOKEN_ID);
     assert.equal(cpOwnerAfter, dt.address, "DT contract must be the owner of the Crypto Punk");
+  });
+
+  it("should transfer NFTs within DT", async () => {
+    return true;
   });
 });
