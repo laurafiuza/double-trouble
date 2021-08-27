@@ -1,5 +1,4 @@
-var DoubleTrouble = artifacts.require("./DoubleTrouble.sol");
-
 module.exports = function(deployer) {
-  deployer.deploy(DoubleTrouble);
+  deployer.deploy(artifacts.require("./DoubleTrouble.sol"));
+  deployer.deploy(artifacts.require("./CryptoPunks.sol"));
 };

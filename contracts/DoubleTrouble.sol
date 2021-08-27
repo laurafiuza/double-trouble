@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 // SPDX-License-Identifier: MIT
 
@@ -24,7 +24,7 @@ contract DoubleTrouble {
   }
 
   // nested mapping that keeps track of who owns the NFTs
-  mapping (address => mapping (uint256 => NftState)) internal _NFTs;
+  mapping (address => mapping (uint256 => NftState)) public _NFTs;
 
   // Returns the current owner of the NFT
   function ownerOf(address collection, uint256 tokenId) external view returns (address) {
@@ -34,14 +34,17 @@ contract DoubleTrouble {
 
   function makeDTable(address collection, uint256 tokenId) external {
     require(_NFTs[collection][tokenId].owner == address(0), "This NFT is already DTable");
-    require(ERC721(collection).supportsInterface(0x80ac58cd),  "collection must refer to an ERC721 address");
-    // TODO: check whether ERC721(collection) throws if collection doesnt implement the ERC721 interface
-    ERC721(collection).transferFrom(msg.sender, address(this), tokenId);
+    require(IERC721(collection).supportsInterface(0x80ac58cd),  "collection must refer to an ERC721 address");
+    require(IERC721(collection).getApproved(tokenId) == address(this), "DoubleTrouble contract must be approved to operate this token");
     _NFTs[collection][tokenId] = NftState({
-      owner: msg.sender,
+      owner: IERC721(collection).ownerOf(tokenId), // owner remains the same
       currentForSalePrice: 9999, //FIXME
       lastPurchasePrice: 99999 //FIXME
     });
+  }
+
+  function debug(address collection) external view returns (bool) {
+    return IERC721(collection).supportsInterface(0x80ac58cd);
   }
 
   /*
