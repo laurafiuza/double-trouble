@@ -15,9 +15,7 @@ contract("DoubleTrouble", accounts => {
 
     nft = await cp.createNft(accounts[0]);
     assert.notEqual(nft, undefined, "createNft failed (undefined return value).");
-  });
 
-  it("should make an NFT DTable", async () => {
     const ownerBefore = await dt.ownerOf(cp.address, CP_TOKEN_ID);
     assert.equal(ownerBefore, ZERO_ADDR, "There should be no owner of this NFT soon after the blockchain is created.");
 
@@ -26,15 +24,29 @@ contract("DoubleTrouble", accounts => {
 
     const retMakeDTable = await dt.makeDTable(cp.address, CP_TOKEN_ID);
     assert.notEqual(retMakeDTable, undefined, "makeDTable failed (undefined return value).");
+  });
 
-    const ownerAfter = await dt.ownerOf(cp.address, CP_TOKEN_ID);
-    assert.equal(ownerAfter, accounts[0], "ownerAfter making DTable does not equal accounts[0].");
-
+  it("DT should own the NFT after makeDTable", async () => {
     const cpOwnerAfter = await cp.ownerOf(CP_TOKEN_ID);
     assert.equal(cpOwnerAfter, dt.address, "DT contract must be the owner of the Crypto Punk");
   });
 
-  it("should transfer NFTs within DT", async () => {
-    return true;
+  it("accounts[0] should own the NFT within DT", async () => {
+    const ownerAfter = await dt.ownerOf(cp.address, CP_TOKEN_ID);
+    assert.equal(ownerAfter, accounts[0], "ownerAfter making DTable does not equal accounts[0].");
   });
+
+  it("should transfer NFTs within DT", async () => {
+    const ownerBefore = await dt.ownerOf(cp.address, CP_TOKEN_ID);
+    assert.equal(ownerBefore, accounts[0], "Initial owner must be accounts[0].");
+
+    const ret = await dt.transferFrom(accounts[0], accounts[1], cp.address, CP_TOKEN_ID);
+    assert.notEqual(ret, undefined, "dt.transferFrom cannot be undefined");
+
+    const ownerAfter = await dt.ownerOf(cp.address, CP_TOKEN_ID);
+    assert.equal(ownerAfter, accounts[1], "owner after transfer must be accounts[1]");
+
+  });
+
+  // TODO: Test the non-happy paths. I.e. that someone else cannot transfer NFTs unless they own it
 });

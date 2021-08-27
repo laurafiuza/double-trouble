@@ -49,23 +49,23 @@ contract DoubleTrouble {
     });
   }
 
+  // Changes ownership of the NFT
+  function transferFrom(address from, address to, address collection, uint256 tokenId) external {
+    address currentOwner = _NFTs[collection][tokenId].owner;
+    require(currentOwner != address(0), "collection and tokenId combination is not present in DT");
+    require(msg.sender == currentOwner, "msg.sender should be current owner of NFT");
+    require(from == currentOwner, "from address should be current owner of NFT");
+    require(to != address(0), "to address cannot be zero");
+    _NFTs[collection][tokenId].owner = to;
+  }
+
+  // FIXME: Delete
   function debug(address collection) external view returns (bool) {
     return IERC721(collection).supportsInterface(0x80ac58cd);
   }
 
+
   /*
-  // Changes ownership of the NFT
-  function transferFrom(address _from, address _to, address _collection, uint256 _tokenId) external {
-    address currentOwner = _NFTs[_collection][_tokenId].owner;
-    require(msg.sender == currentOwner, "msg.sender should be current owner of NFT");
-    require(_from == currentOwner, "from address should be current owner of NFT");
-    require(_to != 0, "to address cannot be zero");
-    // There is no way of checking whether something already exists in a mapping in solidity.
-    // The canonical way is to check whether the key is the "default value", in the case of an address,
-    // it would be 0.
-    require(currentOwner != 0, "collection and tokenId combination is not a valid NFT");
-    _NFTs[_collection][_tokenId].owner = _to;
-  }
 
   // sets currentForSalePrice to price
   function putUpForSale(address _from, address _collection, uint256 _tokenId, uint256 _price) external {
