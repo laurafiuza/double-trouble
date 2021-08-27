@@ -9,12 +9,15 @@ contract CryptoPunks is ERC721URIStorage {
   constructor() ERC721("CryptoPunks", "PUNK") {
   }
 
+  uint256 tokenCounter = 0;
+
   function createNft(address to) public returns (uint256) {
 
-    uint256 newItemId = 42;
-    _mint(to, newItemId);
-    _setTokenURI(newItemId, "https://foo.bar");
+    _mint(to, tokenCounter);
+    _setTokenURI(tokenCounter, "https://foo.bar");
+    uint256 toReturn = tokenCounter;
+    tokenCounter = tokenCounter + 1;
 
-    return newItemId;
+    return toReturn;
   }
 }

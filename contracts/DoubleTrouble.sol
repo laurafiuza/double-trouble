@@ -15,7 +15,6 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 // COMMENT: I changed _new_owner to _newOwner to match syntax of the EIP 721 doc
 
-
 contract DoubleTrouble {
   struct NftState {
     address owner;
@@ -80,8 +79,6 @@ contract DoubleTrouble {
   }
 
   /*
-
-
   // Transfers ownership of the NFT to the _newOwner
   // as long as _price >= currentForSalePrice or _price >= lastPurchasePrice * 2
   // Moves _price ether from _newOwner to the current owner
