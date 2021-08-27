@@ -36,8 +36,14 @@ contract DoubleTrouble {
     require(_NFTs[collection][tokenId].owner == address(0), "This NFT is already DTable");
     require(IERC721(collection).supportsInterface(0x80ac58cd),  "collection must refer to an ERC721 address");
     require(IERC721(collection).getApproved(tokenId) == address(this), "DoubleTrouble contract must be approved to operate this token");
+
+    // In the original collection, the owner forever becomes the DoubleTrouble contract
+    address owner = IERC721(collection).ownerOf(tokenId);
+    IERC721(collection).transferFrom(owner, address(this), tokenId);
+
+    // Moving forward, we record the true owner in the DoubleTrouble contract
     _NFTs[collection][tokenId] = NftState({
-      owner: IERC721(collection).ownerOf(tokenId), // owner remains the same
+      owner: owner,
       currentForSalePrice: 9999, //FIXME
       lastPurchasePrice: 99999 //FIXME
     });
