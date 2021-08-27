@@ -64,10 +64,14 @@ contract DoubleTrouble {
   }
 
   function forSalePrice(address collection, uint256 tokenId) external view returns (uint256) {
+    address currentOwner = _NFTs[collection][tokenId].owner;
+    require(currentOwner != address(0), "collection and tokenId combination is not present in DT");
     return _NFTs[collection][tokenId].currentForSalePrice;
   }
 
   function lastPurchasePrice(address collection, uint256 tokenId) external view returns (uint256) {
+    address currentOwner = _NFTs[collection][tokenId].owner;
+    require(currentOwner != address(0), "collection and tokenId combination is not present in DT");
     return _NFTs[collection][tokenId].lastPurchasePrice;
   }
 
