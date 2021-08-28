@@ -3,6 +3,7 @@ const DoubleTrouble = artifacts.require("./DoubleTrouble.sol");
 const CryptoPunks = artifacts.require("./CryptoPunks.sol");
 
 const ZERO_ADDR = '0x0000000000000000000000000000000000000000';
+const NON_PRESENT_ID = 79;
 
 contract("DoubleTrouble", accounts => {
   // TODO: make tokenId the return value of the createNft function
@@ -41,10 +42,6 @@ contract("DoubleTrouble", accounts => {
     tokenId++;
   });
 
-  it("should not allow to return owner of a zero address collection", async () => {
-    assert.rejects(dt.ownerOf(ZERO_ADDR, 0));
-  });
-
   it("DT should own the NFT after makeDTable", async () => {
     const cpOwnerAfter = await cp.ownerOf(tokenId);
     assert.equal(cpOwnerAfter, dt.address, "DT contract must be the owner of the Crypto Punk");
@@ -53,10 +50,6 @@ contract("DoubleTrouble", accounts => {
   it("accounts[0] should own the NFT within DT", async () => {
     const ownerAfter = await dt.ownerOf(tokenId);
     assert.equal(ownerAfter, accounts[0], "ownerAfter making DTable does not equal accounts[0].");
-  });
-
-  it("should not allow a non-NFT to be DTable", async () => {
-    assert.rejects(dt.makeDTable(accounts[0], 0));
   });
 
   it("should transfer NFTs within DT", async () => {
@@ -70,24 +63,24 @@ contract("DoubleTrouble", accounts => {
     assert.equal(ownerAfter, accounts[1], "owner after transfer must be accounts[1]");
   });
 
+  it("ownerOf should revert if we pass in a non present NFT", async () => {
+    await assert.rejects(dt.ownerOf(NON_PRESENT_ID), /revert ERC721/);
+  });
+
   it("should not transfer NFTs that someone doesn't own", async () => {
-    assert.rejects(dt.transferFrom(accounts[2], accounts[1], tokenId));
+    await assert.rejects(dt.transferFrom(accounts[2], accounts[1], tokenId), /revert ERC721/);
   });
 
   it("should not transfer if the NFT is not DTable", async () => {
-    assert.rejects(dt.transferFrom(accounts[0], accounts[1], accounts[2], 0));
+    await assert.rejects(dt.transferFrom(accounts[0], accounts[1], NON_PRESENT_ID), /revert ERC721/);
   });
 
   it("should not transfer if the to address is the zero address", async () => {
-    assert.rejects( dt.transferFrom(accounts[0], ZERO_ADDR, tokenId));
+    await assert.rejects(dt.transferFrom(accounts[0], ZERO_ADDR, tokenId), /revert ERC721/);
   });
 
-  it("forSalePrice should revert if we pass in a non present NFT", async () => {
-    assert.rejects(dt.forSalePrice(accounts[0], 0));
-  });
-
-  it("forPurchasePrice should revert if we pass in a non present NFT", async () => {
-    assert.rejects(dt.lastPurchasePrice(accounts[0], 0));
+  it("lastPurchasePrice should revert if we pass in a non present NFT", async () => {
+    await assert.rejects(dt.lastPurchasePrice(NON_PRESENT_ID), /revert ERC721/);
   });
 
   it("should put NFT up for sale", async () => {
@@ -99,6 +92,13 @@ contract("DoubleTrouble", accounts => {
 
     const newForSalePrice = await dt.forSalePrice(tokenId);
     assert.equal(newForSalePrice, 3456, "New for sale price should be 3456");
+  });
+
+  it("should proxy tokenURI to original NFT", async () => {
+    let tokenURI = await dt.tokenURI(tokenId);
+    let originalURI = await cp.tokenURI(tokenId);
+    assert.equal(tokenURI, originalURI);
+    assert.equal(tokenURI, "https://foo.bar");
   });
 
   /*
