@@ -17,9 +17,6 @@ contract("DoubleTrouble", accounts => {
     tokenId = 0;
 
     web3.eth.defaultAccount = accounts[0];
-
-    const ownerBefore = await dt.ownerOf(cp.address, tokenId);
-    assert.equal(ownerBefore, ZERO_ADDR, "There should be no owner of this NFT soon after the blockchain is created.");
   });
 
   beforeEach(async() => {
@@ -29,13 +26,13 @@ contract("DoubleTrouble", accounts => {
     const approval = await cp.approve(dt.address, tokenId);
     assert.notEqual(approval, undefined, "approval failed (undefined return value).");
 
-    const retMakeDTable = await dt.makeDTable(cp.address, tokenId);
+    const retMakeDTable = await dt.makeDTable(tokenId);
     assert.notEqual(retMakeDTable, undefined, "makeDTable failed (undefined return value).");
 
-    const forSalePrice = await dt.forSalePrice(cp.address, tokenId);
+    const forSalePrice = await dt.forSalePrice(tokenId);
     assert.equal(forSalePrice, 0, "Initial for sale price should be 0");
 
-    const lastPurchasePrice = await dt.lastPurchasePrice(cp.address, tokenId);
+    const lastPurchasePrice = await dt.lastPurchasePrice(tokenId);
     assert.equal(lastPurchasePrice, 0, "Initial last purchase should be 0");
   });
 
@@ -60,7 +57,7 @@ contract("DoubleTrouble", accounts => {
   });
 
   it("accounts[0] should own the NFT within DT", async () => {
-    const ownerAfter = await dt.ownerOf(cp.address, tokenId);
+    const ownerAfter = await dt.ownerOf(tokenId);
     assert.equal(ownerAfter, accounts[0], "ownerAfter making DTable does not equal accounts[0].");
   });
 
@@ -76,20 +73,20 @@ contract("DoubleTrouble", accounts => {
   });
 
   it("should transfer NFTs within DT", async () => {
-    const ownerBefore = await dt.ownerOf(cp.address, tokenId);
+    const ownerBefore = await dt.ownerOf(tokenId);
     assert.equal(ownerBefore, accounts[0], "Initial owner must be accounts[0].");
 
-    const ret = await dt.transferFrom(accounts[0], accounts[1], cp.address, tokenId);
+    const ret = await dt.transferFrom(accounts[0], accounts[1], tokenId);
     assert.notEqual(ret, undefined, "dt.transferFrom cannot be undefined");
 
-    const ownerAfter = await dt.ownerOf(cp.address, tokenId);
+    const ownerAfter = await dt.ownerOf(tokenId);
     assert.equal(ownerAfter, accounts[1], "owner after transfer must be accounts[1]");
   });
 
   it("should not transfer NFTs that someone doesn't own", async () => {
     let ret;
     try {
-      ret = await dt.transferFrom(accounts[2], accounts[1], cp.address, tokenId);
+      ret = await dt.transferFrom(accounts[2], accounts[1], tokenId);
     } catch (err) {
       assert(err, "Expected transferFrom to revert transaction due to an error, but it did not.");
       assert(err.message.includes("from address should be current owner of NFT"), "expected different error message.");
@@ -111,7 +108,7 @@ contract("DoubleTrouble", accounts => {
   it("should not transfer if the to address is the zero address", async () => {
     let ret;
     try {
-      ret = await dt.transferFrom(accounts[0], ZERO_ADDR, cp.address, tokenId);
+      ret = await dt.transferFrom(accounts[0], ZERO_ADDR, tokenId);
     } catch (err) {
       assert(err, "Expected transferFrom to revert transaction due to an error, but it did not.");
       assert(err.message.includes("to address cannot be zero"), "expected different error message.");
@@ -145,22 +142,22 @@ contract("DoubleTrouble", accounts => {
   });
 
   it("should put NFT up for sale", async () => {
-    const forSalePrice = await dt.forSalePrice(cp.address, tokenId);
+    const forSalePrice = await dt.forSalePrice(tokenId);
     assert.equal(forSalePrice, 0, "Initial for sale price should be  0");
 
-    const ret = await dt.putUpForSale(cp.address, tokenId, 3456);
+    const ret = await dt.putUpForSale(tokenId, 3456);
     assert(ret.receipt.status, true, "Transaction processing failed");
 
-    const newForSalePrice = await dt.forSalePrice(cp.address, tokenId);
+    const newForSalePrice = await dt.forSalePrice(tokenId);
     assert.equal(newForSalePrice, 3456, "New for sale price should be 3456");
   });
 
   it("should not buy NFT if forSalePrice == 0", async () => {
-    const forSalePrice = await dt.forSalePrice(cp.address, tokenId);
+    const forSalePrice = await dt.forSalePrice(tokenId);
     assert.equal(forSalePrice, 0, "Initial for sale price should be  0");
 
-    const ret = await dt.buy(accounts[1], cp.address, tokenId, 50);
+    const ret = await dt.buy(accounts[1], tokenId, 50);
     assert(ret.receipt.status, false, "Transaction should have failed");
-    assert(await dt.ownerOf(cp.address, tokenId), accounts[0], "Ownership should still be accounts[0]");
+    assert(await dt.ownerOf(tokenId), accounts[0], "Ownership should still be accounts[0]");
   });
 });
