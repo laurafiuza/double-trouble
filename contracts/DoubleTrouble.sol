@@ -84,12 +84,11 @@ contract DoubleTrouble {
     _NFTs[collection][tokenId].currentForSalePrice = price;
   }
 
-  /*
   // Transfers ownership of the NFT to the _newOwner
   // as long as _price >= currentForSalePrice or _price >= lastPurchasePrice * 2
   // Moves _price ether from _newOwner to the current owner
   // sets lastPurchasePrice = price
-  function buy(address _newOwner, address _collection, uint256 _tokenId, uint256 _price) external {
+  function buy(address _newOwner, address _collection, uint256 _tokenId) payable external {
     // TODO: is this the right way to transfer? what about collections?
     address currentOwner = _NFTs[_collection][_tokenId].owner;
     require(msg.sender == currentOwner, "msg.sender should be current owner of NFT");
@@ -98,5 +97,4 @@ contract DoubleTrouble {
     _NFTs[_collection][_tokenId].owner = _newOwner;
     _NFTs[_collection][_tokenId].lastPurchasePrice = _price;
   }
-  */
 }

@@ -16,6 +16,8 @@ contract("DoubleTrouble", accounts => {
     assert.notEqual(dt, undefined, "DoubleTrouble contract instance is undefined.");
     tokenId = 0;
 
+    web3.eth.defaultAccount = accounts[0];
+
     const ownerBefore = await dt.ownerOf(cp.address, tokenId);
     assert.equal(ownerBefore, ZERO_ADDR, "There should be no owner of this NFT soon after the blockchain is created.");
   });
@@ -40,17 +42,17 @@ contract("DoubleTrouble", accounts => {
   afterEach(async() => {
     tokenId++;
   });
-     
+
   it("should not allow to return owner of a zero address collection", async () => {
-    let owner;
+    let owner = undefined;
     try {
       owner = await dt.ownerOf(ZERO_ADDR, 0);
     } catch (err) {
       assert(err, "Expected ownerOf to revert transaction due to an error, but it did not.");
       assert(err.message.includes("revert collection address cannot be zero"), "expected different error message.");
     }
-    assert.equal(owner, undefined, "Expected owner to be undefined"); 
-  });   
+    assert.equal(owner, undefined, "Expected owner to be undefined");
+  });
 
   it("DT should own the NFT after makeDTable", async () => {
     const cpOwnerAfter = await cp.ownerOf(tokenId);
@@ -151,5 +153,14 @@ contract("DoubleTrouble", accounts => {
 
     const newForSalePrice = await dt.forSalePrice(cp.address, tokenId);
     assert.equal(newForSalePrice, 3456, "New for sale price should be 3456");
+  });
+
+  it("should not buy NFT if forSalePrice == 0", async () => {
+    const forSalePrice = await dt.forSalePrice(cp.address, tokenId);
+    assert.equal(forSalePrice, 0, "Initial for sale price should be  0");
+
+    const ret = await dt.buy(accounts[1], cp.address, tokenId, 50);
+    assert(ret.receipt.status, false, "Transaction should have failed");
+    assert(await dt.ownerOf(cp.address, tokenId), accounts[0], "Ownership should still be accounts[0]");
   });
 });
