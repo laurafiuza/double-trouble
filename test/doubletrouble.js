@@ -53,6 +53,14 @@ contract("DoubleTrouble", accounts => {
     tokenId++;
   });
 
+  it("DT supports 0xdeadbeef interface (DoubleTrouble)", async () => {
+    assert.equal(await dt.supportsInterface("0xdeadbeef"), true);
+  });
+
+  it("DT supports 0x80ac58cd interface (ERC721)", async () => {
+    assert.equal(await dt.supportsInterface("0x80ac58cd"), true);
+  });
+
   it("DT should own the NFT after makeDTable", async () => {
     const cpOwnerAfter = await cp.ownerOf(tokenId);
     assert.equal(cpOwnerAfter, dt.address, "DT contract must be the owner of the Crypto Punk");

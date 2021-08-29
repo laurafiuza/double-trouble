@@ -81,4 +81,8 @@ contract DoubleTrouble is ERC721URIStorage {
     (bool success, ) = oldOwner.call{value: amountPaid}("");
     require(success, "Transfer failed.");
   }
+
+  function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+      return interfaceId == 0xdeadbeef || super.supportsInterface(interfaceId);
+  }
 }
