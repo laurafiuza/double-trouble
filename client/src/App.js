@@ -22,24 +22,24 @@ class App extends Component {
 
       // Use web3 to get the user's accounts.
       const accounts = await web3.eth.getAccounts();
+      const user = accounts[0];
 
       // Get the contract instance.
       //const networkId = await web3.eth.net.getId();
       //console.log("window.location.pathname");
       const nft = window.location.pathname.substring(1).split("/");
       const collection = nft[0];
-      const tokenId = nft[1];
+      const tokenId = parseInt(nft[1]);
 
       //const deployedNetwork = DoubleTroubleContract.networks[networkId];
       const instance = new web3.eth.Contract(
         DoubleTroubleContract.abi,
         collection,
       );
-      console.log(instance);
-
-      console.log(instance.methods.tokenURI(0));
-      console.log(await instance.methods['tokenURI(uint256)'](0).call());
-      const tokenURI = await instance.methods.tokenURI(parseInt(tokenId)).call() || "not found";
+      console.log(await instance.methods.tokenURI(tokenId).call());
+      const tokenURI = await instance.methods.tokenURI(tokenId).call() || "not found";
+      const owner = await instance.methods.ownerOf(tokenId).call() || "no owner found";
+      const forSalePrice = await instance.methods.forSalePrice(tokenId).call() || "no for sale price found";
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
@@ -48,6 +48,8 @@ class App extends Component {
         accounts,
         contract: instance,
         tokenURI,
+        isOwner: owner === user,
+        isForSale: parseInt(forSalePrice) > 0,
       }, this.refreshView);
     } catch (error) {
       // Catch any errors for any of the above operations.
