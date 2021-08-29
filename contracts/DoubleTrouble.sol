@@ -55,7 +55,7 @@ contract DoubleTrouble is ERC721URIStorage {
     _forSalePrices[tokenId] = price;
   }
 
-  function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+  function tokenURI(uint256 tokenId) external view virtual override returns (string memory) {
     return IERC721Metadata(_originalCollection).tokenURI(tokenId);
   }
 
