@@ -71,17 +71,7 @@ contract("DoubleTrouble", accounts => {
     assert.equal(ownerAfter, accounts[0], "ownerAfter making DTable does not equal accounts[0].");
   });
 
-  it("should transfer NFTs within DT", async () => {
-    /*
-    const ownerBefore = await dt.ownerOf(tokenId);
-    assert.equal(ownerBefore, accounts[0], "Initial owner must be accounts[0].");
-
-    const ret = await dt.transferFrom(accounts[0], accounts[1], tokenId);
-    assert.notEqual(ret, undefined, "dt.transferFrom cannot be undefined");
-
-    const ownerAfter = await dt.ownerOf(tokenId);
-    assert.equal(ownerAfter, accounts[1], "owner after transfer must be accounts[1]");
-    */
+  it("shouldn't allow transfering NFTs within DT", async () => {
     await assert.rejects(dt.transferFrom(accounts[0], accounts[1], tokenId), /revert/);
   });
 
@@ -89,16 +79,8 @@ contract("DoubleTrouble", accounts => {
     await assert.rejects(dt.ownerOf(NON_PRESENT_ID), /revert ERC721/);
   });
 
-  it("should not transfer NFTs that someone doesn't own", async () => {
-    await assert.rejects(dt.transferFrom(accounts[2], accounts[1], tokenId), /revert/);
-  });
-
   it("should not transfer if the NFT is not DTable", async () => {
     await assert.rejects(dt.transferFrom(accounts[0], accounts[1], NON_PRESENT_ID), /revert/);
-  });
-
-  it("should not transfer if the to address is the zero address", async () => {
-    await assert.rejects(dt.transferFrom(accounts[0], ZERO_ADDR, tokenId), /revert/);
   });
 
   it("lastPurchasePrice should revert if we pass in a non present NFT", async () => {
