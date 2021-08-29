@@ -104,14 +104,19 @@ contract("DoubleTrouble", accounts => {
     assert.equal(tokenURI, "https://foo.bar");
   });
 
-  it("should not buy NFT if forSalePrice and lastPurchasePrice are both 0", async () => {
+  it("should not buy NFT if forSalePrice is 0", async () => {
     const forSalePrice = await dt.forSalePrice(tokenId);
     assert.equal(forSalePrice, 0, "Initial for sale price should be  0");
 
+    await assert.rejects(dt.buy(tokenId, {from: accounts[1], value: 2000}), /for sale price/);
+    assert(await dt.ownerOf(tokenId), accounts[0], "Ownership should still be accounts[0]");
+  });
+
+  it("should not force buy NFT if lastPurchasePrice is 0", async () => {
     const lastPurchasePrice = await dt.lastPurchasePrice(tokenId);
     assert.equal(lastPurchasePrice, 0, "Initial last purchase price should be  0");
 
-    await assert.rejects(dt.buy(tokenId, {from: accounts[1], value: 2000}), /Price paid/);
+    await assert.rejects(dt.forceBuy(tokenId, {from: accounts[1], value: 2000}), /last purchase price/);
     assert(await dt.ownerOf(tokenId), accounts[0], "Ownership should still be accounts[0]");
   });
 });

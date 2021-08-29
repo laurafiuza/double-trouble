@@ -60,14 +60,19 @@ contract DoubleTrouble is ERC721URIStorage {
   }
 
   function buy(uint256 tokenId) payable external {
-    uint256 amountPaid = msg.value;
-    bool buyFor2x = _lastPurchasePrices[tokenId] > 0 && amountPaid >= 2 * _lastPurchasePrices[tokenId];
-    bool buyForSalePrice = _forSalePrices[tokenId] > 0 && amountPaid >= _forSalePrices[tokenId];
-    require(buyFor2x || buyForSalePrice, "Price paid must satisfy one of the two buy conditions");
+    require(_forSalePrices[tokenId] > 0 && msg.value >= _forSalePrices[tokenId], "Value sent must be at least the for sale price");
+    _completeBuy(msg.sender, tokenId, msg.value);
+  }
 
+  function forceBuy(uint256 tokenId) payable external {
+    require(_lastPurchasePrices[tokenId] > 0 && msg.value >= 2 * _lastPurchasePrices[tokenId], "Value sent must be at least twice the last purchase price");
+    _completeBuy(msg.sender, tokenId, msg.value);
+  }
+
+  function _completeBuy(address newOwner, uint256 tokenId, uint256 amountPaid) internal virtual {
     // Change owner, set last purchase price, and remove from sale
     address oldOwner = ownerOf(tokenId);
-    _transfer(oldOwner, msg.sender, tokenId);
+    _transfer(oldOwner, newOwner, tokenId);
     _lastPurchasePrices[tokenId] = amountPaid;
     _forSalePrices[tokenId] = 0;
 
