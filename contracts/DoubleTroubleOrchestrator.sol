@@ -4,6 +4,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 
 // SPDX-License-Identifier: MIT
 contract DoubleTroubleOrchestrator {
+  /*
   mapping (address => DoubleTrouble) public _troublesomeCollections;
 
   function makeTroublesomeNft(address nftCollection, uint256 tokenId) {
@@ -21,4 +22,5 @@ contract DoubleTroubleOrchestrator {
     // Deploy troublesome contract for nftCollection
     _troublesomeCollections[nftCollection] = new DoubleTrouble(name, symbol, nftCollection);
   }
+  */
 }
