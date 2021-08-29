@@ -49,14 +49,14 @@ contract DoubleTrouble is ERC721URIStorage {
     return _lastPurchasePrices[tokenId];
   }
 
+  function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+    return IERC721Metadata(_originalCollection).tokenURI(tokenId);
+  }
+
   // sets currentForSalePrice to price
   function putUpForSale(uint256 tokenId, uint256 price) external {
     require(msg.sender == ownerOf(tokenId), "msg.sender should be current owner of NFT");
     _forSalePrices[tokenId] = price;
-  }
-
-  function tokenURI(uint256 tokenId) external view virtual override returns (string memory) {
-    return IERC721Metadata(_originalCollection).tokenURI(tokenId);
   }
 
   function buy(uint256 tokenId) payable external {
