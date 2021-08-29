@@ -1,6 +1,7 @@
 const assert = require('assert');
-const DoubleTrouble = artifacts.require("./DoubleTrouble.sol");
 const CryptoPunks = artifacts.require("./CryptoPunks.sol");
+const DoubleTroubleOrchestrator = artifacts.require("./DoubleTroubleOrchestrator.sol");
+const DoubleTrouble = artifacts.require("./DoubleTrouble.sol");
 
 const ZERO_ADDR = '0x0000000000000000000000000000000000000000';
 const NON_PRESENT_ID = 79;
@@ -9,13 +10,23 @@ contract("DoubleTrouble", accounts => {
   // TODO: make tokenId the return value of the createNft function
   // currently, the return value is a transaction object for some reason,
   // how do we retrieve the return value?
-  var cp, dt, nft, tokenId;
+  var cp, dto, dt, nft, tokenId;
 
   before(async () => {
     cp = await CryptoPunks.deployed();
     assert.notEqual(cp, undefined, "CryptoPunks contract instance is undefined.");
-    dt = await DoubleTrouble.deployed();
-    assert.notEqual(dt, undefined, "DoubleTrouble contract instance is undefined.");
+    dto = await DoubleTroubleOrchestrator.deployed();
+    assert.notEqual(dto, undefined, "DoubleTroubleOrchestrator contract instance is undefined.");
+
+    const ret = await dto.makeTroublesomeCollection(cp.address, "DTCryptoPunks", "DUNK");
+    assert(ret.receipt.status, true, "Transaction processing failed");
+
+    const dt_address = await dto.troublesomeCollection(cp.address);
+    assert.notEqual(dt_address, undefined, "dt_address is undefined.");
+
+    dt = await DoubleTrouble.at(dt_address);
+    assert.equal(dt_address, dt.address, "Address returned by orchestrator must match dt.deployed().");
+
     tokenId = 0;
 
     web3.eth.defaultAccount = accounts[0];

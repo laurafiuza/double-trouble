@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "truffle test test/doubletrouble.js"
+    "test": "truffle test"
   },
   "repository": {
     "type": "git",

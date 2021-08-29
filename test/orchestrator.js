@@ -15,7 +15,7 @@ contract("DoubleTroubleOrchestrator", accounts => {
     cp = await CryptoPunks.deployed();
     assert.notEqual(cp, undefined, "CryptoPunks contract instance is undefined.");
     dto = await DoubleTroubleOrchestrator.deployed();
-    assert.notEqual(dt, undefined, "DoubleTroubleOrchestrator contract instance is undefined.");
+    assert.notEqual(dto, undefined, "DoubleTroubleOrchestrator contract instance is undefined.");
     tokenId = 0;
 
     web3.eth.defaultAccount = accounts[0];
