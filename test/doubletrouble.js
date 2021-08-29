@@ -105,18 +105,49 @@ contract("DoubleTrouble", accounts => {
   });
 
   it("should not buy NFT if forSalePrice is 0", async () => {
-    const forSalePrice = await dt.forSalePrice(tokenId);
-    assert.equal(forSalePrice, 0, "Initial for sale price should be  0");
+    assert.equal(await dt.forSalePrice(tokenId), 0, "Initial for sale price should be  0");
+
+    await assert.rejects(dt.buy(tokenId, {from: accounts[1], value: 2000}), /for sale price/);
+    assert(await dt.ownerOf(tokenId), accounts[0], "Ownership should still be accounts[0]");
+  });
+
+  it("should not buy NFT if paying less than the forSalePrice", async () => {
+    const ret = await dt.putUpForSale(tokenId, 3456);
+    assert(ret.receipt.status, true, "Transaction processing failed");
 
     await assert.rejects(dt.buy(tokenId, {from: accounts[1], value: 2000}), /for sale price/);
     assert(await dt.ownerOf(tokenId), accounts[0], "Ownership should still be accounts[0]");
   });
 
   it("should not force buy NFT if lastPurchasePrice is 0", async () => {
-    const lastPurchasePrice = await dt.lastPurchasePrice(tokenId);
-    assert.equal(lastPurchasePrice, 0, "Initial last purchase price should be  0");
+    assert.equal(await dt.lastPurchasePrice(tokenId), 0, "Initial last purchase price should be  0");
 
     await assert.rejects(dt.forceBuy(tokenId, {from: accounts[1], value: 2000}), /last purchase price/);
     assert(await dt.ownerOf(tokenId), accounts[0], "Ownership should still be accounts[0]");
+  });
+
+  it("should buy and force buy NFTs", async () => {
+    assert.equal(await dt.forSalePrice(tokenId), 0, "Initial for sale price should be 0");
+    assert.equal(await dt.lastPurchasePrice(tokenId), 0, "Initial last purchase price should be  0");
+
+    const ret = await dt.putUpForSale(tokenId, 3456);
+    assert(ret.receipt.status, true, "Transaction processing failed");
+
+    assert.equal(await dt.forSalePrice(tokenId), 3456, "For sale price should be > 0");
+    assert.equal(await dt.lastPurchasePrice(tokenId), 0, "Last purchase price should be 0");
+
+    await dt.buy(tokenId, {from: accounts[1], value: 3456});
+    assert(await dt.ownerOf(tokenId), accounts[1], "Ownership should now be accounts[1]");
+
+    assert.equal(await dt.forSalePrice(tokenId), 0, "For sale price should be 0 after purchase");
+    assert.equal(await dt.lastPurchasePrice(tokenId), 3456, "Last purchase price should be > 0 after purchase");
+
+    await assert.rejects(dt.forceBuy(tokenId, {from: accounts[2], value: 3456}), /last purchase price/);
+
+    await dt.forceBuy(tokenId, {from: accounts[2], value: 3456 * 2});
+    assert(await dt.ownerOf(tokenId), accounts[2], "Ownership should now be accounts[2]");
+
+    assert.equal(await dt.lastPurchasePrice(tokenId), 3456 * 2, "Last purchase price should be twice as big");
+    assert.equal(await dt.forSalePrice(tokenId), 0, "For sale price should be 0 after purchase");
   });
 });
