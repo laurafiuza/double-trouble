@@ -27,15 +27,15 @@ contract DoubleTrouble is ERC721URIStorage {
     _mint(owner, tokenId);
   }
 
-  function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes memory data) public override {
+  function safeTransferFrom(address _from, address _to, uint256 _tokenId, bytes memory data) public override pure{
     revert("Please use the function buy");
   }
 
-  function safeTransferFrom(address _from, address _to, uint256 _tokenId) public override {
+  function safeTransferFrom(address _from, address _to, uint256 _tokenId) public override pure {
     revert("Please use the function buy");
   }
 
-  function transferFrom(address _from, address _to, uint256 _tokenId) public override { 
+  function transferFrom(address _from, address _to, uint256 _tokenId) public override pure { 
     revert("Please use the function buy");
   }
 
