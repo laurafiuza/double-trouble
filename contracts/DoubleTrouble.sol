@@ -35,7 +35,7 @@ contract DoubleTrouble is ERC721URIStorage {
     revert("Please use the function buy");
   }
 
-  function transferFrom(address _from, address _to, uint256 _tokenId) public override pure { 
+  function transferFrom(address _from, address _to, uint256 _tokenId) public override pure {
     revert("Please use the function buy");
   }
 
@@ -57,5 +57,23 @@ contract DoubleTrouble is ERC721URIStorage {
 
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
     return IERC721Metadata(_originalCollection).tokenURI(tokenId);
+  }
+
+  function buy(uint256 tokenId) payable external {
+    uint256 amountPaid = msg.value;
+    bool buyFor2x = _lastPurchasePrices[tokenId] > 0 && amountPaid >= 2 * _lastPurchasePrices[tokenId];
+    bool buyForSalePrice = _forSalePrices[tokenId] > 0 && amountPaid >= _forSalePrices[tokenId];
+    require(buyFor2x || buyForSalePrice, "Price paid must satisfy one of the two buy conditions");
+
+    // Change owner, set last purchase price, and remove from sale
+    address oldOwner = ownerOf(tokenId);
+    _transfer(oldOwner, msg.sender, tokenId);
+    _lastPurchasePrices[tokenId] = amountPaid;
+    _forSalePrices[tokenId] = 0;
+
+    // Send ether to the old owner. Must be at the very end of the buy function to prevent reentrancy attacks
+    // https://consensys.net/diligence/blog/2019/09/stop-using-soliditys-transfer-now/
+    (bool success, ) = oldOwner.call{value: amountPaid}("");
+    require(success, "Transfer failed.");
   }
 }
