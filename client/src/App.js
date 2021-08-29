@@ -35,13 +35,11 @@ class App extends Component {
         DoubleTroubleContract.abi,
         collection,
       );
-
       console.log(instance);
-      /*
-      const response = await instance.methods.tokenURI(tokenId);
-      console.log("response");
-      console.log(response);
-      */
+
+      console.log(instance.methods.tokenURI(0));
+      console.log(await instance.methods['tokenURI(uint256)'](0).call());
+      const tokenURI = await instance.methods.tokenURI(parseInt(tokenId)).call() || "not found";
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
@@ -49,6 +47,7 @@ class App extends Component {
         web3,
         accounts,
         contract: instance,
+        tokenURI,
       }, this.refreshView);
     } catch (error) {
       // Catch any errors for any of the above operations.
