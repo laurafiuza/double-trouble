@@ -15,6 +15,7 @@ class CollectionInspector extends Component {
     super();
     this.localState = {
       inputSalePrice: "",
+      error: undefined,
     };
     this.externalCache = {
       web3: null,
@@ -27,6 +28,10 @@ class CollectionInspector extends Component {
 
     this.deriveExternalCache().then((ret) => {
       this.externalCache = ret;
+      this.forceUpdate();
+    }).catch((err) => {
+      console.error(err);
+      this.localState.error = err.message;
       this.forceUpdate();
     });
   };
@@ -53,9 +58,14 @@ class CollectionInspector extends Component {
   };
 
   render() {
+    if (this.localState.error != undefined) {
+      return <div className="error-box">Error: {this.localState.error}</div>
+    }
+
     if (!this.externalCache.web3) {
       return <div>Loading...</div>;
     }
+
     const { isOwner, isDTable, forSalePrice, lastPurchasePrice } = this.externalCache;
     const isForSale = forSalePrice > 0;
 
