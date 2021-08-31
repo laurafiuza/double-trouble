@@ -187,7 +187,7 @@ class ERC721Inspector extends Component {
   };
 };
 
-class DTCollectionInspector extends Component {
+class TroublesomeCollectionInspector extends Component {
   constructor() {
     super();
     this.localState = {
@@ -211,12 +211,12 @@ class DTCollectionInspector extends Component {
   };
 
   deriveExternalCache = async () => {
-    const instance = new this.props.web3.eth.Contract(
+    const dtCollection = new this.props.web3.eth.Contract(
       DoubleTroubleContract.abi,
       this.props.collection,
     );
 
-    const tokenURI = await instance.methods.tokenURI(this.props.tokenId).call() || "not found";
+    const tokenURI = await dtCollection.methods.tokenURI(this.props.tokenId).call() || "not found";
 
     const nftOwner = await dtCollection.methods.ownerOf(this.props.tokenId).call() || "no owner found";
     const forSalePrice = await dtCollection.methods.forSalePrice(this.props.tokenId).call() || "no for sale price found";
