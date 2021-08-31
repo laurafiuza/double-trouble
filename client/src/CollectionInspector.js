@@ -14,12 +14,44 @@ import "./App.css";
 const DTO_CONTRACT_ADDR = "0x2b97782265b7DEF837165409aD245A3f3Da8d8BB";
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
 
+class CollectionInspector extends Component {
+  constructor() {
+    super();
+    this.localState = {error: undefined};
+    this.externalCache = {
+      dto: undefined, troublesomeCollection: undefined,
+    };
+  };
+
+  componentDidUpdate() {
+    if (this.props.web3) {
+      this.deriveAndRender();
+    }
+  };
+
+  deriveAndRender = () => {
+    this.deriveExternalCache().then((ret) => {
+      this.externalCache = ret;
+      this.forceUpdate();
+    }).catch((err) => {
+      console.error(err);
+      this.localState.error = err.message;
+      this.forceUpdate();
+    });
+  };
+
+  deriveExternalCache = async () => {
+
+  render() {
+
+  };
+}
+
 class ERC721Inspector extends Component {
   constructor() {
     super();
     this.localState = {error: undefined};
     this.externalCache = {
-      web3: null, accounts: null, defaultAccount: null,
       dto: undefined, troublesomeCollection: undefined,
     };
   };
@@ -129,7 +161,7 @@ class ERC721Inspector extends Component {
   };
 };
 
-class DTCollectionInspector extends Component {
+class TroublesomeCollectionInspector extends Component {
   constructor() {
     super();
     this.localState = {
@@ -153,12 +185,12 @@ class DTCollectionInspector extends Component {
   };
 
   deriveExternalCache = async () => {
-    const instance = new this.props.web3.eth.Contract(
+    const dtCollection = new this.props.web3.eth.Contract(
       DoubleTroubleContract.abi,
       this.props.collection,
     );
 
-    const tokenURI = await instance.methods.tokenURI(this.props.tokenId).call() || "not found";
+    const tokenURI = await dtCollection.methods.tokenURI(this.props.tokenId).call() || "not found";
 
     const nftOwner = await instance.methods.ownerOf(this.props.tokenId).call() || "no owner found";
     const forSalePrice = await instance.methods.forSalePrice(this.props.tokenId).call() || "no for sale price found";
