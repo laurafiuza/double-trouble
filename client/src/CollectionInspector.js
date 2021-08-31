@@ -14,6 +14,67 @@ import "./App.css";
 const DTO_CONTRACT_ADDR = "0x2b97782265b7DEF837165409aD245A3f3Da8d8BB";
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
 
+class CollectionInspector extends Component {
+  constructor() {
+    super();
+    this.localState = {error: undefined};
+    this.externalCache = {};
+  };
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (this.props.web3 && this.props != prevProps) {
+      this.deriveAndRender();
+    }
+  };
+
+  deriveAndRender = () => {
+    this.deriveExternalCache().then((ret) => {
+      this.externalCache = ret;
+      this.forceUpdate();
+    }).catch((err) => {
+      console.error(err);
+      this.localState.error = err.message;
+      this.forceUpdate();
+    });
+  };
+
+  deriveExternalCache = async () => {
+    const nftCollection = new this.props.web3.eth.Contract(
+      GenericNFTContract.abi,
+      this.props.collection,
+    );
+    const isTroublesome = await nftCollection.methods.supportsInterface(0xdeadbeef).call();
+
+    var collectionName, collectionSymbol, isERC721 = false;
+    try {
+      collectionName = await nftCollection.methods.name().call();
+      collectionSymbol = await nftCollection.methods.symbol().call();
+      isERC721 = true;
+    } catch(err) {
+      throw new Error(`Invalid ERC721 address ${this.props.collection}`);
+    }
+
+    return {isTroublesome, isERC721}
+  };
+
+  render() {
+    if (this.localState.error) {
+      return <div>
+          <div className="error-box">Error: {this.localState.error}</div>
+        </div>;
+    } else if (this.externalCache.isTroublesome) {
+      return <TroublesomeCollectionInspector web3={this.props.web3}
+        collection={this.props.collection} tokenId={this.props.tokenId} />;
+    } else if (this.externalCache.isERC721) {
+      return <ERC721Inspector web3={this.props.web3}
+        collection={this.props.collection} tokenId={this.props.tokenId} />;
+    } else {
+      return <div>Loading...</div>;
+    }
+
+  };
+}
+
 class ERC721Inspector extends Component {
   constructor() {
     super();
@@ -24,8 +85,8 @@ class ERC721Inspector extends Component {
     };
   };
 
-  componentDidUpdate() {
-    if (this.props.web3) {
+  componentDidUpdate(prevProps) {
+    if (this.props.web3 && this.props != prevProps) {
       this.deriveAndRender();
     }
   };
@@ -52,19 +113,15 @@ class ERC721Inspector extends Component {
       this.props.collection,
     );
 
-    var troublesomeCollection, nftOwner, collectionName, collectionSymbol;
-    try {
-      troublesomeCollection = await dto.methods.troublesomeCollection(this.props.collection).call();
-      collectionName = await nftCollection.methods.name().call();
-      collectionSymbol = await nftCollection.methods.symbol().call();
-    } catch(_err) {
-      throw new Error('Invalid ERC721 Address ' + this.props.collection)
-    }
+    const troublesomeCollection = await dto.methods.troublesomeCollection(this.props.collection).call();
+    const collectionName = await nftCollection.methods.name().call();
+    const collectionSymbol = await nftCollection.methods.symbol().call();
 
-    const tokenURI = await nftCollection.methods.tokenURI(this.props.tokenId).call();
 
+    var nftOwner, tokenURI;
     try {
       nftOwner = await nftCollection.methods.ownerOf(this.props.tokenId).call();
+      tokenURI = await nftCollection.methods.tokenURI(this.props.tokenId).call();
     } catch(_err) {
       throw new Error(`NFT ${this.props.tokenId} not found in collection ${this.props.collection}`)
     }
@@ -161,9 +218,10 @@ class DTCollectionInspector extends Component {
 
     const tokenURI = await instance.methods.tokenURI(this.props.tokenId).call() || "not found";
 
-    const nftOwner = await instance.methods.ownerOf(this.props.tokenId).call() || "no owner found";
-    const forSalePrice = await instance.methods.forSalePrice(this.props.tokenId).call() || "no for sale price found";
-    const lastPurchasePrice = await instance.methods.lastPurchasePrice(this.props.tokenId).call() || "no last purchase price found";
+    const nftOwner = await dtCollection.methods.ownerOf(this.props.tokenId).call() || "no owner found";
+    const forSalePrice = await dtCollection.methods.forSalePrice(this.props.tokenId).call() || "no for sale price found";
+    const lastPurchasePrice = await dtCollection.methods.lastPurchasePrice(this.props.tokenId).call() || "no last purchase price found";
+
     const isOwner = nftOwner && nftOwner == this.props.web3.defaultAccount;
     const isDTable = true; // TODO
 
