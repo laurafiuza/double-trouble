@@ -38,7 +38,9 @@ const _getWeb3 = () =>
 const getWeb3 = async () => {
   const web3 = await _getWeb3();
   const accounts = await web3.eth.getAccounts();
-  return {web3, accounts, defaultAccount: accounts[0]};
+  web3.accounts = accounts;
+  web3.defaultAccount = accounts[0];
+  return web3;
 }
 
 export default getWeb3;

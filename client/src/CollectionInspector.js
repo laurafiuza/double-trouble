@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import getWeb3 from "./getWeb3";
 import DoubleTroubleContract from "./contracts/DoubleTrouble.json";
 import DoubleTroubleOrchestratorContract from "./contracts/DoubleTroubleOrchestrator.json";
 import GenericNFTContract from './contracts/IERC721Metadata.json';
@@ -23,7 +22,15 @@ class ERC721Inspector extends Component {
       web3: null, accounts: null, defaultAccount: null,
       dto: undefined, troublesomeCollection: undefined,
     };
+  };
 
+  componentDidUpdate() {
+    if (this.props.web3) {
+      this.deriveAndRender();
+    }
+  };
+
+  deriveAndRender = () => {
     this.deriveExternalCache().then((ret) => {
       this.externalCache = ret;
       this.forceUpdate();
@@ -35,47 +42,64 @@ class ERC721Inspector extends Component {
   };
 
   deriveExternalCache = async () => {
-    const {web3, accounts, defaultAccount} = await getWeb3();
-    const dto = new web3.eth.Contract(
+    const dto = new this.props.web3.eth.Contract(
       DoubleTroubleOrchestratorContract.abi,
       DTO_CONTRACT_ADDR,
     );
 
-    const nftCollection = new web3.eth.Contract(
+    const nftCollection = new this.props.web3.eth.Contract(
       GenericNFTContract.abi,
       this.props.collection,
     );
 
-    var troublesomeCollection, nftOwner;
+    var troublesomeCollection, nftOwner, collectionName, collectionSymbol;
     try {
       troublesomeCollection = await dto.methods.troublesomeCollection(this.props.collection).call();
+      collectionName = await nftCollection.methods.name().call();
+      collectionSymbol = await nftCollection.methods.symbol().call();
     } catch(_err) {
       throw new Error('Invalid ERC721 Address ' + this.props.collection)
     }
+
+    const tokenURI = await nftCollection.methods.tokenURI(this.props.tokenId).call();
 
     try {
       nftOwner = await nftCollection.methods.ownerOf(this.props.tokenId).call();
     } catch(_err) {
       throw new Error(`NFT ${this.props.tokenId} not found in collection ${this.props.collection}`)
     }
-    const isOwner = nftOwner == defaultAccount;
+    const isOwner = nftOwner && nftOwner == this.props.web3.defaultAccount;
 
-    return {web3, accounts, defaultAccount, dto, nftCollection, troublesomeCollection, nftOwner, isOwner};
+    return {
+      dto, nftCollection, troublesomeCollection, nftOwner, isOwner,
+      collectionName, collectionSymbol, tokenURI,
+    };
   }
 
   render() {
-    if (this.localState.error != undefined) {
-      return <div className="error-box">Error: {this.localState.error}</div>
+    var loadedNft = undefined;
+    if (this.externalCache.collectionName) {
+      loadedNft = <div>
+        Name: {this.externalCache.collectionName} Symbol: {this.externalCache.collectionSymbol} tokenURI: {this.externalCache.tokenURI}
+        </div>;
     }
 
-    if (this.externalCache.web3 == undefined) {
-      return <div>Loading...</div>;
+    if (this.localState.error != undefined) {
+      return <div>
+          {loadedNft != undefined ? loadedNft : null}
+          <div className="error-box">Error: {this.localState.error}</div>
+        </div>;
+    }
+
+    if (this.props.web3 == undefined) {
+      return <div>Loading web3...</div>;
     }
 
     if (this.externalCache.troublesomeCollection == ZERO_ADDR) {
       return (<div>
+        {loadedNft}
         <div>This NFT collection is not in DoubleTrouble yet</div>
-        <button onClick={() => console.error("TODO")}>
+        <button onClick={this.makeTroublesomeCollection}>
           Create a troublesome collection for it
         </button>
       </div>);
@@ -85,10 +109,24 @@ class ERC721Inspector extends Component {
       return <div className="error-box">Something went wrong</div>
     }
     return (<div>
+      <div>Name: {this.externalCache.collectionName} Symbol: {this.externalCache.collectionSymbol}</div>
       This NFT already has a troublesome Collection.
       <a href={`/collections/${this.externalCache.troublesomeCollection}/${this.props.tokenId}`}>View it</a>
     </div>);
   }
+
+  makeTroublesomeCollection = async () => {
+    try {
+      const {dto, collectionName, collectionSymbol} = this.externalCache;
+      const response = await dto.methods
+        .makeTroublesomeCollection(this.props.collection, collectionName, collectionSymbol)
+        .send({from: this.props.web3.defaultAccount});
+      this.deriveAndRender();
+    } catch(err) {
+      console.warn("Error when making Troublesome collection");
+      console.warn(err);
+    }
+  };
 };
 
 class DTCollectionInspector extends Component {
@@ -99,9 +137,6 @@ class DTCollectionInspector extends Component {
       error: undefined,
     };
     this.externalCache = {
-      web3: null,
-      accounts: null,
-      defaultAccount: null,
       tokenURI: "",
       isOwner: false,
       isDTable: true,
@@ -118,21 +153,20 @@ class DTCollectionInspector extends Component {
   };
 
   deriveExternalCache = async () => {
-    const {web3, accounts, defaultAccount} = await getWeb3();
-    const instance = new web3.eth.Contract(
+    const instance = new this.props.web3.eth.Contract(
       DoubleTroubleContract.abi,
       this.props.collection,
     );
 
     const tokenURI = await instance.methods.tokenURI(this.props.tokenId).call() || "not found";
 
-    const ownerOfNft = await instance.methods.ownerOf(this.props.tokenId).call() || "no owner found";
+    const nftOwner = await instance.methods.ownerOf(this.props.tokenId).call() || "no owner found";
     const forSalePrice = await instance.methods.forSalePrice(this.props.tokenId).call() || "no for sale price found";
     const lastPurchasePrice = await instance.methods.lastPurchasePrice(this.props.tokenId).call() || "no last purchase price found";
-    const isOwner = defaultAccount == ownerOfNft;
+    const isOwner = nftOwner && nftOwner == this.props.web3.defaultAccount;
     const isDTable = true; // TODO
 
-    return {web3, accounts, defaultAccount, tokenURI, isOwner, isDTable}
+    return {tokenURI, isOwner, isDTable}
   };
 
   render() {

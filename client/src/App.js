@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import getWeb3 from "./getWeb3";
 import {
   BrowserRouter as Router,
   Switch,
@@ -7,38 +8,69 @@ import {
 } from "react-router-dom";
 import CollectionInspector from "./CollectionInspector";
 
-export default function App() {
-  return (
-    <Router>
-      <div>
-        <nav>
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/about">About</Link>
-            </li>
-            <li>
-              <Link to="/collections/0xdeadbeef/1234">NFT</Link>
-            </li>
-          </ul>
-        </nav>
+class App extends Component {
+  constructor() {
+    super();
+    this.externalCache = {
+      web3: null
+    };
 
-        {/* A <Switch> looks through its children <Route>s and
-            renders the first one that matches the current URL. */}
-        <Switch>
-          <Route path="/about">
-            <div>We are cool</div>
-          </Route>
-          <Route path="/collections/:collection/:tokenId" render={({match}) => {
-            return <CollectionInspector collection={match.params.collection} tokenId={match.params.tokenId} />
-          }} />
-          <Route path="/">
-            <div>Home</div>
-          </Route>
-        </Switch>
-      </div>
-    </Router>
-  );
+    this.deriveAndRender();
+  };
+
+  deriveAndRender = () => {
+    this.deriveExternalCache().then((ret) => {
+      this.externalCache = ret;
+      this.forceUpdate();
+    }).catch((err) => {
+      console.error(err);
+      this.localState.error = err.message;
+      this.forceUpdate();
+    });
+  };
+
+  deriveExternalCache = async () => {
+    const web3 = await getWeb3();
+    return {web3}
+  };
+
+  render() {
+    return (
+      <Router>
+        <div>
+          <nav>
+            <ul>
+              <li>
+                <Link to="/">Home</Link>
+              </li>
+              <li>
+                <Link to="/about">About</Link>
+              </li>
+              <li>
+                <Link to="/collections/0xdeadbeef/1234">NFT</Link>
+              </li>
+            </ul>
+          </nav>
+          {this.externalCache.web3 && <div>Connected wallet: {this.externalCache.web3.defaultAccount}</div>}
+
+          {/* A <Switch> looks through its children <Route>s and
+              renders the first one that matches the current URL. */}
+          <Switch>
+            <Route path="/about">
+              <div>We are cool</div>
+            </Route>
+            <Route path="/collections/:collection/:tokenId" render={({match}) => {
+              return <CollectionInspector web3={this.externalCache.web3}
+                collection={match.params.collection} tokenId={match.params.tokenId} />
+            }} />
+            <Route path="/">
+              <div>Home</div>
+            </Route>
+          </Switch>
+        </div>
+      </Router>
+    );
+  }
 }
+
+export default App;
