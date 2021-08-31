@@ -13,7 +13,6 @@ contract DoubleTroubleOrchestrator {
 
     // Deploy troublesome contract for nftCollection
     _troublesomeCollections[nftCollection] = new DoubleTrouble(name, symbol, nftCollection);
-    _count += 1;
   }
 
   function troublesomeCollection(address nftCollection) external view returns (DoubleTrouble) {
