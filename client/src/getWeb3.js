@@ -1,6 +1,6 @@
 import Web3 from "web3";
 
-const getWeb3 = () =>
+const _getWeb3 = () =>
   new Promise((resolve, reject) => {
     // Wait for loading completion to avoid race conditions with web3 injection timing.
     window.addEventListener("load", async () => {
@@ -34,5 +34,11 @@ const getWeb3 = () =>
       }
     });
   });
+
+const getWeb3 = async () => {
+  const web3 = await _getWeb3();
+  const accounts = await web3.eth.getAccounts();
+  return {web3, accounts, defaultAccount: accounts[0]};
+}
 
 export default getWeb3;

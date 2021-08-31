@@ -1,16 +1,97 @@
 import React, { Component } from "react";
 import getWeb3 from "./getWeb3";
 import DoubleTroubleContract from "./contracts/DoubleTrouble.json";
+import DoubleTroubleOrchestratorContract from "./contracts/DoubleTroubleOrchestrator.json";
+import GenericNFTContract from './contracts/IERC721Metadata.json';
+
 import "./App.css";
 
 // TODO: is dtable?
-
 
 // 1) Inputs (Props)
 // 2) local state (only exists in client)
 // 3) Cache of external state
 
-class CollectionInspector extends Component {
+const DTO_CONTRACT_ADDR = "0x2b97782265b7DEF837165409aD245A3f3Da8d8BB";
+const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
+
+class ERC721Inspector extends Component {
+  constructor() {
+    super();
+    this.localState = {error: undefined};
+    this.externalCache = {
+      web3: null, accounts: null, defaultAccount: null,
+      dto: undefined, troublesomeCollection: undefined,
+    };
+
+    this.deriveExternalCache().then((ret) => {
+      this.externalCache = ret;
+      this.forceUpdate();
+    }).catch((err) => {
+      console.error(err);
+      this.localState.error = err.message;
+      this.forceUpdate();
+    });
+  };
+
+  deriveExternalCache = async () => {
+    const {web3, accounts, defaultAccount} = await getWeb3();
+    const dto = new web3.eth.Contract(
+      DoubleTroubleOrchestratorContract.abi,
+      DTO_CONTRACT_ADDR,
+    );
+
+    const nftCollection = new web3.eth.Contract(
+      GenericNFTContract.abi,
+      this.props.collection,
+    );
+
+    var troublesomeCollection, nftOwner;
+    try {
+      troublesomeCollection = await dto.methods.troublesomeCollection(this.props.collection).call();
+    } catch(_err) {
+      throw new Error('Invalid ERC721 Address ' + this.props.collection)
+    }
+
+    try {
+      nftOwner = await nftCollection.methods.ownerOf(this.props.tokenId).call();
+    } catch(_err) {
+      throw new Error(`NFT ${this.props.tokenId} not found in collection ${this.props.collection}`)
+    }
+    const isOwner = nftOwner == defaultAccount;
+
+    return {web3, accounts, defaultAccount, dto, nftCollection, troublesomeCollection, nftOwner, isOwner};
+  }
+
+  render() {
+    if (this.localState.error != undefined) {
+      return <div className="error-box">Error: {this.localState.error}</div>
+    }
+
+    if (this.externalCache.web3 == undefined) {
+      return <div>Loading...</div>;
+    }
+
+    if (this.externalCache.troublesomeCollection == ZERO_ADDR) {
+      return (<div>
+        <div>This NFT collection is not in DoubleTrouble yet</div>
+        <button onClick={() => console.error("TODO")}>
+          Create a troublesome collection for it
+        </button>
+      </div>);
+    }
+
+    if (this.externalCache.troublesomeCollection == undefined) {
+      return <div className="error-box">Something went wrong</div>
+    }
+    return (<div>
+      This NFT already has a troublesome Collection.
+      <a href={`/collections/${this.externalCache.troublesomeCollection}/${this.props.tokenId}`}>View it</a>
+    </div>);
+  }
+};
+
+class DTCollectionInspector extends Component {
   constructor() {
     super();
     this.localState = {
@@ -37,10 +118,7 @@ class CollectionInspector extends Component {
   };
 
   deriveExternalCache = async () => {
-    const web3 = await getWeb3();
-    const accounts = await web3.eth.getAccounts();
-    const defaultAccount = accounts[0];
-
+    const {web3, accounts, defaultAccount} = await getWeb3();
     const instance = new web3.eth.Contract(
       DoubleTroubleContract.abi,
       this.props.collection,
@@ -217,4 +295,4 @@ class CollectionInspector extends Component {
 
 }
 
-export default CollectionInspector;
+export default ERC721Inspector;
