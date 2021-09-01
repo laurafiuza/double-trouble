@@ -43,7 +43,7 @@ class CollectionInspector extends Component {
       GenericNFTContract.abi,
       this.props.collection,
     );
-    const isTroublesome = await nftCollection.methods.supportsInterface(0xdeadbeef).call();
+    const isTroublesome = await nftCollection.methods.supportsInterface("0xdeadbeef").call();
 
     var collectionName, collectionSymbol, isERC721 = false;
     try {
@@ -71,7 +71,6 @@ class CollectionInspector extends Component {
     } else {
       return <div>Loading...</div>;
     }
-
   };
 }
 
@@ -388,4 +387,4 @@ class TroublesomeCollectionInspector extends Component {
 
 }
 
-export default ERC721Inspector;
+export default CollectionInspector;

@@ -9,6 +9,8 @@ contract DoubleTrouble is ERC721URIStorage {
   mapping (uint256 => uint256) public _forSalePrices;
   mapping (uint256 => uint256) public _lastPurchasePrices;
   address _originalCollection;
+  address _walletDT = address(0x8DbBF70Afb0681eaFde71be77781b207539746b9);
+  uint256 _feeRate = 100;
 
   constructor(string memory name, string memory symbol, address nftCollection) ERC721(name, symbol) {
     require(nftCollection != address(0), "collection address cannot be zero");
@@ -60,12 +62,14 @@ contract DoubleTrouble is ERC721URIStorage {
   }
 
   function buy(uint256 tokenId) payable external {
-    require(_forSalePrices[tokenId] > 0 && msg.value >= _forSalePrices[tokenId], "Value sent must be at least the for sale price");
+    require(_forSalePrices[tokenId] > 0, "NFT is not for sale");
+    require(msg.value >= _forSalePrices[tokenId]), "Value sent must be at least the for sale price");
     _completeBuy(msg.sender, tokenId, msg.value);
   }
 
   function forceBuy(uint256 tokenId) payable external {
-    require(_lastPurchasePrices[tokenId] > 0 && msg.value >= 2 * _lastPurchasePrices[tokenId], "Value sent must be at least twice the last purchase price");
+    require(_forSalePrices[tokenId] > 0, "NFT is not for sale");
+    require(msg.value >= (2 * _lastPurchasePrices[tokenId]), "Value sent must be at least twice the last purchase price");
     _completeBuy(msg.sender, tokenId, msg.value);
   }
 
@@ -75,11 +79,15 @@ contract DoubleTrouble is ERC721URIStorage {
     _transfer(oldOwner, newOwner, tokenId);
     _lastPurchasePrices[tokenId] = amountPaid;
     _forSalePrices[tokenId] = 0;
+    uint256 feeToCharge = amountPaid / _feeRate;
 
     // Send ether to the old owner. Must be at the very end of the buy function to prevent reentrancy attacks
     // https://consensys.net/diligence/blog/2019/09/stop-using-soliditys-transfer-now/
-    (bool success, ) = oldOwner.call{value: amountPaid}("");
-    require(success, "Transfer failed.");
+    (bool oldOwnersuccess, ) = oldOwner.call{value: amountPaid - feeToCharge}("");
+    // Send ether to the DT wallet
+    require(oldOwnersuccess, "Transfer to owner failed.");
+    (bool dtWalletSuccess, ) = _walletDT.call{value: feeToCharge}("");
+    require(dtWalletSuccess, "Transfer to DT wallet failed.");
   }
 
   function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {

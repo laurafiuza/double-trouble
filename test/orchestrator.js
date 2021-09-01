@@ -39,9 +39,6 @@ contract("DoubleTroubleOrchestrator", accounts => {
 
     dt = await DoubleTrouble.at(dt_address);
     assert.equal(dt_address, dt.address, "Address returned by orchestrator must match dt.deployed().");
-
-    const allTroublesome = await dto.allTroublesomeCollections();
-    assert.equal(allTroublesome[cp.address], dt.address, "allTroublesome must return entry for cp");
   });
 
   it("makeTroublesomeCollection should fail if called on same NFT collection twice", async () => {
