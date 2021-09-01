@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import DoubleTroubleContract from "./contracts/DoubleTrouble.json";
 import DoubleTroubleOrchestratorContract from "./contracts/DoubleTroubleOrchestrator.json";
-import GenericNFTContract from './contracts/IERC721Metadata.json';
+import GenericNFTContract from "./contracts/IERC721Metadata.json";
 
 import "./App.css";
 
@@ -11,7 +11,7 @@ import "./App.css";
 // 2) local state (only exists in client)
 // 3) Cache of external state
 
-const DTO_CONTRACT_ADDR = "0x2b97782265b7DEF837165409aD245A3f3Da8d8BB";
+const DTO_CONTRACT_ADDR = "0x35A11AA9379135150EAB5330b55f1B875f0E0dB2";
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
 
 class CollectionInspector extends Component {
@@ -19,12 +19,17 @@ class CollectionInspector extends Component {
     super();
     this.localState = {error: undefined};
     this.externalCache = {};
+
   };
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    if (this.props.web3 && this.props != prevProps) {
+    if (this.props != prevProps) {
       this.deriveAndRender();
     }
+  };
+
+  componentDidMount() {
+    this.deriveAndRender();
   };
 
   deriveAndRender = () => {
@@ -39,19 +44,28 @@ class CollectionInspector extends Component {
   };
 
   deriveExternalCache = async () => {
+    if (!this.props.web3) {
+      return {};
+    }
+
     const nftCollection = new this.props.web3.eth.Contract(
       GenericNFTContract.abi,
       this.props.collection,
     );
-    const isTroublesome = await nftCollection.methods.supportsInterface("0xdeadbeef").call();
 
-    var collectionName, collectionSymbol, isERC721 = false;
+    var isTroublesome, collectionName, collectionSymbol, isERC721 = false;
     try {
       collectionName = await nftCollection.methods.name().call();
       collectionSymbol = await nftCollection.methods.symbol().call();
       isERC721 = true;
     } catch(err) {
       throw new Error(`Invalid ERC721 address ${this.props.collection}`);
+    }
+
+    try {
+      isTroublesome = await nftCollection.methods.supportsInterface("0xdeadbeef").call();
+    } catch(err) {
+      isTroublesome = false;
     }
 
     return {isTroublesome, isERC721}
@@ -84,8 +98,12 @@ class ERC721Inspector extends Component {
     };
   };
 
+  componentDidMount() {
+    this.deriveAndRender();
+  }
+
   componentDidUpdate(prevProps) {
-    if (this.props.web3 && this.props != prevProps) {
+    if (this.props != prevProps) {
       this.deriveAndRender();
     }
   };
@@ -102,6 +120,10 @@ class ERC721Inspector extends Component {
   };
 
   deriveExternalCache = async () => {
+    if (!this.props.web3) {
+      return {};
+    }
+
     const dto = new this.props.web3.eth.Contract(
       DoubleTroubleOrchestratorContract.abi,
       DTO_CONTRACT_ADDR,
