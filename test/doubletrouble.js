@@ -53,6 +53,10 @@ contract("DoubleTrouble", accounts => {
     tokenId++;
   });
 
+  it("DT contract records the original Collection", async () => {
+    assert.equal(await dt.originalCollection(), cp.address, "Original Collection must match CryptoPunks address");
+  });
+
   it("DT supports 0xdeadbeef interface (DoubleTrouble)", async () => {
     assert.equal(await dt.supportsInterface("0xdeadbeef"), true);
   });

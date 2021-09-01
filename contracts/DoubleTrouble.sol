@@ -29,6 +29,10 @@ contract DoubleTrouble is ERC721URIStorage {
     _mint(owner, tokenId);
   }
 
+  function originalCollection() external view returns (address) {
+    return _originalCollection;
+  }
+
   function safeTransferFrom(address, address, uint256, bytes memory) public override pure {
     revert("Please use buy or forceBuy");
   }
