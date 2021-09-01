@@ -123,7 +123,7 @@ contract("DoubleTrouble", accounts => {
   it("should not force buy NFT if lastPurchasePrice is 0", async () => {
     assert.equal(await dt.lastPurchasePrice(tokenId), 0, "Initial last purchase price should be  0");
 
-    await assert.rejects(dt.forceBuy(tokenId, {from: accounts[1], value: 2000}), /NFT is not for sale/);
+    await assert.rejects(dt.forceBuy(tokenId, {from: accounts[1], value: 2000}), /NFT was not yet purchased/);
     assert(await dt.ownerOf(tokenId), accounts[0], "Ownership should still be accounts[0]");
   });
 
@@ -155,16 +155,15 @@ contract("DoubleTrouble", accounts => {
     let [balance0Before, balance1Before] =
       [await web3.eth.getBalance(accounts[0]), await web3.eth.getBalance(accounts[1])];
 
-    let feeRate = divWei(price, web3.utils.toWei('100'));
-    let priceToPay = addWei(price, feeRate);
-    let buyTx = await dt.buy(tokenId, {from: accounts[1], value: priceToPay});
+    let buyTx = await dt.buy(tokenId, {from: accounts[1], value: price});
     assert(await dt.ownerOf(tokenId), accounts[1], "Ownership should now be accounts[1]");
 
     let [balance0After, balance1After] =
       [await web3.eth.getBalance(accounts[0]), await web3.eth.getBalance(accounts[1])];
     let gasUsed = multWei(buyTx.receipt.gasUsed, await web3.eth.getGasPrice());
-    assert.equal(balance0After.toString(), addWei(balance0Before, price).toString(), "Balance of accounts[0] must be bigger after buy");
-    assert.equal(balance1After.toString(), subWei(subWei(balance1Before, priceToPay), gasUsed).toString(), "Balance of accounts[1] must be smaller after buy");
+    let fee = divWei(price, 100);
+    assert.equal(balance0After.toString(), subWei(addWei(balance0Before, price), fee).toString(), "Balance of accounts[0] must be bigger after buy");
+    assert.equal(balance1After.toString(), subWei(subWei(balance1Before, price), gasUsed).toString(), "Balance of accounts[1] must be smaller after buy");
 
     assert.equal(await dt.forSalePrice(tokenId), 0, "For sale price should be 0 after purchase");
     assert.equal(await dt.lastPurchasePrice(tokenId), price, "Last purchase price should be > 0 after purchase");
@@ -173,17 +172,16 @@ contract("DoubleTrouble", accounts => {
 
     const balance2Before = await web3.eth.getBalance(accounts[2]);
 
-    let feeRateDouble = divWei(doublePrice, 100);
-    let priceToPayDouble = addWei(doublePrice, feeRateDouble);
-    buyTx = await dt.forceBuy(tokenId, {from: accounts[2], value: priceToPayDouble});
+    buyTx = await dt.forceBuy(tokenId, {from: accounts[2], value: doublePrice});
     assert(await dt.ownerOf(tokenId), accounts[2], "Ownership should now be accounts[2]");
 
     gasUsed = multWei(buyTx.receipt.gasUsed, await web3.eth.getGasPrice());
     let [balance1AfterAfter, balance2After] =
       [await web3.eth.getBalance(accounts[1]), await web3.eth.getBalance(accounts[2])];
 
-    assert.equal(balance1AfterAfter.toString(), addWei(balance1After, doublePrice).toString(), "Balance of accounts[0] must be bigger after buy");
-    assert.equal(balance2After.toString(), subWei(subWei(balance2Before, priceToPayDouble), gasUsed).toString(), "Balance of accounts[1] must be smaller after buy");
+    fee = divWei(doublePrice, 100);
+    assert.equal(balance1AfterAfter.toString(), subWei(addWei(balance1After, doublePrice), fee).toString(), "Balance of accounts[0] must be bigger after buy");
+    assert.equal(balance2After.toString(), subWei(subWei(balance2Before, doublePrice), gasUsed).toString(), "Balance of accounts[1] must be smaller after buy");
 
     assert.equal(await dt.lastPurchasePrice(tokenId), price * 2, "Last purchase price should be twice as big");
     assert.equal(await dt.forSalePrice(tokenId), 0, "For sale price should be 0 after purchase");

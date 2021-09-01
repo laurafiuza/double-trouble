@@ -63,12 +63,12 @@ contract DoubleTrouble is ERC721URIStorage {
 
   function buy(uint256 tokenId) payable external {
     require(_forSalePrices[tokenId] > 0, "NFT is not for sale");
-    require(msg.value >= _forSalePrices[tokenId]), "Value sent must be at least the for sale price");
+    require(msg.value >= _forSalePrices[tokenId], "Value sent must be at least the for sale price");
     _completeBuy(msg.sender, tokenId, msg.value);
   }
 
   function forceBuy(uint256 tokenId) payable external {
-    require(_forSalePrices[tokenId] > 0, "NFT is not for sale");
+    require(_lastPurchasePrices[tokenId] > 0, "NFT was not yet purchased within DoubleTrouble");
     require(msg.value >= (2 * _lastPurchasePrices[tokenId]), "Value sent must be at least twice the last purchase price");
     _completeBuy(msg.sender, tokenId, msg.value);
   }
