@@ -19,7 +19,6 @@ class CollectionInspector extends Component {
     super();
     this.localState = {error: undefined};
     this.externalCache = {};
-
   };
 
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -216,11 +215,21 @@ class TroublesomeCollectionInspector extends Component {
       error: undefined,
     };
     this.externalCache = {
-      tokenURI: "",
-      isOwner: false,
-      isDTable: true,
+      tokenURI: "", isOwner: false, isTroublesome: true,
     };
+  };
 
+  componentDidMount() {
+    this.deriveAndRender();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props != prevProps) {
+      this.deriveAndRender();
+    }
+  };
+
+  deriveAndRender = () => {
     this.deriveExternalCache().then((ret) => {
       this.externalCache = ret;
       this.forceUpdate();
@@ -232,21 +241,39 @@ class TroublesomeCollectionInspector extends Component {
   };
 
   deriveExternalCache = async () => {
+    if (!this.props.web3) {
+      return {};
+    }
+
     const dtCollection = new this.props.web3.eth.Contract(
       DoubleTroubleContract.abi,
       this.props.collection,
     );
 
-    const tokenURI = await dtCollection.methods.tokenURI(this.props.tokenId).call() || "not found";
+    try {
+      const ret = await dtCollection.methods.supportsInterface("0xdeadbeef").call();
+      if (!ret) {
+        throw new Error("Doesnt suport 0xdeadbeef");
+      }
+    } catch(err) {
+      throw new Error(`Address supplied ${this.props.collection} doesn't refer to a Troublesome NFT collection.`);
+    }
 
-    const nftOwner = await dtCollection.methods.ownerOf(this.props.tokenId).call() || "no owner found";
-    const forSalePrice = await dtCollection.methods.forSalePrice(this.props.tokenId).call() || "no for sale price found";
-    const lastPurchasePrice = await dtCollection.methods.lastPurchasePrice(this.props.tokenId).call() || "no last purchase price found";
+    var tokenURI, nftOwner = false, forSalePrice = 0, lastPurchasePrice = 0, isTroublesome = false;
+    try {
+      tokenURI = await dtCollection.methods.tokenURI(this.props.tokenId).call();
+
+      nftOwner = await dtCollection.methods.ownerOf(this.props.tokenId).call();
+      forSalePrice = await dtCollection.methods.forSalePrice(this.props.tokenId).call();
+      lastPurchasePrice = await dtCollection.methods.lastPurchasePrice(this.props.tokenId).call();
+      isTroublesome = true;
+    } catch(err) {
+      isTroublesome = false;
+    }
 
     const isOwner = nftOwner && nftOwner == this.props.web3.defaultAccount;
-    const isDTable = true; // TODO
 
-    return {tokenURI, isOwner, isDTable}
+    return {tokenURI, isOwner, isTroublesome, forSalePrice, lastPurchasePrice}
   };
 
   render() {
@@ -254,20 +281,20 @@ class TroublesomeCollectionInspector extends Component {
       return <div className="error-box">Error: {this.localState.error}</div>
     }
 
-    if (!this.externalCache.web3) {
+    if (!this.props.web3) {
       return <div>Loading...</div>;
     }
 
-    const { isOwner, isDTable, forSalePrice, lastPurchasePrice } = this.externalCache;
+    const { isOwner, isTroublesome, forSalePrice, lastPurchasePrice } = this.externalCache;
     const isForSale = forSalePrice > 0;
 
-    const showMakeDTableButton = isOwner && !isDTable;
+    const showMakeDTableButton = isOwner && !isTroublesome;
     // TODO: consider creating unmakeDTable function in contract?
-    const showUnMakeDTableButton = isOwner && isDTable;
-    const showPutUpForSaleButton = isOwner && isDTable && !isForSale;
-    const showUnPutUpForSaleButton = isOwner && isDTable && isForSale;
-    const showBuyButton = !isOwner && isDTable && isForSale;
-    const showForceBuyButton = !isOwner && isDTable && lastPurchasePrice > 0;
+    const showUnMakeDTableButton = isOwner && isTroublesome;
+    const showPutUpForSaleButton = isOwner && isTroublesome && !isForSale;
+    const showUnPutUpForSaleButton = isOwner && isTroublesome && isForSale;
+    const showBuyButton = !isOwner && isTroublesome && isForSale;
+    const showForceBuyButton = !isOwner && isTroublesome && lastPurchasePrice > 0;
 
     const makeDTableButton =
       <button onClick={() => this.makeDTable(true)}>
@@ -317,7 +344,7 @@ class TroublesomeCollectionInspector extends Component {
       <div className="CollectionInspector">
         <h1>DoubleTrouble</h1>
         <p>Token URI: {this.externalCache.tokenURI}</p>
-        <p>Is DTable: {this.externalCache.isDTable.toString()}</p>
+        <p>Is Troublesome : {this.externalCache.isTroublesome.toString()}</p>
         <p>Is owner: {this.externalCache.isOwner.toString()}</p>
         <p>For sale price: {this.externalCache.forSalePrice}</p>
         <p>Last purchase price: {this.externalCache.lastPurchasePrice}</p>
