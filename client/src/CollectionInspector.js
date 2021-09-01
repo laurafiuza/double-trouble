@@ -345,7 +345,7 @@ class TroublesomeCollectionInspector extends Component {
         <h1>DoubleTrouble</h1>
         <p>Token URI: {this.externalCache.tokenURI}</p>
         <p>Is Troublesome : {this.externalCache.isTroublesome.toString()}</p>
-        <p>Is owner: {this.externalCache.isOwner.toString()}</p>
+        <p>Is DT owner: {this.externalCache.isOwner.toString()}</p>
         <p>For sale price: {this.externalCache.forSalePrice}</p>
         <p>Last purchase price: {this.externalCache.lastPurchasePrice}</p>
         { showMakeDTableButton && makeDTableButton }

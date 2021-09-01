@@ -39,8 +39,8 @@ contract("DoubleTrouble", accounts => {
     const approval = await cp.approve(dt.address, tokenId);
     assert.notEqual(approval, undefined, "approval failed (undefined return value).");
 
-    const retMakeDTable = await dt.makeDTable(tokenId);
-    assert.notEqual(retMakeDTable, undefined, "makeDTable failed (undefined return value).");
+    const retMakeDTable = await dt.makeTroublesome(tokenId);
+    assert.notEqual(retMakeDTable, undefined, "makeTroublesome failed (undefined return value).");
 
     const forSalePrice = await dt.forSalePrice(tokenId);
     assert.equal(forSalePrice, 0, "Initial for sale price should be 0");
@@ -61,7 +61,7 @@ contract("DoubleTrouble", accounts => {
     assert.equal(await dt.supportsInterface("0x80ac58cd"), true);
   });
 
-  it("DT should own the NFT after makeDTable", async () => {
+  it("DT should own the NFT after makeTroublesome", async () => {
     const cpOwnerAfter = await cp.ownerOf(tokenId);
     assert.equal(cpOwnerAfter, dt.address, "DT contract must be the owner of the Crypto Punk");
   });

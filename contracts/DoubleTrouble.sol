@@ -18,7 +18,7 @@ contract DoubleTrouble is ERC721URIStorage {
     _originalCollection = nftCollection;
   }
 
-  function makeDTable(uint256 tokenId) external {
+  function makeTroublesome(uint256 tokenId) external {
     require(IERC721Metadata(_originalCollection).getApproved(tokenId) == address(this), "DoubleTrouble contract must be approved to operate this token");
 
     // In the original collection, the owner forever becomes the DoubleTrouble contract
