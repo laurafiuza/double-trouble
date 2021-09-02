@@ -14,6 +14,12 @@ import "./App.css";
 const DTO_CONTRACT_ADDR = "0xB0B54AFf64156212472374128DCb4238A9A67B13";
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
 
+const assert = (bool, msg) => {
+  if (!bool) {
+    throw new Error(msg || "Assertion failed")
+  }
+};
+
 class CollectionInspector extends Component {
   constructor() {
     super();
@@ -337,11 +343,11 @@ class TroublesomeCollectionInspector extends Component {
                     New price in Ethers:
                     <input onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
                   </label>
-                  <button onClick={() => this.putUpForSale(parseInt(this.localState.inputSalePrice))}>
+                  <button onClick={() => this.setPrice(parseInt(this.localState.inputSalePrice))}>
                     { forSalePrice == 0 ? "Put up for sale" : "Change price"}
                   </button>
                 { forSalePrice > 0 &&
-                  <button onClick={() => this.putUpForSale(0)}>
+                  <button onClick={() => this.setPrice(0)}>
                     Remove from sale
                   </button>
                 }
@@ -366,8 +372,9 @@ class TroublesomeCollectionInspector extends Component {
               You own this NFT.
               {isDoubleTroubleApproved
                 ? <div>
-                    Click below to make your NFT Troublesome
-                    <button onClick={this.makeTroublesome}>Make Troublesome</button>
+                    Click below to put it up for sale within DoubleTrouble
+                    <input onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
+                    <button onClick={() => this.makeTroublesome(this.localState.inputSalePrice)}>Make Troublesome</button>
                   </div>
                 : <div>
                     Please approve the Double Trouble contract before making your NFT Troublesome.
@@ -398,10 +405,12 @@ class TroublesomeCollectionInspector extends Component {
     }
   };
 
-  makeTroublesome = async (isDTable) => {
+  makeTroublesome = async (priceInEth) => {
     try {
+      assert(priceInEth > 0, "Price must be > 0");
       const { troublesomeCollection } = this.externalCache;
-      const response = await troublesomeCollection.methods.makeTroublesome(this.props.tokenId)
+      const priceInWei = this.props.web3.utils.toWei(priceInEth.toString(), 'ether')
+      const response = await troublesomeCollection.methods.makeTroublesome(this.props.tokenId, priceInWei)
         .send({from: this.props.web3.defaultAccount});
       this.deriveAndRender();
     } catch(err) {
@@ -411,13 +420,13 @@ class TroublesomeCollectionInspector extends Component {
     }
   };
 
-  putUpForSale = async (priceInEth) => {
+  setPrice = async (priceInEth) => {
     try {
       const { troublesomeCollection } = this.externalCache;
       // TODO: Validate > 0
 
       const priceInWei = this.props.web3.utils.toWei(priceInEth.toString(), 'ether')
-      const response = await troublesomeCollection.methods.putUpForSale(this.props.tokenId, priceInWei)
+      const response = await troublesomeCollection.methods.setPrice(this.props.tokenId, priceInWei)
         .send({from: this.props.web3.defaultAccount});
       this.deriveAndRender();
     } catch(err) {
@@ -454,16 +463,6 @@ class TroublesomeCollectionInspector extends Component {
     }
   };
 
-  handleBuyInputChange = (e) => {
-    e.persist();
-    this.setState({inputBuyPrice: e.target.value});
-  };
-
-  handleForceBuyInputChange = (e) => {
-    e.persist();
-    this.setState({inputForceBuyPrice: e.target.value});
-  };
-
 
   localStateLink = (attr) => {
     return {
@@ -476,6 +475,7 @@ class TroublesomeCollectionInspector extends Component {
     };
   }
 }
+
 
 
 export default CollectionInspector;
