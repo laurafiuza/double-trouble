@@ -29,6 +29,15 @@ contract DoubleTrouble is ERC721URIStorage {
     _mint(owner, tokenId);
   }
 
+  function unmakeTroublesome(uint256 tokenId) external {
+    require(msg.sender == ownerOf(tokenId), "msg.sender should be current owner of NFT");
+    require(_lastPurchasePrices[tokenId] == 0, "Cannot remove NFT from DoubleTrouble if it was already bought by someone");
+
+    // Transfer ownership of the NFT
+    IERC721Metadata(_originalCollection).transferFrom(address(this), msg.sender, tokenId);
+    _burn(tokenId);
+  }
+
   function originalCollection() external view returns (address) {
     return _originalCollection;
   }

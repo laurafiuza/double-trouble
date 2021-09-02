@@ -53,6 +53,25 @@ contract("DoubleTrouble", accounts => {
     tokenId++;
   });
 
+  it("Can unmakeTroublesome", async () => {
+    const lastPurchasePrice = await dt.lastPurchasePrice(tokenId);
+    assert.equal(lastPurchasePrice, 0, "Initial last purchase should be 0");
+
+    const cpOwnerBefore = await cp.ownerOf(tokenId);
+    assert.equal(cpOwnerBefore, dt.address, "DT contract must be the owner of the Crypto Punk");
+
+    const dtOwnerBefore = await dt.ownerOf(tokenId);
+    assert.equal(dtOwnerBefore, accounts[0], "owner within DT does not equal accounts[0].");
+
+    const ret = await dt.unmakeTroublesome(tokenId);
+    assert.notEqual(ret, undefined, "unmakeTroublesome failed (undefined return value).");
+
+    const cpOwnerAfter = await cp.ownerOf(tokenId);
+    assert.equal(cpOwnerAfter, accounts[0], "accounts[0] contract must be the owner of the Crypto Punk");
+
+    await assert.rejects(dt.ownerOf(tokenId), /revert ERC721/, "Token shouldnt be present in DT anymore");
+  });
+
   it("DT contract records the original Collection", async () => {
     assert.equal(await dt.originalCollection(), cp.address, "Original Collection must match CryptoPunks address");
   });
@@ -189,5 +208,7 @@ contract("DoubleTrouble", accounts => {
 
     assert.equal(await dt.lastPurchasePrice(tokenId), price * 2, "Last purchase price should be twice as big");
     assert.equal(await dt.forSalePrice(tokenId), 0, "For sale price should be 0 after purchase");
+
+    await assert.rejects(dt.unmakeTroublesome(tokenId, {from: accounts[2]}), /Cannot remove NFT/);
   });
 });
