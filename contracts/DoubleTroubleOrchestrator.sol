@@ -6,13 +6,18 @@ import "./DoubleTrouble.sol";
 // SPDX-License-Identifier: MIT
 contract DoubleTroubleOrchestrator {
   mapping (address => DoubleTrouble) public _troublesomeCollections;
+  address _feeWallet;
+
+  constructor(address feeWallet) {
+    _feeWallet = feeWallet;
+  }
 
   function makeTroublesomeCollection(address nftCollection, string memory name, string memory symbol) external {
     _ensureSupportedNftContract(nftCollection);
     require(address(_troublesomeCollections[nftCollection]) == address(0), "Collection is already Troublesome");
 
     // Deploy troublesome contract for nftCollection
-    _troublesomeCollections[nftCollection] = new DoubleTrouble(name, symbol, nftCollection);
+    _troublesomeCollections[nftCollection] = new DoubleTrouble(name, symbol, nftCollection, _feeWallet);
   }
 
   function troublesomeCollection(address nftCollection) external view returns (DoubleTrouble) {

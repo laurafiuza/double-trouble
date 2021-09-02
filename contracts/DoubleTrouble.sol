@@ -9,13 +9,14 @@ contract DoubleTrouble is ERC721URIStorage {
   mapping (uint256 => uint256) public _forSalePrices;
   mapping (uint256 => uint256) public _lastPurchasePrices;
   address _originalCollection;
-  address _walletDT = address(0x8DbBF70Afb0681eaFde71be77781b207539746b9);
+  address _feeWallet;
   uint256 _feeRate = 100;
 
-  constructor(string memory name, string memory symbol, address nftCollection) ERC721(name, symbol) {
+  constructor(string memory name, string memory symbol, address nftCollection, address feeWallet) ERC721(name, symbol) {
     require(nftCollection != address(0), "collection address cannot be zero");
     require(IERC721Metadata(nftCollection).supportsInterface(0x80ac58cd),  "collection must refer to an ERC721 address");
     _originalCollection = nftCollection;
+    _feeWallet = feeWallet;
   }
 
   function makeTroublesome(uint256 tokenId) external {
@@ -99,8 +100,8 @@ contract DoubleTrouble is ERC721URIStorage {
     (bool oldOwnersuccess, ) = oldOwner.call{value: amountPaid - feeToCharge}("");
     // Send ether to the DT wallet
     require(oldOwnersuccess, "Transfer to owner failed.");
-    (bool dtWalletSuccess, ) = _walletDT.call{value: feeToCharge}("");
-    require(dtWalletSuccess, "Transfer to DT wallet failed.");
+    (bool feeWalletSuccess, ) = _feeWallet.call{value: feeToCharge}("");
+    require(feeWalletSuccess, "Transfer to DT wallet failed.");
   }
 
   function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
