@@ -316,31 +316,13 @@ class TroublesomeCollectionInspector extends Component {
     } = this.externalCache;
     const isForSale = forSalePrice > 0;
 
-    const showUnMakeDTableButton = isTroublesomeOwner && isTroublesome;
     const showPutUpForSaleButton = isTroublesomeOwner && isTroublesome && !isForSale;
-    const showUnPutUpForSaleButton = isTroublesomeOwner && isTroublesome && isForSale;
     const showBuyButton = !isTroublesomeOwner && isTroublesome && isForSale;
     const showForceBuyButton = !isTroublesomeOwner && isTroublesome && lastPurchasePrice > 0;
 
     const unMakeDTableButton =
       <button onClick={() => this.makeDTable(false)}>
         Unmake DTable
-      </button>;
-
-    const putUpForSaleButton =
-      <>
-        <label>
-          New price:
-          <input onChange={(e) => this.handlePriceInputChange(e)} value={this.localState.inputSalePrice} />
-        </label>
-        <button onClick={() => this.putUpForSale(true)}>
-          Put up for sale
-        </button>
-      </>;
-
-    const unPutUpForSaleButton =
-      <button onClick={() => this.putUpForSale(false)}>
-        Unput up for sale
       </button>;
 
     const buyButton =
@@ -369,15 +351,37 @@ class TroublesomeCollectionInspector extends Component {
         <p>Original collection: {originalCollection._address}</p>
         <p>Original owner: {originalOwner}</p>
         <p>Troublesome owner: {troublesomeOwner}</p>
-        <p>For sale price: {forSalePrice}</p>
-        <p>Last purchase price: {lastPurchasePrice}</p>
-        { showUnMakeDTableButton && unMakeDTableButton }
-        { showPutUpForSaleButton && putUpForSaleButton }
-        { showUnPutUpForSaleButton && unPutUpForSaleButton }
+        <p>For sale price: {forSalePrice && this.props.web3.utils.fromWei(forSalePrice.toString(), 'ether')} ETH</p>
+        <p>Last purchase price: {lastPurchasePrice && this.props.web3.utils.fromWei(lastPurchasePrice.toString(), 'ether')} ETH</p>
         { showBuyButton && buyButton }
         { showForceBuyButton && forceBuyButton }
         { isTroublesome &&
-            <div>This NFT is troublesome!</div>
+            <div>
+              <h2>This NFT is troublesome!</h2>
+            { isTroublesomeOwner &&
+                <>
+                  <div>You are the owner.</div>
+                  <label>
+                    New price in Ethers:
+                    <input onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
+                  </label>
+                  <button onClick={() => this.putUpForSale(parseInt(this.localState.inputSalePrice))}>
+                    { forSalePrice == 0 ? "Put up for sale" : "Change price"}
+                  </button>
+                { forSalePrice > 0 &&
+                  <button onClick={() => this.putUpForSale(0)}>
+                    Remove from sale
+                  </button>
+                }
+                { lastPurchasePrice == 0 &&
+                    <div>
+                      No one bought it yet. You can still remove it from the DoubleTrouble contract if you want.
+                      <button onClick={() => window.alert("TODO")}>Untrouble</button>
+                    </div>
+                }
+                </>
+            }
+            </div>
         }
         { !isTroublesome && isOriginalOwner &&
             <div>
@@ -392,6 +396,12 @@ class TroublesomeCollectionInspector extends Component {
                     <button onClick={this.approveDoubleTrouble}>Approve</button>
                   </div>
               }
+            </div>
+        }
+        { !isTroublesome && !isOriginalOwner &&
+            <div>
+              This NFT isn't Troublesome, and you don't own it.
+              View it <a href={`/collections/${originalCollection._address}/${this.props.tokenId}`}>here</a>.
             </div>
         }
       </div>
@@ -423,24 +433,22 @@ class TroublesomeCollectionInspector extends Component {
     }
   };
 
-  putUpForSale = async (isForSale) => {
-    if (!isForSale) {
-      this.setState({ isForSale });
-      return;
-    }
+  putUpForSale = async (priceInEth) => {
     try {
-      const { contract, inputSalePrice, tokenId, defaultUser } = this.state;
-      const intInputSalePrice = parseInt(inputSalePrice);
-      if (intInputSalePrice <= 0) {
-        alert("Please input a price greater than or equal to zero.");
-        return;
-      }
-      const response = await contract.methods.putUpForSale(tokenId, intInputSalePrice).send({from: defaultUser});
-      this.setState({ isForSale });
+      const { troublesomeCollection } = this.externalCache;
+      // TODO: Validate > 0
+
+      const priceInWei = this.props.web3.utils.toWei(priceInEth.toString(), 'ether')
+      const response = await troublesomeCollection.methods.putUpForSale(this.props.tokenId, priceInWei)
+        .send({from: this.props.web3.defaultAccount});
+      this.deriveAndRender();
     } catch(err) {
-      console.log("Unable to put up for sale");
+      console.warn(err);
+      this.localState.error = err.message;
+      this.forceUpdate();
     }
   };
+
 
   buy = async () => {
     try {
@@ -470,11 +478,6 @@ class TroublesomeCollectionInspector extends Component {
     }
   };
 
-  handlePriceInputChange = (e) => {
-    e.persist();
-    this.setState({inputSalePrice: e.target.value});
-  };
-
   handleBuyInputChange = (e) => {
     e.persist();
     this.setState({inputBuyPrice: e.target.value});
@@ -485,6 +488,18 @@ class TroublesomeCollectionInspector extends Component {
     this.setState({inputForceBuyPrice: e.target.value});
   };
 
+
+  localStateLink = (attr) => {
+    return {
+      value: this.localState[attr],
+      onChange: ((e) => {
+        // e.persist();
+        this.localState[attr] = e.target.value;
+        this.forceUpdate();
+      }),
+    };
+  }
 }
+
 
 export default CollectionInspector;
