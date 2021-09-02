@@ -251,13 +251,13 @@ class TroublesomeCollectionInspector extends Component {
       return {};
     }
 
-    const dtCollection = new this.props.web3.eth.Contract(
+    const troublesomeCollection = new this.props.web3.eth.Contract(
       DoubleTroubleContract.abi,
       this.props.collection,
     );
 
     try {
-      const ret = await dtCollection.methods.supportsInterface("0xdeadbeef").call();
+      const ret = await troublesomeCollection.methods.supportsInterface("0xdeadbeef").call();
       if (!ret) {
         throw new Error("Doesnt suport 0xdeadbeef");
       }
@@ -267,12 +267,12 @@ class TroublesomeCollectionInspector extends Component {
 
     var originalAddr, tokenURI, troublesomeOwner, forSalePrice = 0, lastPurchasePrice = 0, isTroublesome = false;
     try {
-      originalAddr = await dtCollection.methods.originalCollection().call();
-      tokenURI = await dtCollection.methods.tokenURI(this.props.tokenId).call();
+      originalAddr = await troublesomeCollection.methods.originalCollection().call();
+      tokenURI = await troublesomeCollection.methods.tokenURI(this.props.tokenId).call();
 
-      troublesomeOwner = await dtCollection.methods.ownerOf(this.props.tokenId).call();
-      forSalePrice = await dtCollection.methods.forSalePrice(this.props.tokenId).call();
-      lastPurchasePrice = await dtCollection.methods.lastPurchasePrice(this.props.tokenId).call();
+      troublesomeOwner = await troublesomeCollection.methods.ownerOf(this.props.tokenId).call();
+      forSalePrice = await troublesomeCollection.methods.forSalePrice(this.props.tokenId).call();
+      lastPurchasePrice = await troublesomeCollection.methods.lastPurchasePrice(this.props.tokenId).call();
       isTroublesome = true;
     } catch(err) {
       isTroublesome = false;
@@ -296,7 +296,7 @@ class TroublesomeCollectionInspector extends Component {
     const isDoubleTroubleApproved = approvedAddr == this.props.collection;
 
     return {
-      tokenURI, originalCollection, isOriginalOwner, isDoubleTroubleApproved,
+      tokenURI, originalCollection, isOriginalOwner, isDoubleTroubleApproved, troublesomeCollection,
       isTroublesomeOwner, isTroublesome, forSalePrice, lastPurchasePrice, originalOwner, troublesomeOwner,
     }
   };
@@ -312,7 +312,7 @@ class TroublesomeCollectionInspector extends Component {
 
     const { tokenURI, isOriginalOwner, isTroublesomeOwner, isDoubleTroubleApproved,
       isTroublesome, forSalePrice, lastPurchasePrice, originalCollection,
-      originalOwner, troublesomeOwner,
+      originalOwner, troublesomeOwner, troublesomeCollection,
     } = this.externalCache;
     const isForSale = forSalePrice > 0;
 
@@ -397,18 +397,29 @@ class TroublesomeCollectionInspector extends Component {
       </div>
     );
   }
-
-  makeDTable = async (isDTable) => {
-    if (!isDTable) {
-      this.setState({ isDTable });
-      return;
-    }
+  approveDoubleTrouble = async () => {
     try {
-      const { contract, tokenId, defaultUser } = this.state;
-      const response = await contract.methods.makeDTable(tokenId).send({from: defaultUser});
-      this.setState({ isDTable });
+      const { originalCollection } = this.externalCache;
+      const response = await originalCollection.methods.approve(this.props.collection, this.props.tokenId)
+        .send({from: this.props.web3.defaultAccount});
+      this.deriveAndRender();
     } catch(err) {
-      console.log("Unable to make DTable");
+      console.warn(err);
+      this.localState.error = err.message;
+      this.forceUpdate();
+    }
+  };
+
+  makeTroublesome = async (isDTable) => {
+    try {
+      const { troublesomeCollection } = this.externalCache;
+      const response = await troublesomeCollection.methods.makeTroublesome(this.props.tokenId)
+        .send({from: this.props.web3.defaultAccount});
+      this.deriveAndRender();
+    } catch(err) {
+      console.warn(err);
+      this.localState.error = err.message;
+      this.forceUpdate();
     }
   };
 
