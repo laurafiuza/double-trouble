@@ -7,6 +7,7 @@ import "./DoubleTrouble.sol";
 contract DoubleTroubleOrchestrator {
   mapping (address => DoubleTrouble) public _troublesomeCollections;
   address _feeWallet;
+  address[] _registeredCollections;
 
   constructor(address feeWallet) {
     _feeWallet = feeWallet;
@@ -18,11 +19,16 @@ contract DoubleTroubleOrchestrator {
 
     // Deploy troublesome contract for nftCollection
     _troublesomeCollections[nftCollection] = new DoubleTrouble(name, symbol, nftCollection, _feeWallet);
+    _registeredCollections.push(nftCollection);
   }
 
   function troublesomeCollection(address nftCollection) external view returns (DoubleTrouble) {
     _ensureSupportedNftContract(nftCollection);
     return _troublesomeCollections[nftCollection];
+  }
+
+  function registeredCollections() external view returns (address[] memory) {
+    return _registeredCollections;
   }
 
   function _ensureSupportedNftContract(address nftCollection) internal view {

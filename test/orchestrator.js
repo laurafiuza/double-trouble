@@ -12,7 +12,7 @@ contract("DoubleTroubleOrchestrator", accounts => {
   // TODO: make tokenId the return value of the createNft function
   // currently, the return value is a transaction object for some reason,
   // how do we retrieve the return value?
-  var dto, cp;
+  var dto, cp, dt;
 
   before(async () => {
     cp = await CryptoPunks.deployed();
@@ -31,17 +31,23 @@ contract("DoubleTroubleOrchestrator", accounts => {
   it("makeTroublesomeCollection should work for NFT contracts", async () => {
     assert.equal(await dto.troublesomeCollection(cp.address), ZERO_ADDR, "Initially cp must not have a troublesome collection");
 
+    assert.equal((await dto.registeredCollections()).length, 0, "Must not have any registered collections");
+
     const ret = await dto.makeTroublesomeCollection(cp.address, NAME, SYMBOL);
-    assert(ret.receipt.status, true, "Transaction processing failed");
+    assert.equal(ret.receipt.status, true, "Transaction processing failed");
 
     const dt_address = await dto.troublesomeCollection(cp.address);
     assert.notEqual(dt_address, undefined, "dt_address is undefined.");
 
     dt = await DoubleTrouble.at(dt_address);
     assert.equal(dt_address, dt.address, "Address returned by orchestrator must match dt.deployed().");
+
+    const [regAddr] = await dto.registeredCollections();
+    assert.equal(regAddr, cp.address, "Must have CryptoPunks as a registered collection");
   });
 
   it("makeTroublesomeCollection should fail if called on same NFT collection twice", async () => {
+    // FIXME: Because of the dt object, this test depends on the one above running first
     assert.equal(await dto.troublesomeCollection(cp.address), dt.address, "cp must already have a troublesome collection");
 
     await assert.rejects(dto.makeTroublesomeCollection(cp.address, NAME, SYMBOL), /already Troublesome/);
