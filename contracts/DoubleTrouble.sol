@@ -19,7 +19,7 @@ contract DoubleTrouble is ERC721URIStorage {
     _feeWallet = feeWallet;
   }
 
-  function makeTroublesome(uint256 tokenId) external {
+  function makeTroublesome(uint256 tokenId, uint256 initialForSalePrice) external {
     require(IERC721Metadata(_originalCollection).getApproved(tokenId) == address(this), "DoubleTrouble contract must be approved to operate this token");
 
     // In the original collection, the owner forever becomes the DoubleTrouble contract
@@ -28,6 +28,7 @@ contract DoubleTrouble is ERC721URIStorage {
 
     // Mint an NFT in the DT contract so we start recording the true owner here
     _mint(owner, tokenId);
+    _forSalePrices[tokenId] = initialForSalePrice;
   }
 
   function unmakeTroublesome(uint256 tokenId) external {
@@ -69,8 +70,7 @@ contract DoubleTrouble is ERC721URIStorage {
     return IERC721Metadata(_originalCollection).tokenURI(tokenId);
   }
 
-  // sets currentForSalePrice to price
-  function putUpForSale(uint256 tokenId, uint256 price) external {
+  function setPrice(uint256 tokenId, uint256 price) external {
     require(msg.sender == ownerOf(tokenId), "msg.sender should be current owner of NFT");
     _forSalePrices[tokenId] = price;
   }

@@ -39,11 +39,12 @@ contract("DoubleTrouble", accounts => {
     const approval = await cp.approve(dt.address, tokenId);
     assert.notEqual(approval, undefined, "approval failed (undefined return value).");
 
-    const retMakeDTable = await dt.makeTroublesome(tokenId);
+    const initialPrice = 1234;
+    const retMakeDTable = await dt.makeTroublesome(tokenId, initialPrice);
     assert.notEqual(retMakeDTable, undefined, "makeTroublesome failed (undefined return value).");
 
     const forSalePrice = await dt.forSalePrice(tokenId);
-    assert.equal(forSalePrice, 0, "Initial for sale price should be 0");
+    assert.equal(forSalePrice, initialPrice, "Initial for sale price should be > 0");
 
     const lastPurchasePrice = await dt.lastPurchasePrice(tokenId);
     assert.equal(lastPurchasePrice, 0, "Initial last purchase should be 0");
@@ -112,9 +113,9 @@ contract("DoubleTrouble", accounts => {
 
   it("should put NFT up for sale", async () => {
     const forSalePrice = await dt.forSalePrice(tokenId);
-    assert.equal(forSalePrice, 0, "Initial for sale price should be  0");
+    assert.notEqual(forSalePrice, 0, "Initial for sale price should not be 3456");
 
-    const ret = await dt.putUpForSale(tokenId, 3456);
+    const ret = await dt.setPrice(tokenId, 3456);
     assert(ret.receipt.status, true, "Transaction processing failed");
 
     const newForSalePrice = await dt.forSalePrice(tokenId);
@@ -129,6 +130,7 @@ contract("DoubleTrouble", accounts => {
   });
 
   it("should not buy NFT if forSalePrice is 0", async () => {
+    const ret = await dt.setPrice(tokenId, 0);
     assert.equal(await dt.forSalePrice(tokenId), 0, "Initial for sale price should be  0");
 
     await assert.rejects(dt.buy(tokenId, {from: accounts[1], value: 2000}), /NFT is not for sale/);
@@ -136,7 +138,7 @@ contract("DoubleTrouble", accounts => {
   });
 
   it("should not buy NFT if paying less than the forSalePrice", async () => {
-    const ret = await dt.putUpForSale(tokenId, 3456);
+    const ret = await dt.setPrice(tokenId, 3456);
     assert(ret.receipt.status, true, "Transaction processing failed");
 
     await assert.rejects(dt.buy(tokenId, {from: accounts[1], value: 2000}), /must be at least/);
@@ -166,10 +168,9 @@ contract("DoubleTrouble", accounts => {
     const price = web3.utils.toWei('2', 'ether');
     const doublePrice = web3.utils.toWei('4', 'ether');
 
-    assert.equal(await dt.forSalePrice(tokenId), 0, "Initial for sale price should be 0");
     assert.equal(await dt.lastPurchasePrice(tokenId), 0, "Initial last purchase price should be  0");
 
-    const ret = await dt.putUpForSale(tokenId, price);
+    const ret = await dt.setPrice(tokenId, price);
     assert(ret.receipt.status, true, "Transaction processing failed");
 
     assert.equal(await dt.forSalePrice(tokenId), price, "For sale price should be > 0");
