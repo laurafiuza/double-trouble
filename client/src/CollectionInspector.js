@@ -221,6 +221,7 @@ class TroublesomeCollectionInspector extends Component {
     };
     this.externalCache = {
       tokenURI: "", isOwner: false, isTroublesome: true,
+      originalCollection: {},
     };
   };
 
@@ -264,11 +265,12 @@ class TroublesomeCollectionInspector extends Component {
       throw new Error(`Address supplied ${this.props.collection} doesn't refer to a Troublesome NFT collection.`);
     }
 
-    var tokenURI, nftOwner = false, forSalePrice = 0, lastPurchasePrice = 0, isTroublesome = false;
+    var originalAddr, tokenURI, troublesomeOwner, forSalePrice = 0, lastPurchasePrice = 0, isTroublesome = false;
     try {
+      originalAddr = await dtCollection.methods.originalCollection().call();
       tokenURI = await dtCollection.methods.tokenURI(this.props.tokenId).call();
 
-      nftOwner = await dtCollection.methods.ownerOf(this.props.tokenId).call();
+      troublesomeOwner = await dtCollection.methods.ownerOf(this.props.tokenId).call();
       forSalePrice = await dtCollection.methods.forSalePrice(this.props.tokenId).call();
       lastPurchasePrice = await dtCollection.methods.lastPurchasePrice(this.props.tokenId).call();
       isTroublesome = true;
@@ -276,9 +278,27 @@ class TroublesomeCollectionInspector extends Component {
       isTroublesome = false;
     }
 
-    const isOwner = nftOwner && nftOwner == this.props.web3.defaultAccount;
+    const isTroublesomeOwner = troublesomeOwner && troublesomeOwner == this.props.web3.defaultAccount;
 
-    return {tokenURI, isOwner, isTroublesome, forSalePrice, lastPurchasePrice}
+    const originalCollection = new this.props.web3.eth.Contract(
+      GenericNFTContract.abi,
+      originalAddr,
+    );
+
+    var originalOwner, approvedAddr;
+    try {
+      originalOwner = await originalCollection.methods.ownerOf(this.props.tokenId).call();
+      approvedAddr = await originalCollection.methods.getApproved(this.props.tokenId).call();
+    } catch(err) {
+      throw new Error(`Unable to find original NFT ${this.props.tokenId} at address ${originalAddr}`)
+    }
+    const isOriginalOwner = originalOwner && originalOwner == this.props.web3.defaultAccount;
+    const isDoubleTroubleApproved = approvedAddr == this.props.collection;
+
+    return {
+      tokenURI, originalCollection, isOriginalOwner, isDoubleTroubleApproved,
+      isTroublesomeOwner, isTroublesome, forSalePrice, lastPurchasePrice, originalOwner, troublesomeOwner,
+    }
   };
 
   render() {
@@ -290,21 +310,17 @@ class TroublesomeCollectionInspector extends Component {
       return <div>Loading...</div>;
     }
 
-    const { isOwner, isTroublesome, forSalePrice, lastPurchasePrice } = this.externalCache;
+    const { tokenURI, isOriginalOwner, isTroublesomeOwner, isDoubleTroubleApproved,
+      isTroublesome, forSalePrice, lastPurchasePrice, originalCollection,
+      originalOwner, troublesomeOwner,
+    } = this.externalCache;
     const isForSale = forSalePrice > 0;
 
-    const showMakeDTableButton = isOwner && !isTroublesome;
-    // TODO: consider creating unmakeDTable function in contract?
-    const showUnMakeDTableButton = isOwner && isTroublesome;
-    const showPutUpForSaleButton = isOwner && isTroublesome && !isForSale;
-    const showUnPutUpForSaleButton = isOwner && isTroublesome && isForSale;
-    const showBuyButton = !isOwner && isTroublesome && isForSale;
-    const showForceBuyButton = !isOwner && isTroublesome && lastPurchasePrice > 0;
-
-    const makeDTableButton =
-      <button onClick={() => this.makeDTable(true)}>
-        Make DTable
-      </button>;
+    const showUnMakeDTableButton = isTroublesomeOwner && isTroublesome;
+    const showPutUpForSaleButton = isTroublesomeOwner && isTroublesome && !isForSale;
+    const showUnPutUpForSaleButton = isTroublesomeOwner && isTroublesome && isForSale;
+    const showBuyButton = !isTroublesomeOwner && isTroublesome && isForSale;
+    const showForceBuyButton = !isTroublesomeOwner && isTroublesome && lastPurchasePrice > 0;
 
     const unMakeDTableButton =
       <button onClick={() => this.makeDTable(false)}>
@@ -348,17 +364,36 @@ class TroublesomeCollectionInspector extends Component {
     return (
       <div className="CollectionInspector">
         <h1>DoubleTrouble</h1>
-        <p>Token URI: {this.externalCache.tokenURI}</p>
-        <p>Is Troublesome : {this.externalCache.isTroublesome.toString()}</p>
-        <p>Is DT owner: {this.externalCache.isOwner.toString()}</p>
-        <p>For sale price: {this.externalCache.forSalePrice}</p>
-        <p>Last purchase price: {this.externalCache.lastPurchasePrice}</p>
-        { showMakeDTableButton && makeDTableButton }
+        <p>Token URI: {tokenURI}</p>
+        <p>Is Troublesome : {isTroublesome}</p>
+        <p>Original collection: {originalCollection._address}</p>
+        <p>Original owner: {originalOwner}</p>
+        <p>Troublesome owner: {troublesomeOwner}</p>
+        <p>For sale price: {forSalePrice}</p>
+        <p>Last purchase price: {lastPurchasePrice}</p>
         { showUnMakeDTableButton && unMakeDTableButton }
         { showPutUpForSaleButton && putUpForSaleButton }
         { showUnPutUpForSaleButton && unPutUpForSaleButton }
         { showBuyButton && buyButton }
         { showForceBuyButton && forceBuyButton }
+        { isTroublesome &&
+            <div>This NFT is troublesome!</div>
+        }
+        { !isTroublesome && isOriginalOwner &&
+            <div>
+              You own this NFT.
+              {isDoubleTroubleApproved
+                ? <div>
+                    Click below to make your NFT Troublesome
+                    <button onClick={this.makeTroublesome}>Make Troublesome</button>
+                  </div>
+                : <div>
+                    Please approve the Double Trouble contract before making your NFT Troublesome.
+                    <button onClick={this.approveDoubleTrouble}>Approve</button>
+                  </div>
+              }
+            </div>
+        }
       </div>
     );
   }
