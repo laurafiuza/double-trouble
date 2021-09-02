@@ -11,7 +11,7 @@ import "./App.css";
 // 2) local state (only exists in client)
 // 3) Cache of external state
 
-const DTO_CONTRACT_ADDR = "0x35A11AA9379135150EAB5330b55f1B875f0E0dB2";
+const DTO_CONTRACT_ADDR = "0xbD532B847F1b4634c9D928F71eC20656D1b5c869";
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
 
 class CollectionInspector extends Component {
@@ -133,7 +133,12 @@ class ERC721Inspector extends Component {
       this.props.collection,
     );
 
-    const troublesomeCollection = await dto.methods.troublesomeCollection(this.props.collection).call();
+    var troublesomeCollection;
+    try {
+      troublesomeCollection = await dto.methods.troublesomeCollection(this.props.collection).call();
+    } catch(err) {
+      throw new Error(`Unable to connect to DoubleTroubleOrchestrator at address ${DTO_CONTRACT_ADDR}`);
+    }
     const collectionName = await nftCollection.methods.name().call();
     const collectionSymbol = await nftCollection.methods.symbol().call();
 
