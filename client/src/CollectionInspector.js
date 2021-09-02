@@ -11,7 +11,7 @@ import "./App.css";
 // 2) local state (only exists in client)
 // 3) Cache of external state
 
-const DTO_CONTRACT_ADDR = "0xbD532B847F1b4634c9D928F71eC20656D1b5c869";
+const DTO_CONTRACT_ADDR = "0xB0B54AFf64156212472374128DCb4238A9A67B13";
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
 
 class CollectionInspector extends Component {
@@ -315,34 +315,8 @@ class TroublesomeCollectionInspector extends Component {
       originalOwner, troublesomeOwner, troublesomeCollection,
     } = this.externalCache;
     const isForSale = forSalePrice > 0;
-
-    const showPutUpForSaleButton = isTroublesomeOwner && isTroublesome && !isForSale;
-    const showBuyButton = !isTroublesomeOwner && isTroublesome && isForSale;
-    const showForceBuyButton = !isTroublesomeOwner && isTroublesome && lastPurchasePrice > 0;
-
-    const unMakeDTableButton =
-      <button onClick={() => this.makeDTable(false)}>
-        Unmake DTable
-      </button>;
-
-    const buyButton =
-      <>
-        <label>
-          Buy for:
-          <input onChange={(e) => this.handleBuyInputChange(e)} value={this.localState.inputBuyPrice} />
-        </label>
-        <button onClick={() => this.buy()}>Buy</button>
-      </>;
-
-    const forceBuyButton =
-      <>
-        <label>
-          Force buy for:
-          <input onChange={(e) => this.handleForceBuyInputChange(e)} value={this.localState.inputForceBuyPrice} />
-        </label>
-        <button onClick={() => this.forceBuy()}>Force buy</button>
-      </>;
-
+    const forSalePriceEth = forSalePrice && this.props.web3.utils.fromWei(forSalePrice.toString(), 'ether');
+    const lastPurchasePriceEth = lastPurchasePrice && this.props.web3.utils.fromWei(lastPurchasePrice.toString(), 'ether');
     return (
       <div className="CollectionInspector">
         <h1>DoubleTrouble</h1>
@@ -351,10 +325,8 @@ class TroublesomeCollectionInspector extends Component {
         <p>Original collection: {originalCollection._address}</p>
         <p>Original owner: {originalOwner}</p>
         <p>Troublesome owner: {troublesomeOwner}</p>
-        <p>For sale price: {forSalePrice && this.props.web3.utils.fromWei(forSalePrice.toString(), 'ether')} ETH</p>
-        <p>Last purchase price: {lastPurchasePrice && this.props.web3.utils.fromWei(lastPurchasePrice.toString(), 'ether')} ETH</p>
-        { showBuyButton && buyButton }
-        { showForceBuyButton && forceBuyButton }
+        <p>For sale price: {forSalePriceEth} ETH</p>
+        <p>Last purchase price: {lastPurchasePriceEth} ETH</p>
         { isTroublesome &&
             <div>
               <h2>This NFT is troublesome!</h2>
@@ -380,6 +352,12 @@ class TroublesomeCollectionInspector extends Component {
                     </div>
                 }
                 </>
+            }
+            { !isTroublesomeOwner &&
+                <div>
+                  <button onClick={this.buy}>Buy for {forSalePriceEth} ETH</button>
+                  <button onClick={this.forceBuy}>Force buy for {lastPurchasePriceEth * 2} ETH</button>
+                </div>
             }
             </div>
         }
@@ -452,29 +430,27 @@ class TroublesomeCollectionInspector extends Component {
 
   buy = async () => {
     try {
-      const { contract, tokenId, defaultUser, inputBuyPrice } = this.state;
-      const intInputBuyPrice = parseInt(inputBuyPrice);
-      if (intInputBuyPrice <= 0) {
-        alert("Please input a price greater than or equal to zero.");
-        return;
-      }
-      const response = await contract.methods.buy(tokenId).send({from: defaultUser, value: intInputBuyPrice});
+      const { troublesomeCollection, forSalePrice } = this.externalCache;
+      const response = await troublesomeCollection.methods.buy(this.props.tokenId)
+        .send({from: this.props.web3.defaultAccount, value: forSalePrice});
+      this.deriveAndRender();
     } catch (err) {
-      console.log("Unable to buy NFT");
+      console.warn(err);
+      this.localState.error = err.message;
+      this.forceUpdate();
     }
   };
 
   forceBuy = async () => {
     try {
-      const { contract, tokenId, defaultUser, inputForceBuyPrice } = this.state;
-      const intInputForceBuyPrice = parseInt(inputForceBuyPrice);
-      if (intInputForceBuyPrice <= 0) {
-        alert("Please input a price greater than or equal to zero.");
-        return;
-      }
-      const response = await contract.methods.forceBuy(tokenId).send({from: defaultUser, intInputForceBuyPrice});
+      const { troublesomeCollection, lastPurchasePrice } = this.externalCache;
+      const response = await troublesomeCollection.methods.forceBuy(this.props.tokenId)
+        .send({from: this.props.web3.defaultAccount, value: lastPurchasePrice * 2});
+      this.deriveAndRender();
     } catch(err) {
-      console.log("Unable to force buy");
+      console.warn(err);
+      this.localState.error = err.message;
+      this.forceUpdate();
     }
   };
 
