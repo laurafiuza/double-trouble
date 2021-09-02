@@ -11,7 +11,7 @@ import "./App.css";
 // 2) local state (only exists in client)
 // 3) Cache of external state
 
-const DTO_CONTRACT_ADDR = "0xB0B54AFf64156212472374128DCb4238A9A67B13";
+const DTO_CONTRACT_ADDR = "0xB2Debc62E45Af60Df935A11eAcDE2D97F109110b";
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
 
 const assert = (bool, msg) => {
