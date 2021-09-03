@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import DoubleTroubleContract from "./contracts/DoubleTrouble.json";
 import GenericNFTContract from "./contracts/IERC721Metadata.json";
 import doubleTroubleOrchestrator from './orchestrator';
+import { Card, Spinner } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 import "./App.css";
 
@@ -77,9 +79,12 @@ class CollectionInspector extends Component {
 
   render() {
     if (this.localState.error) {
-      return <div>
-          <div className="error-box">Error: {this.localState.error}</div>
-        </div>;
+      return <Card>
+        <Card.Title>Error</Card.Title>
+        <Card.Body>
+          <Card.Text>{this.localState.error}</Card.Text>
+        </Card.Body>
+        </Card>;
     } else if (this.externalCache.isTroublesome) {
       return <TroublesomeCollectionInspector web3={this.props.web3}
         collection={this.props.collection} tokenId={this.props.tokenId} />;
@@ -87,7 +92,7 @@ class CollectionInspector extends Component {
       return <ERC721Inspector web3={this.props.web3}
         collection={this.props.collection} tokenId={this.props.tokenId} />;
     } else {
-      return <div>Loading...</div>;
+      return <Spinner animation="border" />;
     }
   };
 }
@@ -172,12 +177,17 @@ class ERC721Inspector extends Component {
     if (this.localState.error != undefined) {
       return <div>
           {loadedNft != undefined ? loadedNft : null}
-          <div className="error-box">Error: {this.localState.error}</div>
+          <Card>
+            <Card.Title>Error</Card.Title>
+            <Card.Body>
+              <Card.Text>{this.localState.error}</Card.Text>
+            </Card.Body>
+          </Card>;
         </div>;
     }
 
     if (this.props.web3 == undefined) {
-      return <div>Loading web3...</div>;
+      return <Spinner animation="border" />;
     }
 
     if (this.externalCache.troublesomeCollection == ZERO_ADDR) {
@@ -191,7 +201,12 @@ class ERC721Inspector extends Component {
     }
 
     if (this.externalCache.troublesomeCollection == undefined) {
-      return <div className="error-box">Something went wrong</div>
+      return <Card>
+        <Card.Title>Error</Card.Title>
+        <Card.Body>
+          <Card.Text>{this.localState.error}</Card.Text>
+        </Card.Body>
+      </Card>;
     }
     return (<div>
       <div>Name: {this.externalCache.collectionName} Symbol: {this.externalCache.collectionSymbol}</div>
@@ -305,11 +320,16 @@ class TroublesomeCollectionInspector extends Component {
 
   render() {
     if (this.localState.error != undefined) {
-      return <div className="error-box">Error: {this.localState.error}</div>
+      return <Card>
+        <Card.Title>Error</Card.Title>
+          <Card.Body>
+            <Card.Text>{this.localState.error}</Card.Text>
+          </Card.Body>
+        </Card>;
     }
 
     if (!this.props.web3) {
-      return <div>Loading...</div>;
+      return <Spinner animation="border" />;
     }
 
     const { tokenURI, isOriginalOwner, isTroublesomeOwner, isDoubleTroubleApproved,
