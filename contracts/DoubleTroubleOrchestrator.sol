@@ -27,8 +27,13 @@ contract DoubleTroubleOrchestrator {
     return _troublesomeCollections[nftCollection];
   }
 
-  function registeredCollections() external view returns (address[] memory) {
-    return _registeredCollections;
+  function registeredCollections() external view returns (address[] memory, address[] memory) {
+    address[] memory mappedCollections = new address[](_registeredCollections.length);
+    for (uint i = 0; i < _registeredCollections.length; i++) {
+      mappedCollections[i] = address(_troublesomeCollections[_registeredCollections[i]]);
+    }
+
+    return (_registeredCollections, mappedCollections);
   }
 
   function _ensureSupportedNftContract(address nftCollection) internal view {

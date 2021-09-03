@@ -31,7 +31,10 @@ contract("DoubleTroubleOrchestrator", accounts => {
   it("makeTroublesomeCollection should work for NFT contracts", async () => {
     assert.equal(await dto.troublesomeCollection(cp.address), ZERO_ADDR, "Initially cp must not have a troublesome collection");
 
-    assert.equal((await dto.registeredCollections()).length, 0, "Must not have any registered collections");
+    console.log(await dto.registeredCollections());
+    const {'0': ret1, '1': ret2} = await dto.registeredCollections()
+    assert.equal(ret1.length, 0, "Must not have any registered collections");
+    assert.equal(ret2.length, 0, "Must not have any registered collections");
 
     const ret = await dto.makeTroublesomeCollection(cp.address, NAME, SYMBOL);
     assert.equal(ret.receipt.status, true, "Transaction processing failed");
@@ -42,8 +45,9 @@ contract("DoubleTroubleOrchestrator", accounts => {
     dt = await DoubleTrouble.at(dt_address);
     assert.equal(dt_address, dt.address, "Address returned by orchestrator must match dt.deployed().");
 
-    const [regAddr] = await dto.registeredCollections();
-    assert.equal(regAddr, cp.address, "Must have CryptoPunks as a registered collection");
+    const {'0': [originalAddr], '1': [mappedAddr]} = await dto.registeredCollections();
+    assert.equal(originalAddr, cp.address, "Must have CryptoPunks as a registered collection");
+    assert.equal(mappedAddr, dt.address, "Must map CryptoPunks to  the right troublesome collection");
   });
 
   it("makeTroublesomeCollection should fail if called on same NFT collection twice", async () => {

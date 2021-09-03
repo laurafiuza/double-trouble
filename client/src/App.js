@@ -50,6 +50,9 @@ class App extends Component {
               <li>
                 <Link to="/collections/0xdeadbeef/1234">NFT</Link>
               </li>
+              <li>
+                <Link to="/collections">Troublesome Collections</Link>
+              </li>
             </ul>
           </nav>
           {this.externalCache.web3 && <div>Connected wallet: {this.externalCache.web3.defaultAccount}</div>}
@@ -64,11 +67,11 @@ class App extends Component {
               return <CollectionInspector web3={this.externalCache.web3}
                 collection={match.params.collection} tokenId={match.params.tokenId} />
             }} />
-            <Route path="/">
-              <div>Home</div>
-            </Route>
             <Route path="/collections">
               <AllCollections web3={this.externalCache.web3} />
+            </Route>
+            <Route path="/">
+              <div>Home</div>
             </Route>
           </Switch>
         </div>
@@ -80,7 +83,8 @@ class App extends Component {
 class AllCollections extends Component {
   constructor() {
     super();
-    this.externalCache = {};
+    this.externalCache = {collections: []};
+    this.localState = {};
 
     this.deriveAndRender();
   };
@@ -98,12 +102,20 @@ class AllCollections extends Component {
 
   deriveExternalCache = async () => {
     const dto = await doubleTroubleOrchestrator(this.props.web3);
-    return {}
+    const collections = await dto.methods.registeredCollections().call();
+    return {collections}
   };
 
   render() {
+    if (this.externalCache.collections.length == 0) {
+      return <div>No troublesome collections yet</div>
+    }
+
     return (
       <div>
+      {this.externalCache.collections.map((collection) =>
+        <div>{collection}</div>
+      )}
       </div>
     );
   }
