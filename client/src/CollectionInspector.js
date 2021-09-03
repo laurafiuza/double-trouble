@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import DoubleTroubleContract from "./contracts/DoubleTrouble.json";
-import DoubleTroubleOrchestratorContract from "./contracts/DoubleTroubleOrchestrator.json";
 import GenericNFTContract from "./contracts/IERC721Metadata.json";
+import doubleTroubleOrchestrator from './orchestrator';
 
 import "./App.css";
 
@@ -11,7 +11,6 @@ import "./App.css";
 // 2) local state (only exists in client)
 // 3) Cache of external state
 
-const DTO_CONTRACT_ADDR = "0xB2Debc62E45Af60Df935A11eAcDE2D97F109110b";
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
 
 const assert = (bool, msg) => {
@@ -129,10 +128,7 @@ class ERC721Inspector extends Component {
       return {};
     }
 
-    const dto = new this.props.web3.eth.Contract(
-      DoubleTroubleOrchestratorContract.abi,
-      DTO_CONTRACT_ADDR,
-    );
+    const dto = await doubleTroubleOrchestrator(this.props.web3);
 
     const nftCollection = new this.props.web3.eth.Contract(
       GenericNFTContract.abi,
@@ -143,7 +139,7 @@ class ERC721Inspector extends Component {
     try {
       troublesomeCollection = await dto.methods.troublesomeCollection(this.props.collection).call();
     } catch(err) {
-      throw new Error(`Unable to connect to DoubleTroubleOrchestrator at address ${DTO_CONTRACT_ADDR}`);
+      throw new Error(`Unable to connect to DoubleTroubleOrchestrator`);
     }
     const collectionName = await nftCollection.methods.name().call();
     const collectionSymbol = await nftCollection.methods.symbol().call();

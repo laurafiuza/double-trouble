@@ -7,6 +7,7 @@ import {
   Link
 } from "react-router-dom";
 import CollectionInspector from "./CollectionInspector";
+import doubleTroubleOrchestrator from './orchestrator';
 
 class App extends Component {
   constructor() {
@@ -66,9 +67,44 @@ class App extends Component {
             <Route path="/">
               <div>Home</div>
             </Route>
+            <Route path="/collections">
+              <AllCollections web3={this.externalCache.web3} />
+            </Route>
           </Switch>
         </div>
       </Router>
+    );
+  }
+}
+
+class AllCollections extends Component {
+  constructor() {
+    super();
+    this.externalCache = {};
+
+    this.deriveAndRender();
+  };
+
+  deriveAndRender = () => {
+    this.deriveExternalCache().then((ret) => {
+      this.externalCache = ret;
+      this.forceUpdate();
+    }).catch((err) => {
+      console.error(err);
+      this.localState.error = err.message;
+      this.forceUpdate();
+    });
+  };
+
+  deriveExternalCache = async () => {
+    const dto = await doubleTroubleOrchestrator(this.props.web3);
+    return {}
+  };
+
+  render() {
+    return (
+      <div>
+      </div>
     );
   }
 }
