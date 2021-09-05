@@ -7,6 +7,7 @@ import {
   Link
 } from "react-router-dom";
 import CollectionInspector from "./CollectionInspector";
+import About from "./About";
 import doubleTroubleOrchestrator from './orchestrator';
 import { Card } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -47,9 +48,6 @@ class App extends Component {
                 <Link to="/">Home</Link>
               </li>
               <li>
-                <Link to="/about">About</Link>
-              </li>
-              <li>
                 <Link to="/collections/0xdeadbeef/1234">NFT</Link>
               </li>
               <li>
@@ -58,8 +56,8 @@ class App extends Component {
             </ul>
           </nav>
           {this.externalCache.web3 && <Card bg="secondary" text="white" style={{width: '18rem'}}>
-            <Card.Title>Connected wallet</Card.Title>
             <Card.Body>
+              <Card.Title>Connected wallet</Card.Title>
               <Card.Text>{this.externalCache.web3.defaultAccount}</Card.Text>
             </Card.Body>
             </Card>}
@@ -67,9 +65,6 @@ class App extends Component {
           {/* A <Switch> looks through its children <Route>s and
               renders the first one that matches the current URL. */}
           <Switch>
-            <Route path="/about">
-              <div>We are cool</div>
-            </Route>
             <Route path="/collections/:collection/:tokenId" render={({match}) => {
               return <CollectionInspector web3={this.externalCache.web3}
                 collection={match.params.collection} tokenId={match.params.tokenId} />
@@ -78,7 +73,7 @@ class App extends Component {
               <AllCollections web3={this.externalCache.web3} />
             </Route>
             <Route path="/">
-              <div>Home</div>
+              return <About />
             </Route>
           </Switch>
         </div>

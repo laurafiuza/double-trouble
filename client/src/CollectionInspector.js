@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import DoubleTroubleContract from "./contracts/DoubleTrouble.json";
 import GenericNFTContract from "./contracts/IERC721Metadata.json";
 import doubleTroubleOrchestrator from './orchestrator';
-import { Card, Spinner, ListGroup } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { Card, Spinner, ListGroup, Table } from 'react-bootstrap';
+import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
@@ -73,8 +73,8 @@ class CollectionInspector extends Component {
   render() {
     if (this.localState.error) {
       return <Card bg="danger" text="white" style={{width: '18rem'}}>
-        <Card.Title>Error</Card.Title>
         <Card.Body>
+          <Card.Title>Error</Card.Title>
           <Card.Text>{this.localState.error}</Card.Text>
         </Card.Body>
         </Card>;
@@ -171,8 +171,8 @@ class ERC721Inspector extends Component {
       return <div>
           {loadedNft != undefined ? loadedNft : null}
           <Card bg="danger" text="white" style={{width: '18rem'}}>
-            <Card.Title>Error</Card.Title>
             <Card.Body>
+              <Card.Title>Error</Card.Title>
               <Card.Text>{this.localState.error}</Card.Text>
             </Card.Body>
           </Card>;
@@ -195,8 +195,8 @@ class ERC721Inspector extends Component {
 
     if (this.externalCache.troublesomeCollection == undefined) {
       return <Card bg="danger" text="white" style={{width: '18rem'}}>
-        <Card.Title>Error</Card.Title>
         <Card.Body>
+          <Card.Title>Error</Card.Title>
           <Card.Text>{this.localState.error}</Card.Text>
         </Card.Body>
       </Card>;
@@ -314,8 +314,8 @@ class TroublesomeCollectionInspector extends Component {
   render() {
     if (this.localState.error != undefined) {
       return <Card bg="danger" text="white" style={{width: '18rem'}}>
-        <Card.Title>Error</Card.Title>
           <Card.Body>
+          <Card.Title>Error</Card.Title>
             <Card.Text>{this.localState.error}</Card.Text>
           </Card.Body>
         </Card>;
@@ -333,80 +333,47 @@ class TroublesomeCollectionInspector extends Component {
     const forSalePriceEth = forSalePrice && this.props.web3.utils.fromWei(forSalePrice.toString(), 'ether');
     const lastPurchasePriceEth = lastPurchasePrice && this.props.web3.utils.fromWei(lastPurchasePrice.toString(), 'ether');
     return (
-      <>
       <Card style={{width: '36rem'}}>
-        <Card.Title>DoubleTrouble</Card.Title>
         <Card.Body>
-          <ListGroup horizontal>
-            <ListGroup.Item>
-              TokenURI
-            </ListGroup.Item>
-            <ListGroup.Item>
-              {tokenURI}
-            </ListGroup.Item>
-          </ListGroup>
-          <ListGroup horizontal>
-            <ListGroup.Item>
-              Is troublesome
-            </ListGroup.Item>
-            <ListGroup.Item>
-              {isTroublesome}
-            </ListGroup.Item>
-          </ListGroup>
-          <ListGroup horizontal>
-            <ListGroup.Item>
-             Original collection 
-            </ListGroup.Item>
-            <ListGroup.Item>
-              {originalCollection._address}
-            </ListGroup.Item>
-          </ListGroup>
-          <ListGroup horizontal>
-            <ListGroup.Item>
-             Original owner 
-            </ListGroup.Item>
-            <ListGroup.Item>
-              {originalOwner}
-            </ListGroup.Item>
-          </ListGroup>
-          <ListGroup horizontal>
-            <ListGroup.Item>
-             Troublesome owner 
-            </ListGroup.Item>
-            <ListGroup.Item>
-              {troublesomeOwner}
-            </ListGroup.Item>
-          </ListGroup>
-          <ListGroup horizontal>
-            <ListGroup.Item>
-             For sale price 
-            </ListGroup.Item>
-            <ListGroup.Item>
-              {forSalePriceEth} ETH
-            </ListGroup.Item>
-          </ListGroup>
-          <ListGroup horizontal>
-            <ListGroup.Item>
-             Last purchase price 
-            </ListGroup.Item>
-            <ListGroup.Item>
-              {forSalePriceEth} ETH
-            </ListGroup.Item>
-          </ListGroup>
-        </Card.Body>
-      </Card>
-      <div className="CollectionInspector">
-        { isTroublesome &&
+          <Card.Title>DoubleTrouble</Card.Title>
+          <Table striped bordered hover>
+            <tbody>
+              <tr>
+                <td>TokenURI</td>
+                <td>{tokenURI}</td>
+              </tr>
+              <tr>
+                <td>Is troublesome</td>
+                <td>{isTroublesome.toString()}</td>
+              </tr>
+              <tr>
+                <td>Original collection</td>
+                <td>{originalCollection._address}</td>
+              </tr>
+              <tr>
+                <td>Original owner</td>
+                <td>{originalOwner}</td>
+              </tr>
+              <tr>
+                <td>Troublesome owner</td>
+                <td>{troublesomeOwner}</td>
+              </tr>
+              <tr>
+                <td>For sale price</td>
+                <td>{forSalePriceEth} ETH</td>
+              </tr>
+              <tr>
+                <td>Last purchase price</td>
+                <td>{lastPurchasePrice} ETH</td>
+              </tr>
+            </tbody>
+          </Table>
+          { isTroublesome &&
             <>
-            <Card style={{width: '18rem'}}>
               <Card.Title>This NFT is troublesome!</Card.Title>
-              <Card.Header>You are the owner</Card.Header>
-            </Card>
-            <div>
-              <h2>This NFT is troublesome!</h2>
-            { isTroublesomeOwner &&
+              { isTroublesomeOwner && 
                 <>
-                  <div>You are the owner.</div>
+                  <Card.Subtitle>You are the owner</Card.Subtitle>
                   <label>
                     New price in Ethers:
                     <input onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
@@ -426,40 +393,39 @@ class TroublesomeCollectionInspector extends Component {
                     </div>
                 }
                 </>
-            }
-            { !isTroublesomeOwner &&
-                <div>
-                  <button onClick={this.buy}>Buy for {forSalePriceEth} ETH</button>
-                  <button onClick={this.forceBuy}>Force buy for {lastPurchasePriceEth * 2} ETH</button>
-                </div>
-            }
-            </div>
-            </>
-        }
-        { !isTroublesome && isOriginalOwner &&
-            <div>
-              You own this NFT.
-              {isDoubleTroubleApproved
-                ? <div>
-                    Click below to put it up for sale within DoubleTrouble
-                    <input onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
-                    <button onClick={() => this.makeTroublesome(this.localState.inputSalePrice)}>Make Troublesome</button>
-                  </div>
-                : <div>
-                    Please approve the Double Trouble contract before making your NFT Troublesome.
-                    <button onClick={this.approveDoubleTrouble}>Approve</button>
-                  </div>
               }
-            </div>
-        }
-        { !isTroublesome && !isOriginalOwner &&
-            <div>
-              This NFT isn't Troublesome, and you don't own it.
-              View it <a href={`/collections/${originalCollection._address}/${this.props.tokenId}`}>here</a>.
-            </div>
-        }
-      </div>
-      </>
+            </>
+          }
+          { !isTroublesomeOwner &&
+              <div>
+                <button onClick={this.buy}>Buy for {forSalePriceEth} ETH</button>
+                <button onClick={this.forceBuy}>Force buy for {lastPurchasePriceEth * 2} ETH</button>
+              </div>
+          }
+          { !isTroublesome && isOriginalOwner &&
+              <div>
+                You own this NFT.
+                {isDoubleTroubleApproved
+                  ? <div>
+                      Click below to put it up for sale within DoubleTrouble
+                      <input onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
+                      <button onClick={() => this.makeTroublesome(this.localState.inputSalePrice)}>Make Troublesome</button>
+                    </div>
+                  : <div>
+                      Please approve the Double Trouble contract before making your NFT Troublesome.
+                      <button onClick={this.approveDoubleTrouble}>Approve</button>
+                    </div>
+                }
+              </div>
+          }
+          { !isTroublesome && !isOriginalOwner &&
+              <div>
+                This NFT isn't Troublesome, and you don't own it.
+                View it <a href={`/collections/${originalCollection._address}/${this.props.tokenId}`}>here</a>.
+              </div>
+          }
+        </Card.Body>
+      </Card>
     );
   }
   approveDoubleTrouble = async () => {
