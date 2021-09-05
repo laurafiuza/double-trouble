@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import DoubleTroubleContract from "./contracts/DoubleTrouble.json";
 import GenericNFTContract from "./contracts/IERC721Metadata.json";
 import doubleTroubleOrchestrator from './orchestrator';
-import { Card, Spinner, ListGroup, Table } from 'react-bootstrap';
+import { Card, Spinner, ListGroup, Table, Form, FormControl, InputGroup, Button } from 'react-bootstrap';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 
@@ -161,10 +161,11 @@ class ERC721Inspector extends Component {
   render() {
     var loadedNft = undefined;
     if (this.externalCache.collectionName) {
-      loadedNft = <div>
+      loadedNft = <Card>
         {this.externalCache.tokenURI != undefined && <img src={this.externalCache.tokenURI}/>}
+        {this.externalCache.tokenURI != undefined && <Card.Img variant="top" src={this.externalCache.tokenURI} />}
         Name: {this.externalCache.collectionName} Symbol: {this.externalCache.collectionSymbol} tokenURI: {this.externalCache.tokenURI}
-        </div>;
+        </Card>;
     }
 
     if (this.localState.error != undefined) {
@@ -184,13 +185,13 @@ class ERC721Inspector extends Component {
     }
 
     if (this.externalCache.troublesomeCollection == ZERO_ADDR) {
-      return (<div>
+      return (<Card>
         {loadedNft}
-        <div>This NFT collection is not in DoubleTrouble yet</div>
-        <button onClick={this.makeTroublesomeCollection}>
+        <Card.Text>This NFT collection is not in DoubleTrouble yet</Card.Text>
+        <Button variant="outline-success" onClick={this.makeTroublesomeCollection}>
           Create a troublesome collection for it
-        </button>
-      </div>);
+        </Button>
+      </Card>);
     }
 
     if (this.externalCache.troublesomeCollection == undefined) {
@@ -374,55 +375,63 @@ class TroublesomeCollectionInspector extends Component {
               { isTroublesomeOwner && 
                 <>
                   <Card.Subtitle>You are the owner</Card.Subtitle>
-                  <label>
-                    New price in Ethers:
-                    <input onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
-                  </label>
-                  <button onClick={() => this.setPrice(parseInt(this.localState.inputSalePrice))}>
+                  <Form.Label htmlFor="new-price">New price in ETH</Form.Label>
+                  <InputGroup className="mb-3">
+                    <InputGroup.Text id="basic-addon3">
+                      $
+                    </InputGroup.Text>
+                    <FormControl id="new-price" aria-describedby="basic-addon3" onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
+                  </InputGroup>
+                  <Button variant="outline-dark" onClick={() => this.setPrice(parseInt(this.localState.inputSalePrice))}>
                     { forSalePrice == 0 ? "Put up for sale" : "Change price"}
-                  </button>
+                  </Button>
                 { forSalePrice > 0 &&
-                  <button onClick={() => this.setPrice(0)}>
+                  <Button variant="outline-danger" onClick={() => this.setPrice(0)}>
                     Remove from sale
-                  </button>
+                  </Button>
                 }
                 { lastPurchasePrice == 0 &&
-                    <div>
+                    <Card.Text>
                       No one bought it yet. You can still remove it from the DoubleTrouble contract if you want.
-                      <button onClick={() => window.alert("TODO")}>Untrouble</button>
-                    </div>
+                      <Button variant="outline-danger" onClick={() => window.alert("TODO")}>Untrouble</Button>
+                    </Card.Text>
                 }
                 </>
               }
             </>
           }
           { !isTroublesomeOwner &&
-              <div>
-                <button onClick={this.buy}>Buy for {forSalePriceEth} ETH</button>
-                <button onClick={this.forceBuy}>Force buy for {lastPurchasePriceEth * 2} ETH</button>
-              </div>
+              <>
+                <Button variant="outline-dark" onClick={this.buy}>Buy for {forSalePriceEth} ETH</Button>
+                <Button variant="outline-dark" onClick={this.forceBuy}>Force buy for {lastPurchasePriceEth * 2} ETH</Button>
+              </>
           }
           { !isTroublesome && isOriginalOwner &&
-              <div>
+              <>
                 You own this NFT.
                 {isDoubleTroubleApproved
-                  ? <div>
+                  ? <Card.Text>
                       Click below to put it up for sale within DoubleTrouble
-                      <input onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
-                      <button onClick={() => this.makeTroublesome(this.localState.inputSalePrice)}>Make Troublesome</button>
-                    </div>
-                  : <div>
+                      <InputGroup className="mb-3">
+                        <InputGroup.Text id="basic-addon3">
+                          $
+                        </InputGroup.Text>
+                        <FormControl onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
+                      </InputGroup>
+                      <Button variant="outline-dark" onClick={() => this.makeTroublesome(this.localState.inputSalePrice)}>Make Troublesome</Button>
+                    </Card.Text>
+                  : <Card.Text>
                       Please approve the Double Trouble contract before making your NFT Troublesome.
-                      <button onClick={this.approveDoubleTrouble}>Approve</button>
-                    </div>
+                      <Button variant="outline-dark" onClick={this.approveDoubleTrouble}>Approve</Button>
+                    </Card.Text>
                 }
-              </div>
+              </>
           }
           { !isTroublesome && !isOriginalOwner &&
-              <div>
+              <Card.Text>
                 This NFT isn't Troublesome, and you don't own it.
-                View it <a href={`/collections/${originalCollection._address}/${this.props.tokenId}`}>here</a>.
-              </div>
+                <Card.Link href={`/collections/${originalCollection._address}/${this.props.tokenId}`}>View it here</Card.Link>.
+              </Card.Text>
           }
         </Card.Body>
       </Card>
