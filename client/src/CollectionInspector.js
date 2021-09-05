@@ -2,16 +2,9 @@ import React, { Component } from "react";
 import DoubleTroubleContract from "./contracts/DoubleTrouble.json";
 import GenericNFTContract from "./contracts/IERC721Metadata.json";
 import doubleTroubleOrchestrator from './orchestrator';
-import { Card, Spinner } from 'react-bootstrap';
+import { Card, Spinner, ListGroup } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
 import "./App.css";
-
-// TODO: is dtable?
-
-// 1) Inputs (Props)
-// 2) local state (only exists in client)
-// 3) Cache of external state
 
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
 
@@ -79,7 +72,7 @@ class CollectionInspector extends Component {
 
   render() {
     if (this.localState.error) {
-      return <Card>
+      return <Card bg="danger" text="white" style={{width: '18rem'}}>
         <Card.Title>Error</Card.Title>
         <Card.Body>
           <Card.Text>{this.localState.error}</Card.Text>
@@ -177,7 +170,7 @@ class ERC721Inspector extends Component {
     if (this.localState.error != undefined) {
       return <div>
           {loadedNft != undefined ? loadedNft : null}
-          <Card>
+          <Card bg="danger" text="white" style={{width: '18rem'}}>
             <Card.Title>Error</Card.Title>
             <Card.Body>
               <Card.Text>{this.localState.error}</Card.Text>
@@ -201,7 +194,7 @@ class ERC721Inspector extends Component {
     }
 
     if (this.externalCache.troublesomeCollection == undefined) {
-      return <Card>
+      return <Card bg="danger" text="white" style={{width: '18rem'}}>
         <Card.Title>Error</Card.Title>
         <Card.Body>
           <Card.Text>{this.localState.error}</Card.Text>
@@ -320,7 +313,7 @@ class TroublesomeCollectionInspector extends Component {
 
   render() {
     if (this.localState.error != undefined) {
-      return <Card>
+      return <Card bg="danger" text="white" style={{width: '18rem'}}>
         <Card.Title>Error</Card.Title>
           <Card.Body>
             <Card.Text>{this.localState.error}</Card.Text>
@@ -340,16 +333,75 @@ class TroublesomeCollectionInspector extends Component {
     const forSalePriceEth = forSalePrice && this.props.web3.utils.fromWei(forSalePrice.toString(), 'ether');
     const lastPurchasePriceEth = lastPurchasePrice && this.props.web3.utils.fromWei(lastPurchasePrice.toString(), 'ether');
     return (
+      <>
+      <Card style={{width: '36rem'}}>
+        <Card.Title>DoubleTrouble</Card.Title>
+        <Card.Body>
+          <ListGroup horizontal>
+            <ListGroup.Item>
+              TokenURI
+            </ListGroup.Item>
+            <ListGroup.Item>
+              {tokenURI}
+            </ListGroup.Item>
+          </ListGroup>
+          <ListGroup horizontal>
+            <ListGroup.Item>
+              Is troublesome
+            </ListGroup.Item>
+            <ListGroup.Item>
+              {isTroublesome}
+            </ListGroup.Item>
+          </ListGroup>
+          <ListGroup horizontal>
+            <ListGroup.Item>
+             Original collection 
+            </ListGroup.Item>
+            <ListGroup.Item>
+              {originalCollection._address}
+            </ListGroup.Item>
+          </ListGroup>
+          <ListGroup horizontal>
+            <ListGroup.Item>
+             Original owner 
+            </ListGroup.Item>
+            <ListGroup.Item>
+              {originalOwner}
+            </ListGroup.Item>
+          </ListGroup>
+          <ListGroup horizontal>
+            <ListGroup.Item>
+             Troublesome owner 
+            </ListGroup.Item>
+            <ListGroup.Item>
+              {troublesomeOwner}
+            </ListGroup.Item>
+          </ListGroup>
+          <ListGroup horizontal>
+            <ListGroup.Item>
+             For sale price 
+            </ListGroup.Item>
+            <ListGroup.Item>
+              {forSalePriceEth} ETH
+            </ListGroup.Item>
+          </ListGroup>
+          <ListGroup horizontal>
+            <ListGroup.Item>
+             Last purchase price 
+            </ListGroup.Item>
+            <ListGroup.Item>
+              {forSalePriceEth} ETH
+            </ListGroup.Item>
+          </ListGroup>
+        </Card.Body>
+      </Card>
       <div className="CollectionInspector">
-        <h1>DoubleTrouble</h1>
-        <p>Token URI: {tokenURI}</p>
-        <p>Is Troublesome : {isTroublesome}</p>
-        <p>Original collection: {originalCollection._address}</p>
-        <p>Original owner: {originalOwner}</p>
-        <p>Troublesome owner: {troublesomeOwner}</p>
-        <p>For sale price: {forSalePriceEth} ETH</p>
-        <p>Last purchase price: {lastPurchasePriceEth} ETH</p>
         { isTroublesome &&
+            <>
+            <Card style={{width: '18rem'}}>
+              <Card.Title>This NFT is troublesome!</Card.Title>
+              <Card.Header>You are the owner</Card.Header>
+            </Card>
             <div>
               <h2>This NFT is troublesome!</h2>
             { isTroublesomeOwner &&
@@ -382,6 +434,7 @@ class TroublesomeCollectionInspector extends Component {
                 </div>
             }
             </div>
+            </>
         }
         { !isTroublesome && isOriginalOwner &&
             <div>
@@ -406,6 +459,7 @@ class TroublesomeCollectionInspector extends Component {
             </div>
         }
       </div>
+      </>
     );
   }
   approveDoubleTrouble = async () => {

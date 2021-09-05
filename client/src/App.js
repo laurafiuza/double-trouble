@@ -8,6 +8,8 @@ import {
 } from "react-router-dom";
 import CollectionInspector from "./CollectionInspector";
 import doubleTroubleOrchestrator from './orchestrator';
+import { Card } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 class App extends Component {
   constructor() {
@@ -55,7 +57,12 @@ class App extends Component {
               </li>
             </ul>
           </nav>
-          {this.externalCache.web3 && <div>Connected wallet: {this.externalCache.web3.defaultAccount}</div>}
+          {this.externalCache.web3 && <Card bg="secondary" text="white" style={{width: '18rem'}}>
+            <Card.Title>Connected wallet</Card.Title>
+            <Card.Body>
+              <Card.Text>{this.externalCache.web3.defaultAccount}</Card.Text>
+            </Card.Body>
+            </Card>}
 
           {/* A <Switch> looks through its children <Route>s and
               renders the first one that matches the current URL. */}
