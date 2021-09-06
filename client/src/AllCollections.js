@@ -1,6 +1,6 @@
 import React, {Component} from "react";
 import doubleTroubleOrchestrator from './orchestrator';
-import { Card } from "react-bootstrap";
+import { Card, CardGroup } from "react-bootstrap";
 
 class AllCollections extends Component {
   constructor(props) {
@@ -23,15 +23,14 @@ class AllCollections extends Component {
   };
 
   deriveExternalCache = async () => {
-    console.log("inside");
     const dto = await doubleTroubleOrchestrator(this.props.web3);
     const collections = await dto.methods.registeredCollections().call();
     return {collections}
   };
 
   render() {
-    console.log("beep");
-    console.log(this.props);
+    const originalCollection = "boop";
+    const tokenId = 0;
     if (this.externalCache.collections.length === 0) {
       return <Card style={{width: "36rem"}}>
         <Card.Body>
@@ -44,11 +43,57 @@ class AllCollections extends Component {
     }
 
     return (
-      <div>
+      <CardGroup style={{width: "72rem"}}>
       {this.externalCache.collections.map((collection) =>
-        <div>{collection}</div>
+        <>
+        <Card style={{width: "24rem"}}>
+          <Card.Img variant="top" src="https://lh3.googleusercontent.com/xZ4a3gbXAj9J-a5w8H5TIXJyZwQipIGybjXo1LMxafy3PCo71XaSmQ_c2p55tMlek3RoHz_cBZkS0t4si02D7YrZW7Iyzk2NjNo0tQ=s0"/>
+          <Card.Body>
+            <Card.Title>
+              Collection Title
+            </Card.Title>
+            <Card.Subtitle>
+              SYMB
+            </Card.Subtitle>
+            <Card.Link href={`/collections/${originalCollection}/${tokenId}`}>View it here</Card.Link>
+            <Card.Footer>
+              <small className="text-muted">Last updated 3 mins ago</small>
+            </Card.Footer>
+          </Card.Body>
+        </Card>
+        <Card style={{width: "24rem"}}>
+          <Card.Img variant="top" src="https://lh3.googleusercontent.com/xZ4a3gbXAj9J-a5w8H5TIXJyZwQipIGybjXo1LMxafy3PCo71XaSmQ_c2p55tMlek3RoHz_cBZkS0t4si02D7YrZW7Iyzk2NjNo0tQ=s0"/>
+          <Card.Body>
+            <Card.Title>
+              Collection Title
+            </Card.Title>
+            <Card.Subtitle>
+              SYMB
+            </Card.Subtitle>
+            <Card.Link href={`/collections/${originalCollection}/${tokenId}`}>View it here</Card.Link>
+            <Card.Footer>
+              <small className="text-muted">Last updated 3 mins ago</small>
+            </Card.Footer>
+          </Card.Body>
+        </Card>
+        <Card style={{width: "24rem"}}>
+          <Card.Img variant="top" src="https://lh3.googleusercontent.com/xZ4a3gbXAj9J-a5w8H5TIXJyZwQipIGybjXo1LMxafy3PCo71XaSmQ_c2p55tMlek3RoHz_cBZkS0t4si02D7YrZW7Iyzk2NjNo0tQ=s0"/>
+          <Card.Body>
+            <Card.Title>
+              Collection Title
+            </Card.Title>
+            <Card.Subtitle>
+              SYMB
+            </Card.Subtitle>
+            <Card.Link href={`/collections/${originalCollection}/${tokenId}`}>View it here</Card.Link>
+            <Card.Footer>
+              <small className="text-muted">Last updated 3 mins ago</small>
+            </Card.Footer>
+          </Card.Body>
+        </Card>
+        </>
       )}
-      </div>
+      </CardGroup>
     );
   }
 }

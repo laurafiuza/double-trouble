@@ -38,8 +38,6 @@ class DoubleTrouble extends Component {
   };
 
   render() {
-    console.log("boop");
-    console.log(this.externalCache);
     return (
       <Router>
         <div>

@@ -15,8 +15,6 @@ const orchestratorAddr = {
 const doubleTroubleOrchestrator = async (web3) => {
   const chainId = await web3.eth.getChainId();
   if (!(chainId in orchestratorAddr)) {
-    console.log("chainID");
-    console.log(chainId);
     return null;
   }
 
