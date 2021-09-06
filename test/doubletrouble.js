@@ -212,4 +212,16 @@ contract("DoubleTrouble", accounts => {
 
     await assert.rejects(dt.unmakeTroublesome(tokenId, {from: accounts[2]}), /Cannot remove NFT/);
   });
+
+  it("should return the correct registered tokens in a given collection", async () => {
+    registeredTokens = await dt.registeredTokens();
+    trueTokens = []
+    for (i = 0; i < 17; i++) {
+      trueTokens = [...trueTokens, i];
+    }
+    givenTokens = registeredTokens.map(t => {
+      return t.words[0]
+    });
+    assert.deepEqual(givenTokens, trueTokens, "Number of registered tokens does not match");
+  });
 });

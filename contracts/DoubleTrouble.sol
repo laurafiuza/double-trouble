@@ -11,10 +11,11 @@ contract DoubleTrouble is ERC721URIStorage {
   address _originalCollection;
   address _feeWallet;
   uint256 _feeRate = 100;
+  uint256[] _registeredTokens;
 
   constructor(string memory name, string memory symbol, address nftCollection, address feeWallet) ERC721(name, symbol) {
     require(nftCollection != address(0), "collection address cannot be zero");
-    require(IERC721Metadata(nftCollection).supportsInterface(0x80ac58cd),  "collection must refer to an ERC721 address");
+    require(IERC721Metadata(nftCollection).supportsInterface(0x80ac58cd), "collection must refer to an ERC721 address");
     _originalCollection = nftCollection;
     _feeWallet = feeWallet;
   }
@@ -29,6 +30,7 @@ contract DoubleTrouble is ERC721URIStorage {
     // Mint an NFT in the DT contract so we start recording the true owner here
     _mint(owner, tokenId);
     _forSalePrices[tokenId] = initialForSalePrice;
+    _registeredTokens.push(tokenId);
   }
 
   function unmakeTroublesome(uint256 tokenId) external {
@@ -38,6 +40,12 @@ contract DoubleTrouble is ERC721URIStorage {
     // Transfer ownership of the NFT
     IERC721Metadata(_originalCollection).transferFrom(address(this), msg.sender, tokenId);
     _burn(tokenId);
+    for (uint i = 0; i < _registeredTokens.length; i++) {
+      if (_registeredTokens[i] == tokenId) {
+        delete _registeredTokens[i];
+        break;
+      }
+    }
   }
 
   function originalCollection() external view returns (address) {
@@ -105,6 +113,10 @@ contract DoubleTrouble is ERC721URIStorage {
   }
 
   function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-      return interfaceId == 0xdeadbeef || super.supportsInterface(interfaceId);
+    return interfaceId == 0xdeadbeef || super.supportsInterface(interfaceId);
+  }
+
+  function registeredTokens() external view returns (uint256[] memory) {
+    return _registeredTokens;
   }
 }

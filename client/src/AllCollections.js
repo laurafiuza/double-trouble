@@ -1,11 +1,12 @@
 import React, {Component} from "react";
 import doubleTroubleOrchestrator from './orchestrator';
 import { Card, CardGroup } from "react-bootstrap";
+import DoubleTroubleContract from "./contracts/DoubleTrouble.json";
 
 class AllCollections extends Component {
   constructor(props) {
     super(props);
-    this.externalCache = {collections: []};
+    this.externalCache = {collections: [], web3: null};
     this.localState = {};
 
     this.deriveAndRender();
@@ -25,7 +26,17 @@ class AllCollections extends Component {
   deriveExternalCache = async () => {
     const dto = await doubleTroubleOrchestrator(this.props.web3);
     const collections = await dto.methods.registeredCollections().call();
-    return {collections}
+    return {collections, this.props.web3};
+  };
+
+  getCollectionInfo = async () => {
+    if (!this.externalCache.web3) {
+      return null;
+    }
+    const troublesomeCollection = new this.externalCache.web3.eth.Contract(
+      DoubleTroubleContract.abi,
+      this.props.collection,
+    );
   };
 
   render() {
