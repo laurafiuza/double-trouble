@@ -6,7 +6,8 @@ import DoubleTroubleContract from "./contracts/DoubleTrouble.json";
 class AllCollections extends Component {
   constructor(props) {
     super(props);
-    this.externalCache = {collections: [], web3: null};
+    // TODO: delete collections
+    this.externalCache = {collections: [], nfts: {}, web3: null};
     this.localState = {};
 
     this.deriveAndRender();
@@ -26,17 +27,17 @@ class AllCollections extends Component {
   deriveExternalCache = async () => {
     const dto = await doubleTroubleOrchestrator(this.props.web3);
     const collections = await dto.methods.registeredCollections().call();
-    return {collections, this.props.web3};
-  };
-
-  getCollectionInfo = async () => {
-    if (!this.externalCache.web3) {
-      return null;
+    let nfts = {};
+    for (const collection of collections) {
+      const troublesomeCollection = new this.props.web3.eth.Contract(
+        DoubleTroubleContract.abi,
+        collection,
+      );
+      const registeredTokens = await troublesomeCollection.methods.registeredTokens().call();
+      // TODO: registered tokens is not printing to console log, debug
+      nfts[collection] = registeredTokens;
     }
-    const troublesomeCollection = new this.externalCache.web3.eth.Contract(
-      DoubleTroubleContract.abi,
-      this.props.collection,
-    );
+    return {nfts, collections, web3: this.props.web3};
   };
 
   render() {
@@ -54,6 +55,7 @@ class AllCollections extends Component {
     }
 
     return (
+      <>
       <CardGroup style={{width: "72rem"}}>
       {this.externalCache.collections.map((collection) =>
         <>
@@ -105,6 +107,7 @@ class AllCollections extends Component {
         </>
       )}
       </CardGroup>
+      </>
     );
   }
 }
