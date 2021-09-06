@@ -42,6 +42,10 @@ class CollectionInspector extends Component {
     });
   };
 
+  refreshPage = () => {
+    window.location.reload();
+  };
+
   deriveExternalCache = async () => {
     if (!this.props.web3) {
       return {};
@@ -73,10 +77,11 @@ class CollectionInspector extends Component {
   render() {
     if (this.localState.error) {
       return <Card bg="danger" text="white" style={{width: '18rem'}}>
-        <Card.Body>
-          <Card.Title>Error</Card.Title>
-          <Card.Text>{this.localState.error}</Card.Text>
-        </Card.Body>
+          <Card.Body>
+            <Card.Title>Error</Card.Title>
+            <Card.Text>{this.localState.error}</Card.Text>
+            <Button variant="light" onClick={() => this.refreshPage}>Go back</Button>
+          </Card.Body>
         </Card>;
     } else if (this.externalCache.isTroublesome) {
       return <TroublesomeCollectionInspector web3={this.props.web3}
@@ -93,7 +98,7 @@ class CollectionInspector extends Component {
 class ERC721Inspector extends Component {
   constructor() {
     super();
-    this.localState = {error: undefined};
+    this.localState = {error: undefined, imgSrc: null};
     this.externalCache = {
       web3: null, accounts: null, defaultAccount: null,
       dto: undefined, troublesomeCollection: undefined,
@@ -108,6 +113,10 @@ class ERC721Inspector extends Component {
     if (this.props != prevProps) {
       this.deriveAndRender();
     }
+  };
+
+  refreshPage = () => {
+    window.location.reload();
   };
 
   deriveAndRender = () => {
@@ -151,6 +160,7 @@ class ERC721Inspector extends Component {
       throw new Error(`NFT ${this.props.tokenId} not found in collection ${this.props.collection}`)
     }
     const isOwner = nftOwner && nftOwner == this.props.web3.defaultAccount;
+    this.localState.imgSrc = tokenURI;
 
     return {
       dto, nftCollection, troublesomeCollection, nftOwner, isOwner,
@@ -158,12 +168,18 @@ class ERC721Inspector extends Component {
     };
   }
 
+  handleImgError = () => {
+    this.localState.imgSrc = null;
+    this.forceUpdate();
+  };
+
   render() {
+    alert("hmmm");
     var loadedNft = undefined;
     if (this.externalCache.collectionName) {
       loadedNft = <Card>
-        {this.externalCache.tokenURI != undefined && <img src={this.externalCache.tokenURI}/>}
-        {this.externalCache.tokenURI != undefined && <Card.Img variant="top" src={this.externalCache.tokenURI} />}
+        // We do this to check whether img path is valid before rendering
+        {this.localState.imgSrc && <Card.Img onError={() => this.handleImgError()} src={this.localState.imgSrc}/>}
         Name: {this.externalCache.collectionName} Symbol: {this.externalCache.collectionSymbol} tokenURI: {this.externalCache.tokenURI}
         </Card>;
     }
@@ -175,6 +191,7 @@ class ERC721Inspector extends Component {
             <Card.Body>
               <Card.Title>Error</Card.Title>
               <Card.Text>{this.localState.error}</Card.Text>
+              <Button variant="light" onClick={() => this.refreshPage()}></Button>
             </Card.Body>
           </Card>;
         </div>;
@@ -199,6 +216,7 @@ class ERC721Inspector extends Component {
         <Card.Body>
           <Card.Title>Error</Card.Title>
           <Card.Text>{this.localState.error}</Card.Text>
+          <Button variant="light" onClick={() => this.refreshPage()}>Go back</Button>
         </Card.Body>
       </Card>;
     }
@@ -236,9 +254,13 @@ class TroublesomeCollectionInspector extends Component {
     };
   };
 
+  refreshPage = () => {
+    window.location.reload();
+  };
+
   componentDidMount() {
     this.deriveAndRender();
-  }
+  };
 
   componentDidUpdate(prevProps) {
     if (this.props != prevProps) {
@@ -318,6 +340,7 @@ class TroublesomeCollectionInspector extends Component {
           <Card.Body>
           <Card.Title>Error</Card.Title>
             <Card.Text>{this.localState.error}</Card.Text>
+            <Button variant="light" onClick={() => this.refreshPage()}>Go back</Button>
           </Card.Body>
         </Card>;
     }
@@ -331,11 +354,13 @@ class TroublesomeCollectionInspector extends Component {
       originalOwner, troublesomeOwner, troublesomeCollection,
     } = this.externalCache;
     const isForSale = forSalePrice > 0;
+    const canForceBuy = lastPurchasePrice > 0;
     const forSalePriceEth = forSalePrice && this.props.web3.utils.fromWei(forSalePrice.toString(), 'ether');
     const lastPurchasePriceEth = lastPurchasePrice && this.props.web3.utils.fromWei(lastPurchasePrice.toString(), 'ether');
     return (
       <Card style={{width: '36rem'}}>
         <Card.Body>
+          <Card.Img variant="top" src={this.localState.tokenURI} onError={() => this.handleImgError()}/>
           <Card.Title>DoubleTrouble</Card.Title>
           <Table striped bordered hover>
             <tbody>
@@ -365,7 +390,7 @@ class TroublesomeCollectionInspector extends Component {
               </tr>
               <tr>
                 <td>Last purchase price</td>
-                <td>{lastPurchasePrice} ETH</td>
+                <td>{lastPurchasePriceEth} ETH</td>
               </tr>
             </tbody>
           </Table>
@@ -374,37 +399,41 @@ class TroublesomeCollectionInspector extends Component {
               <Card.Title>This NFT is troublesome!</Card.Title>
               { isTroublesomeOwner && 
                 <>
-                  <Card.Subtitle>You are the owner</Card.Subtitle>
-                  <Form.Label htmlFor="new-price">New price in ETH</Form.Label>
-                  <InputGroup className="mb-3">
-                    <InputGroup.Text id="basic-addon3">
-                      $
-                    </InputGroup.Text>
-                    <FormControl id="new-price" aria-describedby="basic-addon3" onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
-                  </InputGroup>
-                  <Button variant="outline-dark" onClick={() => this.setPrice(parseInt(this.localState.inputSalePrice))}>
-                    { forSalePrice == 0 ? "Put up for sale" : "Change price"}
-                  </Button>
-                { forSalePrice > 0 &&
-                  <Button variant="outline-danger" onClick={() => this.setPrice(0)}>
-                    Remove from sale
-                  </Button>
-                }
-                { lastPurchasePrice == 0 &&
-                    <Card.Text>
-                      No one bought it yet. You can still remove it from the DoubleTrouble contract if you want.
-                      <Button variant="outline-danger" onClick={() => window.alert("TODO")}>Untrouble</Button>
-                    </Card.Text>
-                }
+                  <Card.Subtitle style={{color: "green"}}>You are the owner</Card.Subtitle>
+                  <ListGroup>
+                    <ListGroup.Item>
+                    <Form.Label htmlFor="new-price">New price in ETH</Form.Label>
+                    <InputGroup className="mb-3">
+                      <InputGroup.Text id="basic-addon3">
+                        $
+                      </InputGroup.Text>
+                      <FormControl id="new-price" aria-describedby="basic-addon3" onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
+                    </InputGroup>
+                    <Button variant="outline-dark" onClick={() => this.setPrice(parseInt(this.localState.inputSalePrice))}>
+                      { forSalePrice == 0 ? "Put up for sale" : "Change price"}
+                    </Button>
+                  { forSalePrice > 0 &&
+                    <Button variant="light" onClick={() => this.setPrice(0)}>
+                      Remove from sale
+                    </Button>
+                  }
+                  { lastPurchasePrice == 0 &&
+                      <Card.Text>
+                        No one bought it yet. You can still remove it from the DoubleTrouble contract if you want.
+                        <Button variant="light" onClick={() => window.alert("TODO")}>Untrouble</Button>
+                      </Card.Text>
+                  }
+                  </ListGroup.Item>
+                  </ListGroup>
                 </>
               }
             </>
           }
-          { !isTroublesomeOwner &&
-              <>
-                <Button variant="outline-dark" onClick={this.buy}>Buy for {forSalePriceEth} ETH</Button>
-                <Button variant="outline-dark" onClick={this.forceBuy}>Force buy for {lastPurchasePriceEth * 2} ETH</Button>
-              </>
+          { !isTroublesomeOwner && isForSale &&
+              <Button variant="outline-dark" onClick={this.buy}>Buy for {forSalePriceEth} ETH</Button>
+          }
+          { !isTroublesomeOwner && canForceBuy &&
+              <Button variant="outline-dark" onClick={this.forceBuy}>Force buy for {lastPurchasePriceEth * 2} ETH</Button>
           }
           { !isTroublesome && isOriginalOwner &&
               <>
