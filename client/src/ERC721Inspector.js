@@ -84,7 +84,6 @@ class ERC721Inspector extends Component {
   };
 
   render() {
-    alert("hmmm");
     var loadedNft = undefined;
     if (this.externalCache.collectionName) {
       loadedNft = <Card>
