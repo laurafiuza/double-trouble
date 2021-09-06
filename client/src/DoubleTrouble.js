@@ -38,6 +38,8 @@ class DoubleTrouble extends Component {
   };
 
   render() {
+    console.log("boop");
+    console.log(this.externalCache);
     return (
       <Router>
         <div>
@@ -53,7 +55,11 @@ class DoubleTrouble extends Component {
                 collection={match.params.collection} tokenId={match.params.tokenId} />
             }} />
             <Route path="/collections">
-              <AllCollections web3={this.externalCache.web3} />
+              {
+                this.externalCache.web3 ? 
+                <AllCollections web3={this.externalCache.web3} />
+                : <p>boop</p>
+              }
             </Route>
             <Route path="/">
               <About />

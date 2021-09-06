@@ -3,8 +3,8 @@ import doubleTroubleOrchestrator from './orchestrator';
 import { Card } from "react-bootstrap";
 
 class AllCollections extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.externalCache = {collections: []};
     this.localState = {};
 
@@ -23,12 +23,15 @@ class AllCollections extends Component {
   };
 
   deriveExternalCache = async () => {
+    console.log("inside");
     const dto = await doubleTroubleOrchestrator(this.props.web3);
     const collections = await dto.methods.registeredCollections().call();
     return {collections}
   };
 
   render() {
+    console.log("beep");
+    console.log(this.props);
     if (this.externalCache.collections.length === 0) {
       return <Card style={{width: "36rem"}}>
         <Card.Body>
