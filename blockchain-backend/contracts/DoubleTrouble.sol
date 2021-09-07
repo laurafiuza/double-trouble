@@ -15,7 +15,6 @@ contract DoubleTrouble is ERC721URIStorage {
 
   constructor(string memory name, string memory symbol, address nftCollection, address feeWallet) ERC721(name, symbol) {
     require(nftCollection != address(0), "collection address cannot be zero");
-    require(IERC721Metadata(nftCollection).supportsInterface(0x80ac58cd), "collection must refer to an ERC721 address");
     _originalCollection = nftCollection;
     _feeWallet = feeWallet;
   }

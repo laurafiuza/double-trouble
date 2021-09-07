@@ -24,10 +24,6 @@ contract("DoubleTroubleOrchestrator", accounts => {
     web3.eth.defaultAccount = accounts[0];
   });
 
-  it("makeTroublesomeCollection should not work for non ERC721 address", async () => {
-    await assert.rejects(dto.makeTroublesomeCollection(NON_NFT_CONTRACT_ADDRESS, NAME, SYMBOL), /revert/);
-  });
-
   it("makeTroublesomeCollection should work for NFT contracts", async () => {
     assert.equal(await dto.troublesomeCollection(cp.address), ZERO_ADDR, "Initially cp must not have a troublesome collection");
 
@@ -54,5 +50,10 @@ contract("DoubleTroubleOrchestrator", accounts => {
     assert.equal(await dto.troublesomeCollection(cp.address), dt.address, "cp must already have a troublesome collection");
 
     await assert.rejects(dto.makeTroublesomeCollection(cp.address, NAME, SYMBOL), /already Troublesome/);
+  });
+
+  it("makeTroublesomeCollection should still work for non ERC721 address", async () => {
+    const ret = await dto.makeTroublesomeCollection(NON_NFT_CONTRACT_ADDRESS, NAME, SYMBOL);
+    assert.equal(ret.receipt.status, true, "Transaction processing failed");
   });
 });
