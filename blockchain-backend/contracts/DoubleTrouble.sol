@@ -40,12 +40,23 @@ contract DoubleTrouble is ERC721URIStorage {
     // Transfer ownership of the NFT
     IERC721Metadata(_originalCollection).transferFrom(address(this), msg.sender, tokenId);
     _burn(tokenId);
-    for (uint i = 0; i < _registeredTokens.length; i++) {
+    _removeRegistered(tokenId);
+  }
+
+  function _removeRegistered(uint256 tokenId) internal {
+    bool found = false;
+    for (uint256 i = 0; i < _registeredTokens.length - 1; i++) {
+      if (found) {
+        _registeredTokens[i] = _registeredTokens[i + 1];
+      }
+
       if (_registeredTokens[i] == tokenId) {
-        delete _registeredTokens[i];
-        break;
+        found = true;
       }
     }
+
+    require(found || _registeredTokens[_registeredTokens.length - 1] == tokenId, "tokenId not found in remove");
+    _registeredTokens.pop();
   }
 
   function originalCollection() external view returns (address) {

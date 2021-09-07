@@ -190,15 +190,6 @@ contract("DoubleTrouble", accounts => {
     await assert.rejects(dt.unmakeTroublesome(tokenId, {from: accounts[2]}), /Cannot remove NFT/);
   });
 
-  it("should return the correct registered tokens in a given collection", async () => {
-    registeredTokens = await dt.registeredTokens();
-    givenTokens = registeredTokens.map(t => {
-      return t.words[0];
-    })
-    trueTokens = [0];
-    assert.deepEqual(givenTokens, trueTokens, "Number of registered tokens does not match");
-  });
-
   it("Can unmakeTroublesome", async () => {
     const otherTokenId = 2;
 
@@ -207,8 +198,8 @@ contract("DoubleTrouble", accounts => {
 
     const initialPrice = 1234;
     const retMakeDTable = await dt.makeTroublesome(otherTokenId, initialPrice);
-
     assert.notEqual(retMakeDTable, undefined, "makeTroublesome failed (undefined return value).");
+
     const lastPurchasePrice = await dt.lastPurchasePrice(otherTokenId);
     assert.equal(lastPurchasePrice, 0, "Initial last purchase should be 0");
 
@@ -225,5 +216,21 @@ contract("DoubleTrouble", accounts => {
     assert.equal(cpOwnerAfter, accounts[0], "accounts[0] contract must be the owner of the Crypto Punk");
 
     await assert.rejects(dt.ownerOf(otherTokenId), /revert ERC721/, "Token shouldnt be present in DT anymore");
+  });
+
+  it("should return the correct registered tokens in a given collection", async () => {
+    const otherTokenId = 2;
+    const approval = await cp.approve(dt.address, otherTokenId);
+    assert.notEqual(approval, undefined, "approval failed (undefined return value).");
+
+    const initialPrice = 1234;
+    const retMakeDTable = await dt.makeTroublesome(otherTokenId, initialPrice);
+
+    assert.notEqual(retMakeDTable, undefined, "makeTroublesome failed (undefined return value).");
+    const registeredTokens = (await dt.registeredTokens()).map(t => { return t.words[0] });
+    assert.deepEqual(registeredTokens, [0, 2], "Number of registered tokens does not match");
+
+    const ret = await dt.unmakeTroublesome(otherTokenId);
+    assert.notEqual(ret, undefined, "unmakeTroublesome failed (undefined return value).");
   });
 });
