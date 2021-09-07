@@ -30,9 +30,6 @@ contract("DoubleTrouble", accounts => {
     tokenId = 0;
     web3.eth.defaultAccount = accounts[0];
 
-    nft = await cp.createNft(accounts[0]);
-    assert.notEqual(nft, undefined, "createNft failed (undefined return value).");
-
     const approval = await cp.approve(dt.address, tokenId);
     assert.notEqual(approval, undefined, "approval failed (undefined return value).");
 
