@@ -25,6 +25,8 @@ contract("DoubleTroubleOrchestrator", accounts => {
   });
 
   it("makeTroublesomeCollection should work for NFT contracts", async () => {
+    await assert.rejects(dto.registeredCollection(0), /tokenId not present/);
+
     assert.equal(await dto.troublesomeCollection(cp.address), ZERO_ADDR, "Initially cp must not have a troublesome collection");
 
     const {'0': ret1, '1': ret2} = await dto.registeredCollections()
@@ -43,6 +45,9 @@ contract("DoubleTroubleOrchestrator", accounts => {
     const {'0': [originalAddr], '1': [mappedAddr]} = await dto.registeredCollections();
     assert.equal(originalAddr, cp.address, "Must have CryptoPunks as a registered collection");
     assert.equal(mappedAddr, dt.address, "Must map CryptoPunks to  the right troublesome collection");
+
+    const expected = {'0': originalAddr, '1': mappedAddr};
+    assert.deepEqual(await dto.registeredCollection(0), expected, "Should have registered collection at index 0");
   });
 
   it("makeTroublesomeCollection should fail if called on same NFT collection twice", async () => {
@@ -53,7 +58,17 @@ contract("DoubleTroubleOrchestrator", accounts => {
   });
 
   it("makeTroublesomeCollection should still work for non ERC721 address", async () => {
-    const ret = await dto.makeTroublesomeCollection(NON_NFT_CONTRACT_ADDRESS, NAME, SYMBOL);
+    await assert.rejects(dto.registeredCollection(1), /tokenId not present/);
+    const ret = await dto.makeTroublesomeCollection(NON_NFT_CONTRACT_ADDRESS, NAME, SYMBOL, {from: accounts[2]});
     assert.equal(ret.receipt.status, true, "Transaction processing failed");
+
+    const expected = {'0': NON_NFT_CONTRACT_ADDRESS, '1': await dto.troublesomeCollection(NON_NFT_CONTRACT_ADDRESS)};
+    assert.deepEqual(await dto.registeredCollection(1), expected, "Should have registered collection at index 1");
+  });
+
+  it("makeTroublesomeCollection should have minted NFTs", async () => {
+    assert.equal(await dto.ownerOf(0), accounts[0], "Must have minted tokenId 0 for account 0");
+    assert.equal(await dto.ownerOf(1), accounts[2], "Must have minted tokenId 1 for account 2");
+    await assert.rejects(dto.ownerOf(2), /nonexistent token/);
   });
 });
