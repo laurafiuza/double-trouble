@@ -61,7 +61,6 @@ class ERC721Inspector extends Component {
     const collectionName = await nftCollection.methods.name().call();
     const collectionSymbol = await nftCollection.methods.symbol().call();
 
-
     var nftOwner, tokenURI;
     try {
       nftOwner = await nftCollection.methods.ownerOf(this.props.tokenId).call();
@@ -70,7 +69,9 @@ class ERC721Inspector extends Component {
       throw new Error(`NFT ${this.props.tokenId} not found in collection ${this.props.collection}`)
     }
     const isOwner = nftOwner && nftOwner === this.props.web3.defaultAccount;
-    this.localState.imgSrc = tokenURI;
+    fetch(tokenURI).then(resp => resp.json()).then(data => {
+      this.localState.imgSrc = data.properties.image.description;
+    });
 
     return {
       dto, nftCollection, troublesomeCollection, nftOwner, isOwner,
@@ -129,11 +130,15 @@ class ERC721Inspector extends Component {
         </Card.Body>
       </Card>;
     }
-    return (<div>
-      <div>Name: {this.externalCache.collectionName} Symbol: {this.externalCache.collectionSymbol}</div>
-      This NFT already has a troublesome Collection.
-      <a href={`/collections/${this.externalCache.troublesomeCollection}/${this.props.tokenId}`}>View it</a>
-    </div>);
+    return (<Card style={{width: "36rem"}}>
+      <Card.Img variant="top" src={this.localState.imgSrc} />
+        <Card.Body>
+      <Card.Title>Double Trouble</Card.Title>
+      <Card.Subtitle>{this.externalCache.collectionName} ({this.externalCache.collectionSymbol})</Card.Subtitle>
+      <Card.Text>This NFT already has a troublesome Collection.</Card.Text>
+      <Card.Link href={`/collections/${this.externalCache.troublesomeCollection}/${this.props.tokenId}`}>View it</Card.Link>
+    </Card.Body>
+    </Card>);
   }
 
   makeTroublesomeCollection = async () => {

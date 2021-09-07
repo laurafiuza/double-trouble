@@ -6,7 +6,7 @@ import DoubleTroubleContract from "./contracts/DoubleTrouble.json";
 class AllCollections extends Component {
   constructor(props) {
     super(props);
-    // TODO: delete collections
+    // TODO: delete collections from externalCache, only use nfts
     this.externalCache = {collections: [], nfts: {}, web3: null};
     this.localState = {};
 
@@ -28,11 +28,16 @@ class AllCollections extends Component {
     const dto = await doubleTroubleOrchestrator(this.props.web3);
     const collections = await dto.methods.registeredCollections().call();
     let nfts = {};
-    for (const collection of collections) {
+    const flatCollections = Object.values(collections).flat();
+    for (const collection of flatCollections) {
+      console.log("collection");
+      console.log(collection);
       const troublesomeCollection = new this.props.web3.eth.Contract(
         DoubleTroubleContract.abi,
         collection,
       );
+      console.log("troublesomeCollection");
+      console.log(troublesomeCollection.methods.registeredTokens());
       const registeredTokens = await troublesomeCollection.methods.registeredTokens().call();
       // TODO: registered tokens is not printing to console log, debug
       nfts[collection] = registeredTokens;
@@ -46,7 +51,7 @@ class AllCollections extends Component {
     if (this.externalCache.collections.length === 0) {
       return <Card style={{width: "36rem"}}>
         <Card.Body>
-        <Card.Header as="h5">Double Trouble</Card.Header>
+        <Card.Title>Double Trouble</Card.Title>
         <Card.Text>
           No troublesome collections yet
         </Card.Text>

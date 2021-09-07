@@ -31,7 +31,6 @@ contract("DoubleTroubleOrchestrator", accounts => {
   it("makeTroublesomeCollection should work for NFT contracts", async () => {
     assert.equal(await dto.troublesomeCollection(cp.address), ZERO_ADDR, "Initially cp must not have a troublesome collection");
 
-    console.log(await dto.registeredCollections());
     const {'0': ret1, '1': ret2} = await dto.registeredCollections()
     assert.equal(ret1.length, 0, "Must not have any registered collections");
     assert.equal(ret2.length, 0, "Must not have any registered collections");

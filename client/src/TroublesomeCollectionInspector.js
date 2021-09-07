@@ -126,9 +126,9 @@ class TroublesomeCollectionInspector extends Component {
     const lastPurchasePriceEth = lastPurchasePrice && this.props.web3.utils.fromWei(lastPurchasePrice.toString(), 'ether');
     return (
       <Card style={{width: '36rem'}}>
+        <Card.Img variant="top" src={this.localState.tokenURI} onError={() => this.handleImgError()}/>
         <Card.Body>
-          <Card.Img variant="top" src={this.localState.tokenURI} onError={() => this.handleImgError()}/>
-          <Card.Title>DoubleTrouble</Card.Title>
+          <Card.Title>Double Trouble</Card.Title>
           <Table striped bordered hover>
             <tbody>
               <tr>
