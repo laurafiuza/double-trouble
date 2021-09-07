@@ -52,7 +52,6 @@ class AllCollections extends Component {
     if (this.externalCache.collections.length === 0) {
       return <Card style={{width: "36rem"}}>
         <Card.Body>
-        <Card.Title>Double Trouble</Card.Title>
         <Card.Text>
           No troublesome collections yet
         </Card.Text>

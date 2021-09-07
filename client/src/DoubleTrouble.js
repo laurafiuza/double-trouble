@@ -8,7 +8,7 @@ import {
 import CollectionInspector from "./CollectionInspector";
 import About from "./About";
 import AllCollections from "./AllCollections";
-import { Button, ButtonGroup, Spinner } from 'react-bootstrap';
+import { Spinner, Navbar, Container, Nav } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 class DoubleTrouble extends Component {
@@ -39,34 +39,42 @@ class DoubleTrouble extends Component {
 
   render() {
     return (
-      <Router>
-        <div>
-          <ButtonGroup>
-            <Button variant="outline-info"><a style={{textDecoration: "none"}} href="/">Home</a></Button>
-            <Button variant="outline-info"><a style={{textDecoration: "none"}} href="/collections">All troublesome collections</a></Button>
-          </ButtonGroup>
-          {/* A <Switch> looks through its children <Route>s and
-              renders the first one that matches the current URL. */}
-          <Switch>
-            <Route path="/collections/:collection/:tokenId" render={({match}) => {
-              return <CollectionInspector web3={this.externalCache.web3}
-                collection={match.params.collection} tokenId={match.params.tokenId} />
-            }} />
-            <Route path="/collections">
-              {
-                this.externalCache.web3
-                  ? 
-                <AllCollections web3={this.externalCache.web3} />
-                  :
-                <Spinner animation="border" />
-              }
-            </Route>
-            <Route path="/">
-              <About />
-            </Route>
-          </Switch>
-        </div>
-      </Router>
+        <Router>
+          <div>
+            <Navbar bg="light" expand="lg">
+              <Container>
+                <Navbar.Brand href="/">Double Trouble</Navbar.Brand>
+                <Navbar.Toggle aria-controls="basic-navbar-nav" />
+                <Navbar.Collapse id="basic-navbar-nav">
+                  <Nav className="me-auto">
+                    <Nav.Link href="/">Home</Nav.Link>
+                    <Nav.Link href="/collections">All collections</Nav.Link>
+                  </Nav>
+                </Navbar.Collapse>
+            </Container>
+            </Navbar>
+            {/* A <Switch> looks through its children <Route>s and
+                renders the first one that matches the current URL. */}
+            <Switch>
+              <Route path="/collections/:collection/:tokenId" render={({match}) => {
+                return <CollectionInspector web3={this.externalCache.web3}
+                  collection={match.params.collection} tokenId={match.params.tokenId} />
+              }} />
+              <Route path="/collections">
+                {
+                  this.externalCache.web3
+                    ? 
+                  <AllCollections web3={this.externalCache.web3} />
+                    :
+                  <Spinner animation="border" />
+                }
+              </Route>
+              <Route path="/">
+                <About />
+              </Route>
+            </Switch>
+          </div>
+        </Router>
     );
   }
 }

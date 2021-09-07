@@ -114,7 +114,6 @@ class ERC721Inspector extends Component {
     return (<Card style={{width: "36rem"}}>
       <ImageCard tokenURI={this.externalCache.tokenURI} />
         <Card.Body>
-      <Card.Title>Double Trouble</Card.Title>
       <Card.Subtitle>{this.externalCache.collectionName} ({this.externalCache.collectionSymbol})</Card.Subtitle>
       <Card.Text>This NFT already has a troublesome Collection.</Card.Text>
       <Card.Link href={`/collections/${this.externalCache.troublesomeCollection}/${this.props.tokenId}`}>View it</Card.Link>
