@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import doubleTroubleOrchestrator from './orchestrator';
 import GenericNFTContract from "./contracts/IERC721Metadata.json";
 import ErrorCard from './ErrorCard';
+import ImageCard from './ImageCard';
 import { Card, Button, Spinner } from "react-bootstrap";
 
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
@@ -9,7 +10,7 @@ const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
 class ERC721Inspector extends Component {
   constructor() {
     super();
-    this.localState = {error: undefined, imgSrc: null};
+    this.localState = {error: undefined};
     this.externalCache = {
       web3: null, accounts: null, defaultAccount: null,
       dto: undefined, troublesomeCollection: undefined,
@@ -70,9 +71,6 @@ class ERC721Inspector extends Component {
       throw new Error(`NFT ${this.props.tokenId} not found in collection ${this.props.collection}`)
     }
     const isOwner = nftOwner && nftOwner === this.props.web3.defaultAccount;
-    fetch(tokenURI).then(resp => resp.json()).then(data => {
-      this.localState.imgSrc = data.image;
-    });
 
     return {
       dto, nftCollection, troublesomeCollection, nftOwner, isOwner,
@@ -80,17 +78,11 @@ class ERC721Inspector extends Component {
     };
   }
 
-  handleImgError = () => {
-    this.localState.imgSrc = null;
-    this.forceUpdate();
-  };
-
   render() {
     var loadedNft = undefined;
     if (this.externalCache.collectionName) {
       loadedNft = <Card>
-        {/* We do this to check whether img path is valid before rendering */}
-        {this.localState.imgSrc && <Card.Img onError={() => this.handleImgError()} src={this.localState.imgSrc}/>}
+        <ImageCard tokenURI={this.externalCache.tokenURI} />
         Name: {this.externalCache.collectionName} Symbol: {this.externalCache.collectionSymbol} tokenURI: {this.externalCache.tokenURI}
         </Card>;
     }
@@ -120,7 +112,7 @@ class ERC721Inspector extends Component {
       return <ErrorCard error={this.localState.error} />;
     }
     return (<Card style={{width: "36rem"}}>
-      <Card.Img variant="top" src={this.localState.imgSrc} />
+      <ImageCard tokenURI={this.externalCache.tokenURI} />
         <Card.Body>
       <Card.Title>Double Trouble</Card.Title>
       <Card.Subtitle>{this.externalCache.collectionName} ({this.externalCache.collectionSymbol})</Card.Subtitle>

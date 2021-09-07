@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import DoubleTroubleContract from "./contracts/DoubleTrouble.json";
 import GenericNFTContract from "./contracts/IERC721Metadata.json";
 import ErrorCard from './ErrorCard';
+import ImageCard from './ImageCard';
 import { Card, Button, Spinner, Table, ListGroup, Form, InputGroup, FormControl } from "react-bootstrap";
 
 const assert = (bool, msg) => {
@@ -121,7 +122,7 @@ class TroublesomeCollectionInspector extends Component {
     const lastPurchasePriceEth = lastPurchasePrice && this.props.web3.utils.fromWei(lastPurchasePrice.toString(), 'ether');
     return (
       <Card style={{width: '36rem'}}>
-        <Card.Img variant="top" src={this.localState.tokenURI} onError={() => this.handleImgError()}/>
+        <ImageCard tokenURI={this.externalCache.tokenURI} />
         <Card.Body>
           <Card.Title>Double Trouble</Card.Title>
           <Table striped bordered hover>

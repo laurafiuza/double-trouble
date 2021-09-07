@@ -1,6 +1,7 @@
 import React, {Component} from "react";
 import doubleTroubleOrchestrator from './orchestrator';
 import { Card, CardGroup } from "react-bootstrap";
+import ImageCard from './ImageCard';
 import DoubleTroubleContract from "./contracts/DoubleTrouble.json";
 
 class AllCollections extends Component {
@@ -65,7 +66,7 @@ class AllCollections extends Component {
       {this.externalCache.collections.map((collection) =>
         <>
         <Card style={{width: "24rem"}}>
-          <Card.Img variant="top" src="https://lh3.googleusercontent.com/xZ4a3gbXAj9J-a5w8H5TIXJyZwQipIGybjXo1LMxafy3PCo71XaSmQ_c2p55tMlek3RoHz_cBZkS0t4si02D7YrZW7Iyzk2NjNo0tQ=s0"/>
+          <ImageCard tokenURI={"https://api.artblocks.io/token/0"}/>
           <Card.Body>
             <Card.Title>
               Collection Title
@@ -80,7 +81,7 @@ class AllCollections extends Component {
           </Card.Body>
         </Card>
         <Card style={{width: "24rem"}}>
-          <Card.Img variant="top" src="https://lh3.googleusercontent.com/xZ4a3gbXAj9J-a5w8H5TIXJyZwQipIGybjXo1LMxafy3PCo71XaSmQ_c2p55tMlek3RoHz_cBZkS0t4si02D7YrZW7Iyzk2NjNo0tQ=s0"/>
+          <ImageCard tokenURI={"https://api.artblocks.io/token/1"}/>
           <Card.Body>
             <Card.Title>
               Collection Title
@@ -95,7 +96,7 @@ class AllCollections extends Component {
           </Card.Body>
         </Card>
         <Card style={{width: "24rem"}}>
-          <Card.Img variant="top" src="https://lh3.googleusercontent.com/xZ4a3gbXAj9J-a5w8H5TIXJyZwQipIGybjXo1LMxafy3PCo71XaSmQ_c2p55tMlek3RoHz_cBZkS0t4si02D7YrZW7Iyzk2NjNo0tQ=s0"/>
+          <ImageCard tokenURI={"https://api.artblocks.io/token/2"}/>
           <Card.Body>
             <Card.Title>
               Collection Title
