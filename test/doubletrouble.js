@@ -41,6 +41,7 @@ contract("DoubleTrouble", accounts => {
 
     const initialPrice = 1234;
     const retMakeDTable = await dt.makeTroublesome(tokenId, initialPrice);
+    console.log(retMakeDTable);
     assert.notEqual(retMakeDTable, undefined, "makeTroublesome failed (undefined return value).");
 
     const forSalePrice = await dt.forSalePrice(tokenId);
@@ -48,6 +49,7 @@ contract("DoubleTrouble", accounts => {
 
     const lastPurchasePrice = await dt.lastPurchasePrice(tokenId);
     assert.equal(lastPurchasePrice, 0, "Initial last purchase should be 0");
+    console.log(tokenId);
   });
 
   afterEach(async() => {
@@ -126,7 +128,7 @@ contract("DoubleTrouble", accounts => {
     let tokenURI = await dt.tokenURI(tokenId);
     let originalURI = await cp.tokenURI(tokenId);
     assert.equal(tokenURI, originalURI);
-    assert.equal(tokenURI, "https://foo.bar");
+    assert.equal(tokenURI, "https://api.artblocks.io/token/0");
   });
 
   it("should not buy NFT if forSalePrice is 0", async () => {
