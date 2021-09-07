@@ -6,7 +6,6 @@ class About extends Component {
   render() {
     return <Card style={{width: '36rem'}}>
       <Card.Body>
-        <Card.Title>About</Card.Title>
           <ListGroup>
           <ListGroup.Item>
             <Card.Title>About</Card.Title>
