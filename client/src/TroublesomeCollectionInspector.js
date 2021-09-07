@@ -124,7 +124,7 @@ class TroublesomeCollectionInspector extends Component {
       <Card style={{width: '36rem'}}>
         <ImageCard tokenURI={this.externalCache.tokenURI} />
         <Card.Body>
-          <Card.Title>Double Trouble</Card.Title>
+          <ImageCard tokenURI={tokenURI}/>
           <Table striped bordered hover>
             <tbody>
               <tr>

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card } from 'react-bootstrap';
+import { Card, Spinner } from 'react-bootstrap';
 
 class ImageCard extends Component {
   constructor(props) {
@@ -47,17 +47,20 @@ class ImageCard extends Component {
   };
 
   render() {
+    /* Loading */
+    if (this.externalCache.image === undefined) {
+      return <Spinner animation="border" />;
+    }
+    /* Image source is not valid */
+    if (this.externalCache.image === null) {
+      return null;
+    }
     return (
-      <>
-      {
-      this.externalCache.imgSrc &&
       <Card.Img
         onError={() => this.handleImgError()} 
         variant="top"
         src={this.externalCache.image}
-        /> 
-      }
-      </>);
+        />); 
   };
 }
 

@@ -39,9 +39,9 @@ class AllCollections extends Component {
       );
       console.log("troublesomeCollection");
       console.log(troublesomeCollection.methods.registeredTokens());
-      const registeredTokens = await troublesomeCollection.methods.registeredTokens().call();
+      //const registeredTokens = await troublesomeCollection.methods.registeredTokens().call();
       // TODO: registered tokens is not printing to console log, debug
-      nfts[collection] = registeredTokens;
+      //nfts[collection] = registeredTokens;
     }
     return {nfts, collections, web3: this.props.web3};
   };
@@ -62,8 +62,6 @@ class AllCollections extends Component {
     return (
       <>
       <CardGroup style={{width: "72rem"}}>
-      {this.externalCache.collections.map((collection) =>
-        <>
         <Card style={{width: "24rem"}}>
           <ImageCard tokenURI={"https://api.artblocks.io/token/0"}/>
           <Card.Body>
@@ -74,9 +72,6 @@ class AllCollections extends Component {
               SYMB
             </Card.Subtitle>
             <Card.Link href={`/collections/${originalCollection}/${tokenId}`}>View it here</Card.Link>
-            <Card.Footer>
-              <small className="text-muted">Last updated 3 mins ago</small>
-            </Card.Footer>
           </Card.Body>
         </Card>
         <Card style={{width: "24rem"}}>
@@ -89,9 +84,6 @@ class AllCollections extends Component {
               SYMB
             </Card.Subtitle>
             <Card.Link href={`/collections/${originalCollection}/${tokenId}`}>View it here</Card.Link>
-            <Card.Footer>
-              <small className="text-muted">Last updated 3 mins ago</small>
-            </Card.Footer>
           </Card.Body>
         </Card>
         <Card style={{width: "24rem"}}>
@@ -104,13 +96,8 @@ class AllCollections extends Component {
               SYMB
             </Card.Subtitle>
             <Card.Link href={`/collections/${originalCollection}/${tokenId}`}>View it here</Card.Link>
-            <Card.Footer>
-              <small className="text-muted">Last updated 3 mins ago</small>
-            </Card.Footer>
           </Card.Body>
         </Card>
-        </>
-      )}
       </CardGroup>
       </>
     );
