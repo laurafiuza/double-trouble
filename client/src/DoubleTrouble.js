@@ -8,7 +8,7 @@ import {
 import CollectionInspector from "./CollectionInspector";
 import About from "./About";
 import AllCollections from "./AllCollections";
-import { Spinner, Navbar, Container, Nav } from 'react-bootstrap';
+import { Spinner, Navbar, Container, Nav, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 class DoubleTrouble extends Component {
@@ -49,8 +49,12 @@ class DoubleTrouble extends Component {
                   <Nav className="me-auto">
                     <Nav.Link href="/">Home</Nav.Link>
                     <Nav.Link href="/collections">All collections</Nav.Link>
+                    <Button>Make your NFT troublesome</Button>
                   </Nav>
                 </Navbar.Collapse>
+            </Container>
+            <Container>
+              { this.externalCache.web3 && `Connected wallet: ${this.externalCache.web3.accounts[0]}`} 
             </Container>
             </Navbar>
             {/* A <Switch> looks through its children <Route>s and

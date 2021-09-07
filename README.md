@@ -8,7 +8,7 @@ TODO: npm install for packages? inside client?
 ## How to run
 1. Click the settings button at the top right of the Ganache GUI.
 2. Click "Add Project"
-3. Find the directory where you git-cloned Double Trouble and select the file `truffle-config.js`.
+3. Find the directory where you git-cloned Double Trouble and select the file `blockchain-backend/truffle-config.js`.
 4. `cd blockchain-backend` and enter `truffle migrate --reset`
 5. Go to Ganache, click "Contracts", and find the address for the DoubleTroubleOrchestrator contract.
 6. `cd ../client` and enter `REACT_APP_DTO_ADDR=[address] yarn start`
