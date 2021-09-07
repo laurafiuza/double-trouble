@@ -195,13 +195,10 @@ contract("DoubleTrouble", accounts => {
 
   it("should return the correct registered tokens in a given collection", async () => {
     registeredTokens = await dt.registeredTokens();
-    trueTokens = []
-    for (i = 0; i < 17; i++) {
-      trueTokens = [...trueTokens, i];
-    }
     givenTokens = registeredTokens.map(t => {
-      return t.words[0]
-    });
+      return t.words[0];
+    })
+    trueTokens = [0];
     assert.deepEqual(givenTokens, trueTokens, "Number of registered tokens does not match");
   });
 
