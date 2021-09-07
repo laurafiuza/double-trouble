@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import DoubleTroubleContract from "./contracts/DoubleTrouble.json";
 import GenericNFTContract from "./contracts/IERC721Metadata.json";
+import ErrorCard from './ErrorCard';
 import { Card, Button, Spinner, Table, ListGroup, Form, InputGroup, FormControl } from "react-bootstrap";
 
 const assert = (bool, msg) => {
@@ -103,13 +104,7 @@ class TroublesomeCollectionInspector extends Component {
 
   render() {
     if (this.localState.error !== undefined) {
-      return <Card bg="danger" text="white" style={{width: '18rem'}}>
-          <Card.Body>
-          <Card.Title>Error</Card.Title>
-            <Card.Text>{this.localState.error}</Card.Text>
-            <Button variant="light" onClick={() => this.refreshPage()}>Go back</Button>
-          </Card.Body>
-        </Card>;
+      return <ErrorCard error={this.localState.error}/>
     }
 
     if (!this.props.web3) {

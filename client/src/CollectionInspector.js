@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import GenericNFTContract from "./contracts/IERC721Metadata.json";
 import ERC721Inspector from './ERC721Inspector';
 import TroublesomeCollectionInspector from './TroublesomeCollectionInspector';
-import { Card, Spinner, Button } from 'react-bootstrap';
+import { Spinner } from 'react-bootstrap';
+import ErrorCard from './ErrorCard';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 
@@ -68,13 +69,7 @@ class CollectionInspector extends Component {
 
   render() {
     if (this.localState.error) {
-      return <Card bg="danger" text="white" style={{width: '18rem'}}>
-          <Card.Body>
-            <Card.Title>Error</Card.Title>
-            <Card.Text>{this.localState.error}</Card.Text>
-            <Button variant="light" onClick={() => this.refreshPage}>Go back</Button>
-          </Card.Body>
-        </Card>;
+      return <ErrorCard error={this.localState.error}/>
     } else if (this.externalCache.isTroublesome) {
       return <TroublesomeCollectionInspector web3={this.props.web3}
         collection={this.props.collection} tokenId={this.props.tokenId} />;

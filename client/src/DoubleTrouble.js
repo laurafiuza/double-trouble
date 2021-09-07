@@ -8,7 +8,7 @@ import {
 import CollectionInspector from "./CollectionInspector";
 import About from "./About";
 import AllCollections from "./AllCollections";
-import { Button, ButtonGroup } from 'react-bootstrap';
+import { Button, ButtonGroup, Spinner } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 class DoubleTrouble extends Component {
@@ -54,9 +54,11 @@ class DoubleTrouble extends Component {
             }} />
             <Route path="/collections">
               {
-                this.externalCache.web3 ? 
+                this.externalCache.web3
+                  ? 
                 <AllCollections web3={this.externalCache.web3} />
-                : <p>boop</p>
+                  :
+                <Spinner animation="border" />
               }
             </Route>
             <Route path="/">

@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import doubleTroubleOrchestrator from './orchestrator';
 import GenericNFTContract from "./contracts/IERC721Metadata.json";
+import ErrorCard from './ErrorCard';
 import { Card, Button, Spinner } from "react-bootstrap";
 
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
@@ -95,16 +96,10 @@ class ERC721Inspector extends Component {
     }
 
     if (this.localState.error !== undefined) {
-      return <div>
+      return <>
           {loadedNft !== undefined ? loadedNft : null}
-          <Card bg="danger" text="white" style={{width: '18rem'}}>
-            <Card.Body>
-              <Card.Title>Error</Card.Title>
-              <Card.Text>{this.localState.error}</Card.Text>
-              <Button variant="light" onClick={() => this.refreshPage()}></Button>
-            </Card.Body>
-          </Card>;
-        </div>;
+          <ErrorCard error={this.localState.error}/>
+        </>;
     }
 
     if (this.props.web3 === undefined) {
@@ -122,13 +117,7 @@ class ERC721Inspector extends Component {
     }
 
     if (this.externalCache.troublesomeCollection === undefined) {
-      return <Card bg="danger" text="white" style={{width: '18rem'}}>
-        <Card.Body>
-          <Card.Title>Error</Card.Title>
-          <Card.Text>{this.localState.error}</Card.Text>
-          <Button variant="light" onClick={() => this.refreshPage()}>Go back</Button>
-        </Card.Body>
-      </Card>;
+      return <ErrorCard error={this.localState.error} />;
     }
     return (<Card style={{width: "36rem"}}>
       <Card.Img variant="top" src={this.localState.imgSrc} />
