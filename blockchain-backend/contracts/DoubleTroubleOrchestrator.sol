@@ -6,11 +6,13 @@ import "./DoubleTrouble.sol";
 // SPDX-License-Identifier: MIT
 contract DoubleTroubleOrchestrator {
   mapping (address => DoubleTrouble) public _troublesomeCollections;
+  DoubleTroubleFactory _dtFactory;
   address _feeWallet;
   address[] _registeredCollections;
 
-  constructor(address feeWallet) {
+  constructor(DoubleTroubleFactory dtFactory, address feeWallet) {
     _feeWallet = feeWallet;
+    _dtFactory = dtFactory;
   }
 
   function makeTroublesomeCollection(address nftCollection, string memory name, string memory symbol) external {
@@ -18,7 +20,7 @@ contract DoubleTroubleOrchestrator {
     require(address(_troublesomeCollections[nftCollection]) == address(0), "Collection is already Troublesome");
 
     // Deploy troublesome contract for nftCollection
-    _troublesomeCollections[nftCollection] = new DoubleTrouble(name, symbol, nftCollection, _feeWallet);
+    _troublesomeCollections[nftCollection] = _dtFactory.makeNew(name, symbol, nftCollection, _feeWallet);
     _registeredCollections.push(nftCollection);
   }
 
@@ -38,5 +40,12 @@ contract DoubleTroubleOrchestrator {
 
   function _ensureSupportedNftContract(address nftCollection) internal view {
     require(IERC721Metadata(nftCollection).supportsInterface(0x80ac58cd),  "collection must refer to an ERC721 address");
+  }
+}
+
+contract DoubleTroubleFactory {
+  function makeNew(string memory name, string memory symbol, address nftCollection, address feeWallet)
+        external returns (DoubleTrouble) {
+    return new DoubleTrouble(name, symbol, nftCollection, feeWallet);
   }
 }
