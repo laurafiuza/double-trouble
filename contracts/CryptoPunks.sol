@@ -6,8 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 // SPDX-License-Identifier: MIT
 
 contract CryptoPunks is ERC721URIStorage {
-  constructor() ERC721("CryptoPunks", "PUNK") {
-  }
+  constructor() ERC721("CryptoPunks", "PUNK") {}
 
   uint256 tokenCounter = 0;
 

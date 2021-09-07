@@ -41,7 +41,6 @@ contract("DoubleTrouble", accounts => {
 
     const initialPrice = 1234;
     const retMakeDTable = await dt.makeTroublesome(tokenId, initialPrice);
-    console.log(retMakeDTable);
     assert.notEqual(retMakeDTable, undefined, "makeTroublesome failed (undefined return value).");
 
     const forSalePrice = await dt.forSalePrice(tokenId);
@@ -49,7 +48,6 @@ contract("DoubleTrouble", accounts => {
 
     const lastPurchasePrice = await dt.lastPurchasePrice(tokenId);
     assert.equal(lastPurchasePrice, 0, "Initial last purchase should be 0");
-    console.log(tokenId);
   });
 
   afterEach(async() => {
@@ -73,6 +71,11 @@ contract("DoubleTrouble", accounts => {
     assert.equal(cpOwnerAfter, accounts[0], "accounts[0] contract must be the owner of the Crypto Punk");
 
     await assert.rejects(dt.ownerOf(tokenId), /revert ERC721/, "Token shouldnt be present in DT anymore");
+  });
+
+  it("makeTroublesome should fail for tokenID that doesn't exist", async () => {
+    const nonExistentTokenId = 555;
+    assert.rejects(dt.makeTroublesome(nonExistentTokenId, 1234), /nonexistent token/);
   });
 
   it("DT contract records the original Collection", async () => {
