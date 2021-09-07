@@ -49,6 +49,13 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
   }
 }
 
+/*
+* We need a Factory contract here because otherwise
+* DoubleTroubleOrchestrator's code would have to include all of
+* DoubleTrouble's code, and this would make DTO go above the 24KB Ethereum contract size limit.
+*
+* See more on this here: https://ethereum.stackexchange.com/questions/41501/contract-code-size-and-how-to-work-around-it
+*/
 contract DoubleTroubleFactory {
   function makeNew(string memory name, string memory symbol, address nftCollection, address feeWallet)
         external returns (DoubleTrouble) {
