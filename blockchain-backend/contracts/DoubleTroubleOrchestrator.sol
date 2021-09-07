@@ -1,16 +1,17 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "./DoubleTrouble.sol";
 
 // SPDX-License-Identifier: MIT
-contract DoubleTroubleOrchestrator {
+contract DoubleTroubleOrchestrator is ERC721URIStorage {
   mapping (address => DoubleTrouble) public _troublesomeCollections;
   DoubleTroubleFactory _dtFactory;
   address _feeWallet;
   address[] _registeredCollections;
 
-  constructor(DoubleTroubleFactory dtFactory, address feeWallet) {
+  constructor(DoubleTroubleFactory dtFactory, address feeWallet) ERC721("Double Trouble", "TRBL") {
     _feeWallet = feeWallet;
     _dtFactory = dtFactory;
   }
@@ -40,6 +41,10 @@ contract DoubleTroubleOrchestrator {
 
   function _ensureSupportedNftContract(address nftCollection) internal view {
     require(IERC721Metadata(nftCollection).supportsInterface(0x80ac58cd),  "collection must refer to an ERC721 address");
+  }
+
+  function tokenURI(uint256) public view virtual override returns (string memory) {
+    revert("TODO");
   }
 }
 
