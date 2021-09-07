@@ -71,7 +71,7 @@ class ERC721Inspector extends Component {
     }
     const isOwner = nftOwner && nftOwner === this.props.web3.defaultAccount;
     fetch(tokenURI).then(resp => resp.json()).then(data => {
-      this.localState.imgSrc = data.properties.image.description;
+      this.localState.imgSrc = data.image;
     });
 
     return {
