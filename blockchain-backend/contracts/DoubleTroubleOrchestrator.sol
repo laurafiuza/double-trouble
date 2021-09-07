@@ -22,6 +22,7 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
 
     // Deploy troublesome contract for nftCollection
     _troublesomeCollections[nftCollection] = _dtFactory.makeNew(name, symbol, nftCollection, _feeWallet);
+    _mint(msg.sender, _registeredCollections.length);
     _registeredCollections.push(nftCollection);
   }
 
@@ -37,6 +38,12 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
     }
 
     return (_registeredCollections, mappedCollections);
+  }
+
+  function registeredCollection(uint256 tokenId) external view returns (address, address) {
+    require(tokenId < _registeredCollections.length, "tokenId not present");
+    address original = _registeredCollections[tokenId];
+    return (original, address(_troublesomeCollections[original]));
   }
 
   function _ensureSupportedNftContract(address nftCollection) internal view {
