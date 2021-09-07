@@ -28,11 +28,8 @@ contract("DoubleTrouble", accounts => {
     assert.equal(dt_address, dt.address, "Address returned by orchestrator must match dt.deployed().");
 
     tokenId = 0;
-
     web3.eth.defaultAccount = accounts[0];
-  });
 
-  beforeEach(async() => {
     nft = await cp.createNft(accounts[0]);
     assert.notEqual(nft, undefined, "createNft failed (undefined return value).");
 
@@ -50,28 +47,6 @@ contract("DoubleTrouble", accounts => {
     assert.equal(lastPurchasePrice, 0, "Initial last purchase should be 0");
   });
 
-  afterEach(async() => {
-    tokenId++;
-  });
-
-  it("Can unmakeTroublesome", async () => {
-    const lastPurchasePrice = await dt.lastPurchasePrice(tokenId);
-    assert.equal(lastPurchasePrice, 0, "Initial last purchase should be 0");
-
-    const cpOwnerBefore = await cp.ownerOf(tokenId);
-    assert.equal(cpOwnerBefore, dt.address, "DT contract must be the owner of the Crypto Punk");
-
-    const dtOwnerBefore = await dt.ownerOf(tokenId);
-    assert.equal(dtOwnerBefore, accounts[0], "owner within DT does not equal accounts[0].");
-
-    const ret = await dt.unmakeTroublesome(tokenId);
-    assert.notEqual(ret, undefined, "unmakeTroublesome failed (undefined return value).");
-
-    const cpOwnerAfter = await cp.ownerOf(tokenId);
-    assert.equal(cpOwnerAfter, accounts[0], "accounts[0] contract must be the owner of the Crypto Punk");
-
-    await assert.rejects(dt.ownerOf(tokenId), /revert ERC721/, "Token shouldnt be present in DT anymore");
-  });
 
   it("makeTroublesome should fail for tokenID that doesn't exist", async () => {
     const nonExistentTokenId = 555;
@@ -228,5 +203,33 @@ contract("DoubleTrouble", accounts => {
       return t.words[0]
     });
     assert.deepEqual(givenTokens, trueTokens, "Number of registered tokens does not match");
+  });
+
+  it("Can unmakeTroublesome", async () => {
+    const otherTokenId = 2;
+
+    const approval = await cp.approve(dt.address, otherTokenId);
+    assert.notEqual(approval, undefined, "approval failed (undefined return value).");
+
+    const initialPrice = 1234;
+    const retMakeDTable = await dt.makeTroublesome(otherTokenId, initialPrice);
+
+    assert.notEqual(retMakeDTable, undefined, "makeTroublesome failed (undefined return value).");
+    const lastPurchasePrice = await dt.lastPurchasePrice(otherTokenId);
+    assert.equal(lastPurchasePrice, 0, "Initial last purchase should be 0");
+
+    const cpOwnerBefore = await cp.ownerOf(otherTokenId);
+    assert.equal(cpOwnerBefore, dt.address, "DT contract must be the owner of the Crypto Punk");
+
+    const dtOwnerBefore = await dt.ownerOf(otherTokenId);
+    assert.equal(dtOwnerBefore, accounts[0], "owner within DT does not equal accounts[0].");
+
+    const ret = await dt.unmakeTroublesome(otherTokenId);
+    assert.notEqual(ret, undefined, "unmakeTroublesome failed (undefined return value).");
+
+    const cpOwnerAfter = await cp.ownerOf(otherTokenId);
+    assert.equal(cpOwnerAfter, accounts[0], "accounts[0] contract must be the owner of the Crypto Punk");
+
+    await assert.rejects(dt.ownerOf(otherTokenId), /revert ERC721/, "Token shouldnt be present in DT anymore");
   });
 });
