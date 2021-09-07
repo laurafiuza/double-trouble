@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import CollectionInspector from "./CollectionInspector";
 import About from "./About";
+import Create from "./Create";
 import AllCollections from "./AllCollections";
 import { Spinner, Navbar, Container, Nav, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -49,7 +50,7 @@ class DoubleTrouble extends Component {
                   <Nav className="me-auto">
                     <Nav.Link href="/">Home</Nav.Link>
                     <Nav.Link href="/collections">All collections</Nav.Link>
-                    <Button>Make your NFT troublesome</Button>
+                    <Button><a style={{textDecoration: "none", color: "white"}} href="/create">Make your NFT troublesome</a></Button>
                   </Nav>
                 </Navbar.Collapse>
             </Container>
@@ -72,6 +73,9 @@ class DoubleTrouble extends Component {
                     :
                   <Spinner animation="border" />
                 }
+              </Route>
+              <Route path="/create">
+                <Create />
               </Route>
               <Route path="/">
                 <About />
