@@ -46,12 +46,12 @@ contract DoubleTrouble is ERC721URIStorage {
   function _removeRegistered(uint256 tokenId) internal {
     bool found = false;
     for (uint256 i = 0; i < _registeredTokens.length - 1; i++) {
-      if (found) {
-        _registeredTokens[i] = _registeredTokens[i + 1];
-      }
-
       if (_registeredTokens[i] == tokenId) {
         found = true;
+      }
+
+      if (found) {
+        _registeredTokens[i] = _registeredTokens[i + 1];
       }
     }
 

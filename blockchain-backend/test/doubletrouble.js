@@ -190,14 +190,52 @@ contract("DoubleTrouble", accounts => {
     await assert.rejects(dt.unmakeTroublesome(tokenId, {from: accounts[2]}), /Cannot remove NFT/);
   });
 
+  it("should return the correct registered tokens in a given collection", async () => {
+    let registeredTokens = (await dt.registeredTokens()).map(t => { return t.words[0] });
+    assert.deepEqual(registeredTokens, [0], "Number of registered tokens does not match");
+
+    // Add token 2
+    assert.notEqual(await cp.approve(dt.address, 2), undefined, "approval failed (undefined return value).");
+
+    const initialPrice = 1234;
+    let retMakeDTable = await dt.makeTroublesome(2, initialPrice);
+    assert.notEqual(retMakeDTable, undefined, "makeTroublesome failed (undefined return value).");
+
+    registeredTokens = (await dt.registeredTokens()).map(t => { return t.words[0] });
+    assert.deepEqual(registeredTokens, [0, 2], "Number of registered tokens does not match");
+
+    // Add token 1
+    assert.notEqual(await cp.approve(dt.address, 1), undefined, "approval failed (undefined return value).");
+
+    retMakeDTable = await dt.makeTroublesome(1, initialPrice);
+    assert.notEqual(retMakeDTable, undefined, "makeTroublesome failed (undefined return value).");
+
+    registeredTokens = (await dt.registeredTokens()).map(t => { return t.words[0] });
+    assert.deepEqual(registeredTokens, [0, 2, 1], "Number of registered tokens does not match");
+
+    // Remove token 2
+    ret = await dt.unmakeTroublesome(2);
+    assert.notEqual(ret, undefined, "unmakeTroublesome failed (undefined return value).");
+
+    registeredTokens = (await dt.registeredTokens()).map(t => { return t.words[0] });
+    assert.deepEqual(registeredTokens, [0, 1], "Number of registered tokens does not match");
+
+    // Remove token 1
+    ret = await dt.unmakeTroublesome(1);
+    assert.notEqual(ret, undefined, "unmakeTroublesome failed (undefined return value).");
+
+    // Back at the beginning
+    registeredTokens = (await dt.registeredTokens()).map(t => { return t.words[0] });
+    assert.deepEqual(registeredTokens, [0], "Number of registered tokens does not match");
+  });
+
   it("Can unmakeTroublesome", async () => {
     const otherTokenId = 2;
 
     const approval = await cp.approve(dt.address, otherTokenId);
     assert.notEqual(approval, undefined, "approval failed (undefined return value).");
 
-    const initialPrice = 1234;
-    const retMakeDTable = await dt.makeTroublesome(otherTokenId, initialPrice);
+    const retMakeDTable = await dt.makeTroublesome(otherTokenId, 1234);
     assert.notEqual(retMakeDTable, undefined, "makeTroublesome failed (undefined return value).");
 
     const lastPurchasePrice = await dt.lastPurchasePrice(otherTokenId);
@@ -218,19 +256,4 @@ contract("DoubleTrouble", accounts => {
     await assert.rejects(dt.ownerOf(otherTokenId), /revert ERC721/, "Token shouldnt be present in DT anymore");
   });
 
-  it("should return the correct registered tokens in a given collection", async () => {
-    const otherTokenId = 2;
-    const approval = await cp.approve(dt.address, otherTokenId);
-    assert.notEqual(approval, undefined, "approval failed (undefined return value).");
-
-    const initialPrice = 1234;
-    const retMakeDTable = await dt.makeTroublesome(otherTokenId, initialPrice);
-
-    assert.notEqual(retMakeDTable, undefined, "makeTroublesome failed (undefined return value).");
-    const registeredTokens = (await dt.registeredTokens()).map(t => { return t.words[0] });
-    assert.deepEqual(registeredTokens, [0, 2], "Number of registered tokens does not match");
-
-    const ret = await dt.unmakeTroublesome(otherTokenId);
-    assert.notEqual(ret, undefined, "unmakeTroublesome failed (undefined return value).");
-  });
 });
