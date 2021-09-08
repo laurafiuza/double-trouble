@@ -34,7 +34,10 @@ class About extends Component {
             <Card.Title>TRBL Tokens</Card.Title>
             <ListGroup variant="flush">
               <ListGroup.Item>
-                If you're the first person to bring a new NFT collection to DoubleTrouble, we'll mint a special TRBL token just for you. A TRBL token will automatically grant its owner a percentage of all sales that happen for the corresponding Troublesome Collection. TRBL tokens are also ERC-721 NFTs, so they can be bought and sold in regular NFT exchanges, as well as of course in the Double Trouble platform.
+                If you're the first person to bring a new NFT collection to DoubleTrouble, we'll mint a special TRBL token just for you. A TRBL token will automatically grant its owner a percentage of all sales that happen for the corresponding Troublesome Collection.
+              </ListGroup.Item>
+              <ListGroup.Item>
+              TRBL tokens are also ERC-721 NFTs, so they can be bought and sold in regular NFT exchanges, as well as of course in the Double Trouble platform.
               </ListGroup.Item>
             </ListGroup>
           </ListGroup.Item>
