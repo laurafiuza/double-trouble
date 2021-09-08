@@ -3,7 +3,7 @@ import DoubleTroubleContract from "./contracts/DoubleTrouble.json";
 import GenericNFTContract from "./contracts/IERC721Metadata.json";
 import ErrorCard from './ErrorCard';
 import ImageCard from './ImageCard';
-import { Card, Button, Spinner, Table, ListGroup, Form, InputGroup, FormControl } from "react-bootstrap";
+import { Card, Button, Spinner, Table, ListGroup, InputGroup, FormControl } from "react-bootstrap";
 
 const assert = (bool, msg) => {
   if (!bool) {
