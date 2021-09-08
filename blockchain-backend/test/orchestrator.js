@@ -72,7 +72,14 @@ contract("DoubleTroubleOrchestrator", accounts => {
     await assert.rejects(dto.ownerOf(2), /nonexistent token/);
   });
 
-  it("should get tokenURI for TRBL NFTs", async () => {
+  it("should parse tokenURI for TRBL NFTs", async () => {
     console.log(await dto.tokenURI(0));
+    let [nix, b64] = (await dto.tokenURI(0)).split(',');
+    let metadata = JSON.parse(Buffer.from(b64, 'base64').toString());
+    assert.equal(metadata.name, 'TRBL #0', "Name must be TRBL #0");
+
+    [nix, b64] = (await dto.tokenURI(0)).split(',');
+    metadata = JSON.parse(Buffer.from(b64, 'base64').toString());
+    assert.equal(metadata.name, 'TRBL #1', "Name must be TRBL #1");
   });
 });

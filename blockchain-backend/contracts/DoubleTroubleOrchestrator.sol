@@ -66,7 +66,7 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
 
     string[20] memory parts;
     uint256 lastPart = 0;
-    parts[lastPart++] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
+    parts[lastPart++] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 380 380"><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
 
     parts[lastPart++] = string(abi.encodePacked('TRBL #', strTokenId));
     parts[lastPart++] = '</text><text x="10" y="40" class="base">';
@@ -85,8 +85,10 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
       // NOOP
     }
 
-    parts[lastPart++] = string(abi.encodePacked(originalAddr, ' mapped to ', troublesomeAddr));
+    parts[lastPart++] = string(abi.encodePacked('Original: ', originalAddr));
+    parts[lastPart++] = '</text><text x="10" y="100" class="base">';
 
+    parts[lastPart++] = string(abi.encodePacked('Troublesome: ', troublesomeAddr));
     parts[lastPart++] = '</text></svg>';
 
     string memory output;
@@ -96,7 +98,7 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
 
     string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "TRBL #', strTokenId, '", "originalCollection": "',
                                                                       originalAddr, '", "troublesomeCollection": "',
-                                                                      troublesomeAddr, '", "description": "TRBL NFTs are 1 to 1 with collections made troublesome by our community. Whoever arrives first and makes an NFT collection troublesome gets the Double Trouble NFT for that collection as a prize. Feel free to use and interpret TRBL NFTs in any way you want.", "image": "data:image/svg+xml;base64,',
+                                                                      troublesomeAddr, '", "description": "There is one TRBL NFT for each collection made troublesome by our community. Whoever arrives first and makes an NFT collection troublesome gets the TRBL NFT for that collection as a prize. Feel free to use and interpret TRBL NFTs in any way you want.", "image": "data:image/svg+xml;base64,',
                                                                       Base64.encode(bytes(output)), '"}'))));
     output = string(abi.encodePacked('data:application/json;base64,', json));
 
@@ -106,25 +108,24 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
   // Library functions below here
 
   function toString(uint256 value) internal pure returns (string memory) {
-  // Inspired by OraclizeAPI's implementation - MIT license
-  // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
-
-      if (value == 0) {
-          return "0";
-      }
-      uint256 temp = value;
-      uint256 digits;
-      while (temp != 0) {
-          digits++;
-          temp /= 10;
-      }
-      bytes memory buffer = new bytes(digits);
-      while (value != 0) {
-          digits -= 1;
-          buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
-          value /= 10;
-      }
-      return string(buffer);
+    // Inspired by OraclizeAPI's implementation - MIT license
+    // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
+    if (value == 0) {
+        return "0";
+    }
+    uint256 temp = value;
+    uint256 digits;
+    while (temp != 0) {
+        digits++;
+        temp /= 10;
+    }
+    bytes memory buffer = new bytes(digits);
+    while (value != 0) {
+        digits -= 1;
+        buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+        value /= 10;
+    }
+    return string(buffer);
   }
 
   function toString(address x) internal pure returns (string memory) {
@@ -136,8 +137,8 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
         s[2*i] = char(hi);
         s[2*i+1] = char(lo);
     }
-    return string(s);
-  }
+    return string(abi.encodePacked('0x', string(s)));
+ }
 
   function char(bytes1 b) internal pure returns (bytes1 c) {
       if (uint8(b) < 10) return bytes1(uint8(b) + 0x30);
