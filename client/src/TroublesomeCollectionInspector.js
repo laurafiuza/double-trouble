@@ -127,14 +127,6 @@ class TroublesomeCollectionInspector extends Component {
           <Table striped bordered hover>
             <tbody>
               <tr>
-                <td>TokenURI</td>
-                <td>{tokenURI}</td>
-              </tr>
-              <tr>
-                <td>Is troublesome</td>
-                <td>{isTroublesome.toString()}</td>
-              </tr>
-              <tr>
                 <td>Original collection</td>
                 <td>{originalCollection._address}</td>
               </tr>
@@ -146,14 +138,18 @@ class TroublesomeCollectionInspector extends Component {
                 <td>Troublesome owner</td>
                 <td>{troublesomeOwner}</td>
               </tr>
-              <tr>
-                <td>For sale price</td>
-                <td>{forSalePriceEth} ETH</td>
-              </tr>
-              <tr>
-                <td>Last purchase price</td>
-                <td>{lastPurchasePriceEth} ETH</td>
-              </tr>
+              { forSalePrice > 0 &&
+                <tr>
+                  <td>For sale price</td>
+                  <td>{forSalePriceEth} ETH</td>
+                </tr>
+              }
+              { lastPurchasePrice > 0 &&
+                <tr>
+                  <td>Last purchase price</td>
+                  <td>{lastPurchasePriceEth} ETH</td>
+                </tr>
+              }
             </tbody>
           </Table>
           { isTroublesome &&

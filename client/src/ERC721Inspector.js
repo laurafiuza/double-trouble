@@ -83,7 +83,8 @@ class ERC721Inspector extends Component {
     if (this.externalCache.collectionName) {
       loadedNft = <Card>
         <ImageCard tokenURI={this.externalCache.tokenURI} />
-        Name: {this.externalCache.collectionName} Symbol: {this.externalCache.collectionSymbol} tokenURI: {this.externalCache.tokenURI}
+        <div>Name: {this.externalCache.collectionName}</div>
+        <div>Symbol: {this.externalCache.collectionSymbol}</div>
         </Card>;
     }
 
@@ -101,9 +102,9 @@ class ERC721Inspector extends Component {
     if (this.externalCache.troublesomeCollection === ZERO_ADDR) {
       return (<Card>
         {loadedNft}
-        <Card.Text>This NFT collection is not in DoubleTrouble yet</Card.Text>
-        <Button variant="outline-success" onClick={this.makeTroublesomeCollection}>
-          Create a troublesome collection for it
+        <Card.Text>You are the first one to bring an NFT from this collection to DoubleTrouble.</Card.Text>
+        <Button variant="outline-dark" onClick={this.makeTroublesomeCollection}>
+          Deploy a troublesome collection for it and claim your TRBL token
         </Button>
       </Card>);
     }
