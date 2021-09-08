@@ -66,25 +66,28 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
 
     string[20] memory parts;
     uint256 lastPart = 0;
-    parts[lastPart++] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 380 380"><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
+    parts[lastPart++] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 400 400"><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
 
     parts[lastPart++] = string(abi.encodePacked('TRBL #', strTokenId));
-    parts[lastPart++] = '</text><text x="10" y="40" class="base">';
+    parts[lastPart++] = '</text>';
 
     try this.getOriginalCollectionName(tokenId) returns (string memory name) {
+      parts[lastPart++] = '<text x="10" y="40" class="base">';
       parts[lastPart++] = name;
-      parts[lastPart++] = '</text><text x="10" y="60" class="base">';
+      parts[lastPart++] = '</text>';
     } catch (bytes memory /*lowLevelData*/) {
       // NOOP
     }
 
     try this.getOriginalCollectionSymbol(tokenId) returns (string memory symbol) {
+      parts[lastPart++] = '<text x="10" y="60" class="base">';
       parts[lastPart++] = symbol;
-      parts[lastPart++] = '</text><text x="10" y="80" class="base">';
+      parts[lastPart++] = '</text>';
     } catch (bytes memory /*lowLevelData*/) {
       // NOOP
     }
 
+    parts[lastPart++] = '<text x="10" y="80" class="base">';
     parts[lastPart++] = string(abi.encodePacked('Original: ', originalAddr));
     parts[lastPart++] = '</text><text x="10" y="100" class="base">';
 
@@ -98,7 +101,7 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
 
     string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "TRBL #', strTokenId, '", "originalCollection": "',
                                                                       originalAddr, '", "troublesomeCollection": "',
-                                                                      troublesomeAddr, '", "description": "There is one TRBL NFT for each collection made troublesome by our community. Whoever arrives first and makes an NFT collection troublesome gets the TRBL NFT for that collection as a prize. Feel free to use and interpret TRBL NFTs in any way you want.", "image": "data:image/svg+xml;base64,',
+                                                                      troublesomeAddr, '", "description": "There is one TRBL NFT for each collection made troublesome by our community. Whoever arrives first and makes an NFT collection troublesome gets the unique TRBL NFT for that collection as a prize. Feel free to use and interpret TRBL NFTs in any way you want.", "image": "data:image/svg+xml;base64,',
                                                                       Base64.encode(bytes(output)), '"}'))));
     output = string(abi.encodePacked('data:application/json;base64,', json));
 
