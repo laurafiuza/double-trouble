@@ -44,6 +44,15 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
     return (original, address(_troublesomeCollections[original]));
   }
 
+  function tokenIdForTroublesomeCollection(address troublesomeCollectionAddr) external view returns (uint256) {
+    for (uint i = 0; i < _registeredCollections.length; i++) {
+      if (troublesomeCollectionAddr == address(_troublesomeCollections[_registeredCollections[i]])) {
+        return i;
+      }
+    }
+    revert("Collection not found");
+  }
+
   // This is the most meta code in this contract
   // If tokenId is owned by an externally owned account, trblOwnerOf returns that account
   // if tokenId is owned by the troublesome contract of this DTO, return the owner per
