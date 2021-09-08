@@ -74,8 +74,8 @@ class TroublesomeCollectionInspector extends Component {
       tokenURI = await troublesomeCollection.methods.tokenURI(this.props.tokenId).call();
 
       troublesomeOwner = await troublesomeCollection.methods.ownerOf(this.props.tokenId).call();
-      forSalePrice = await troublesomeCollection.methods.forSalePrice(this.props.tokenId).call();
-      lastPurchasePrice = await troublesomeCollection.methods.lastPurchasePrice(this.props.tokenId).call();
+      forSalePrice = parseInt(await troublesomeCollection.methods.forSalePrice(this.props.tokenId).call());
+      lastPurchasePrice = parseInt(await troublesomeCollection.methods.lastPurchasePrice(this.props.tokenId).call());
       isTroublesome = true;
     } catch(err) {
       isTroublesome = false;
@@ -122,7 +122,6 @@ class TroublesomeCollectionInspector extends Component {
     const lastPurchasePriceEth = lastPurchasePrice && this.props.web3.utils.fromWei(lastPurchasePrice.toString(), 'ether');
     return (
       <Card style={{width: '36rem'}}>
-        <ImageCard tokenURI={this.externalCache.tokenURI} />
         <Card.Body>
           <ImageCard tokenURI={tokenURI}/>
           <Table striped bordered hover>
@@ -165,10 +164,9 @@ class TroublesomeCollectionInspector extends Component {
                   <Card.Subtitle style={{color: "green"}}>You are the owner</Card.Subtitle>
                   <ListGroup>
                     <ListGroup.Item>
-                    <Form.Label htmlFor="new-price">New price in ETH</Form.Label>
                     <InputGroup className="mb-3">
                       <InputGroup.Text id="basic-addon3">
-                        $
+                        New price in ETH
                       </InputGroup.Text>
                       <FormControl id="new-price" aria-describedby="basic-addon3" onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
                     </InputGroup>
@@ -176,14 +174,14 @@ class TroublesomeCollectionInspector extends Component {
                       { forSalePrice === 0 ? "Put up for sale" : "Change price"}
                     </Button>
                   { forSalePrice > 0 &&
-                    <Button variant="light" onClick={() => this.setPrice(0)}>
+                    <Button variant="outline-dark" onClick={() => this.setPrice(0)}>
                       Remove from sale
                     </Button>
                   }
                   { lastPurchasePrice === 0 &&
                       <Card.Text>
-                        No one bought it yet. You can still remove it from the DoubleTrouble contract if you want.
-                        <Button variant="light" onClick={() => window.alert("TODO")}>Untrouble</Button>
+                        <div>No one bought it yet. You can still remove it from the DoubleTrouble contract if you want.</div>
+                        <Button variant="outline-dark" onClick={this.unmakeTroublesome}>Untrouble</Button>
                       </Card.Text>
                   }
                   </ListGroup.Item>
@@ -203,14 +201,13 @@ class TroublesomeCollectionInspector extends Component {
                 You own this NFT.
                 {isDoubleTroubleApproved
                   ? <Card.Text>
-                      Click below to put it up for sale within DoubleTrouble
                       <InputGroup className="mb-3">
                         <InputGroup.Text id="basic-addon3">
-                          $
+                          New price in ETH
                         </InputGroup.Text>
                         <FormControl onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
                       </InputGroup>
-                      <Button variant="outline-dark" onClick={() => this.makeTroublesome(this.localState.inputSalePrice)}>Make Troublesome</Button>
+                      <Button variant="outline-dark" onClick={() => this.makeTroublesome(this.localState.inputSalePrice)}>Put up for sale</Button>
                     </Card.Text>
                   : <Card.Text>
                       Please approve the Double Trouble contract before making your NFT Troublesome.
@@ -248,6 +245,19 @@ class TroublesomeCollectionInspector extends Component {
       const { troublesomeCollection } = this.externalCache;
       const priceInWei = this.props.web3.utils.toWei(priceInEth.toString(), 'ether')
       await troublesomeCollection.methods.makeTroublesome(this.props.tokenId, priceInWei)
+        .send({from: this.props.web3.defaultAccount});
+      this.deriveAndRender();
+    } catch(err) {
+      console.warn(err);
+      this.localState.error = err.message;
+      this.forceUpdate();
+    }
+  };
+
+  unmakeTroublesome = async () => {
+    try {
+      const { troublesomeCollection } = this.externalCache;
+      await troublesomeCollection.methods.unmakeTroublesome(this.props.tokenId)
         .send({from: this.props.web3.defaultAccount});
       this.deriveAndRender();
     } catch(err) {
