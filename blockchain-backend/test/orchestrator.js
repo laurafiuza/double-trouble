@@ -72,14 +72,18 @@ contract("DoubleTroubleOrchestrator", accounts => {
     await assert.rejects(dto.ownerOf(2), /nonexistent token/);
   });
 
-  it("should parse tokenURI for TRBL NFTs", async () => {
-    console.log(await dto.tokenURI(0));
+  it("should parse tokenURI and get TRBL NFTs", async () => {
     let [nix, b64] = (await dto.tokenURI(0)).split(',');
     let metadata = JSON.parse(Buffer.from(b64, 'base64').toString());
     assert.equal(metadata.name, 'TRBL #0', "Name must be TRBL #0");
+    assert.equal(metadata.originalCollection.toUpperCase(), cp.address.toUpperCase(), "original collection in metadata must match");
+    assert.equal(metadata.troublesomeCollection.toUpperCase(), dt.address.toUpperCase(), "troublesome collection in metadata must match");
 
     [nix, b64] = (await dto.tokenURI(1)).split(',');
     metadata = JSON.parse(Buffer.from(b64, 'base64').toString());
     assert.equal(metadata.name, 'TRBL #1', "Name must be TRBL #1");
+    assert.equal(metadata.originalCollection.toUpperCase(), NON_NFT_CONTRACT_ADDRESS.toUpperCase(), "original collection in metadata must match");
+    const troublesomeAddr = await dto.troublesomeCollection(NON_NFT_CONTRACT_ADDRESS)
+    assert.equal(metadata.troublesomeCollection.toUpperCase(), troublesomeAddr.toUpperCase(), "troublesome collection in metadata must match");
   });
 });
