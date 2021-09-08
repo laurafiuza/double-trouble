@@ -29,7 +29,15 @@ class About extends Component {
               When you first put an NFT up for sale in Double Trouble, you still have a chance to "untrouble" it - i.e. remove it from the Troublesome collection. As soon as someone purchases an NFT in Double Trouble, however, that NFT becomes forever locked in the platform, to forever preserve the 2x force buy functionality for it.
             </ListGroup.Item>
           </ListGroup>
-        </ListGroup.Item>
+          </ListGroup.Item>
+          <ListGroup.Item>
+            <Card.Title>TRBL Tokens</Card.Title>
+            <ListGroup variant="flush">
+              <ListGroup.Item>
+                If you're the first person to bring a new NFT collection to DoubleTrouble, we'll mint a special TRBL token just for you. TRBL tokens are also ERC-721 NFTs, so they can be bought and sold in regular NFT exchanges, as well as of course in the Double Trouble platform.
+              </ListGroup.Item>
+            </ListGroup>
+          </ListGroup.Item>
         </ListGroup>
       </Card.Body>
       </Card>;
