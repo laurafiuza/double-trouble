@@ -78,7 +78,7 @@ contract("DoubleTroubleOrchestrator", accounts => {
     let metadata = JSON.parse(Buffer.from(b64, 'base64').toString());
     assert.equal(metadata.name, 'TRBL #0', "Name must be TRBL #0");
 
-    [nix, b64] = (await dto.tokenURI(0)).split(',');
+    [nix, b64] = (await dto.tokenURI(1)).split(',');
     metadata = JSON.parse(Buffer.from(b64, 'base64').toString());
     assert.equal(metadata.name, 'TRBL #1', "Name must be TRBL #1");
   });
