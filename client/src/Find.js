@@ -2,17 +2,12 @@ import React, { Component } from 'react';
 import { Form, InputGroup, FormControl, Button, Card } from 'react-bootstrap';
 import { Redirect } from 'react-router-dom';
 
-const assert = (bool, msg) => {
-  if (!bool) {
-    throw new Error(msg || "Assertion failed");
-  }
-};
-
 class Find extends Component {
   constructor() {
     super();
     this.localState = {
-      openseaLink: "",
+      collectionAddress: "",
+      tokenId: "",
       error: undefined,
       redirect: null,
     };
@@ -29,18 +24,7 @@ class Find extends Component {
   };
 
   goToTroublesomePage = () => {
-    let pathnameArr;
-    try {
-      const url = new URL(this.localState.openseaLink);
-      assert(url.hostname !== "www.opensea.io", "Invalid domain, please use Opensea");
-      pathnameArr = url.pathname.split("/");
-      assert(pathnameArr[0] !== "assets", "Invalid Opensea Link");
-    } catch (err) {
-      this.localState.error = err.message;
-      this.forceUpdate();
-      return;
-    }
-    this.localState.redirect = `/collections/${pathnameArr[1]}/${pathnameArr[2]}`;
+    this.localState.redirect = `/collections/${this.localState.collectionAddress}/${this.localState.tokenId}`;
     this.forceUpdate();
   }
 
@@ -53,15 +37,15 @@ class Find extends Component {
     return (
       <Card style={{width: '36rem'}}>
         <Card.Body>
-        <Form.Label htmlFor="find-nft">Paste Opensea link below</Form.Label>
+        <Form.Label htmlFor="find-nft">Collection Address</Form.Label>
         <InputGroup className="mb-3">
-          <InputGroup.Text id="basic-addon3">
-            https://opensea.io/...
-          </InputGroup.Text>
-          <FormControl id="find-nft" aria-describedby="basic-addon3" onChange={this.localStateLink('openseaLink').onChange} value={this.localState.openseaLink} />
+          <FormControl id="find-nft" aria-describedby="basic-addon3" onChange={this.localStateLink('collectionAddress').onChange} value={this.localState.collectionAddress} />
+        </InputGroup>
+        <Form.Label htmlFor="find-nft">Token ID</Form.Label>
+        <InputGroup className="mb-3">
+          <FormControl id="find-nft" aria-describedby="basic-addon3" onChange={this.localStateLink('tokenId').onChange} value={this.localState.tokenId}/>
         </InputGroup>
         <Button onClick={() => this.goToTroublesomePage()}>Find NFT</Button>
-        <Card.Text text="danger">{this.localState.error}</Card.Text>
       </Card.Body>
       </Card>
     );
