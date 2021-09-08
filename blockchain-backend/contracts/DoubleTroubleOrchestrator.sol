@@ -54,8 +54,8 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
   }
 
   // This is the most meta code in this contract
-  // If tokenId is owned by an externally owned account, trblOwnerOf returns that account
-  // if tokenId is owned by the troublesome contract of this DTO, return the owner per
+  // If TRBL # tokenId is owned by an externally owned account, trblOwnerOf returns that account
+  // if TRBL # tokenId is owned by the troublesome contract of this DTO, return the owner per
   // the troublesome contract
   function trblOwnerOf(uint256 tokenId) external view returns (address) {
     // Try to reach for a troublesomeCollection for this DTO

@@ -33,7 +33,7 @@ contract("DoubleTroubleOrchestrator", accounts => {
     assert.equal(ret1.length, 0, "Must not have any registered collections");
     assert.equal(ret2.length, 0, "Must not have any registered collections");
 
-    const ret = await dto.makeTroublesomeCollection(cp.address, NAME, SYMBOL);
+    const ret = await dto.makeTroublesomeCollection(cp.address, NAME, SYMBOL, {from: accounts[6]});
     assert.equal(ret.receipt.status, true, "Transaction processing failed");
 
     const dt_address = await dto.troublesomeCollection(cp.address);
@@ -67,8 +67,12 @@ contract("DoubleTroubleOrchestrator", accounts => {
   });
 
   it("makeTroublesomeCollection should have minted TRBL NFTs", async () => {
-    assert.equal(await dto.ownerOf(0), accounts[0], "Must have minted tokenId 0 for account 0");
+    assert.equal(await dto.ownerOf(0), accounts[6], "Must have minted tokenId 0 for account 6");
     assert.equal(await dto.ownerOf(1), accounts[2], "Must have minted tokenId 1 for account 2");
+
+    assert.equal(await dto.trblOwnerOf(0), accounts[6], "TRBL owner must be account 6");
+    assert.equal(await dto.trblOwnerOf(1), accounts[2], "TRBL owner must be account 2");
+
     await assert.rejects(dto.ownerOf(2), /nonexistent token/);
   });
 
@@ -85,5 +89,25 @@ contract("DoubleTroubleOrchestrator", accounts => {
     assert.equal(metadata.originalCollection.toUpperCase(), NON_NFT_CONTRACT_ADDRESS.toUpperCase(), "original collection in metadata must match");
     const troublesomeAddr = await dto.troublesomeCollection(NON_NFT_CONTRACT_ADDRESS)
     assert.equal(metadata.troublesomeCollection.toUpperCase(), troublesomeAddr.toUpperCase(), "troublesome collection in metadata must match");
+  });
+
+  it("trblOwnerOf should work when TRBL tokens also become troublesome", async () => {
+    const ret = await dto.makeTroublesomeCollection(dto.address, "Double Trouble", "TRBL");
+    assert.equal(ret.receipt.status, true, "Transaction processing failed");
+
+    const metaDtAddr = await dto.troublesomeCollection(dto.address);
+    const metaDt = await DoubleTrouble.at(metaDtAddr);
+
+    assert.equal(await dto.trblOwnerOf(0), accounts[6], "TRBL owner must be account 6");
+    assert.equal(await dto.trblOwnerOf(1), accounts[2], "TRBL owner must be account 2");
+
+    assert.notEqual(await dto.approve(metaDt.address, 0, {from: accounts[6]}), undefined, "approval failed (undefined return value).");
+    assert.notEqual(await metaDt.makeTroublesome(0, 1234), undefined, "makeTroublesome failed (undefined return value).");
+
+    assert.notEqual(await dto.approve(metaDt.address, 1, {from: accounts[2]}), undefined, "approval failed (undefined return value).");
+    assert.notEqual(await metaDt.makeTroublesome(1, 4567), undefined, "makeTroublesome failed (undefined return value).");
+
+    assert.equal(await dto.trblOwnerOf(0), accounts[6], "TRBL owner must still be account 6");
+    assert.equal(await dto.trblOwnerOf(1), accounts[2], "TRBL owner must still be account 2");
   });
 });
