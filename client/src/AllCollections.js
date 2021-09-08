@@ -39,7 +39,9 @@ class AllCollections extends Component {
       );
       console.log("troublesomeCollection");
       console.log(troublesomeCollection.methods.registeredTokens());
-      //const registeredTokens = await troublesomeCollection.methods.registeredTokens().call();
+      const registeredTokens = await troublesomeCollection.methods.registeredTokens().call();
+      console.log("registeredTokens");
+      console.log(registeredTokens);
       // TODO: registered tokens is not printing to console log, debug
       //nfts[collection] = registeredTokens;
     }

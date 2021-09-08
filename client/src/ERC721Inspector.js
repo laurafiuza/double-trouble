@@ -81,10 +81,9 @@ class ERC721Inspector extends Component {
   render() {
     var loadedNft = undefined;
     if (this.externalCache.collectionName) {
-      loadedNft = <Card>
+      loadedNft = <Card style={{width: '36rem'}}>
         <ImageCard tokenURI={this.externalCache.tokenURI} />
-        <div>Name: {this.externalCache.collectionName}</div>
-        <div>Symbol: {this.externalCache.collectionSymbol}</div>
+        <Card.Subtitle>{this.externalCache.collectionName} ({this.externalCache.collectionSymbol})</Card.Subtitle>
         </Card>;
     }
 
@@ -100,7 +99,7 @@ class ERC721Inspector extends Component {
     }
 
     if (this.externalCache.troublesomeCollection === ZERO_ADDR) {
-      return (<Card>
+      return (<Card style={{width: '36rem'}}>
         {loadedNft}
         <Card.Text>You are the first one to bring an NFT from this collection to DoubleTrouble.</Card.Text>
         <Button variant="outline-dark" onClick={this.makeTroublesomeCollection}>
