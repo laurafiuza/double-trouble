@@ -2,21 +2,25 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import "./DoubleTroubleOrchestrator.sol";
 
 // SPDX-License-Identifier: MIT
 contract DoubleTrouble is ERC721URIStorage {
   // nested mapping that keeps track of who owns the NFTs
   mapping (uint256 => uint256) public _forSalePrices;
   mapping (uint256 => uint256) public _lastPurchasePrices;
+  DoubleTroubleOrchestrator _dto;
   address _originalCollection;
   address _feeWallet;
   uint256 _feeRate = 100;
   uint256[] _registeredTokens;
 
-  constructor(string memory name, string memory symbol, address nftCollection, address feeWallet) ERC721(name, symbol) {
+  constructor(string memory name, string memory symbol, address nftCollection, address feeWallet, address dto) ERC721(name, symbol) {
     require(nftCollection != address(0), "collection address cannot be zero");
+    require(dto != address(0), "dto address cannot be zero");
     _originalCollection = nftCollection;
     _feeWallet = feeWallet;
+    _dto = DoubleTroubleOrchestrator(dto);
   }
 
   function makeTroublesome(uint256 tokenId, uint256 initialForSalePrice) external {

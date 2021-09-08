@@ -20,7 +20,7 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
     require(address(_troublesomeCollections[nftCollection]) == address(0), "Collection is already Troublesome");
 
     // Deploy troublesome contract for nftCollection
-    _troublesomeCollections[nftCollection] = _dtFactory.makeNew(name, symbol, nftCollection, _feeWallet);
+    _troublesomeCollections[nftCollection] = _dtFactory.makeNew(name, symbol, nftCollection, _feeWallet, address(this));
     _mint(msg.sender, _registeredCollections.length);
     _registeredCollections.push(nftCollection);
   }
@@ -44,6 +44,19 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
     return (original, address(_troublesomeCollections[original]));
   }
 
+  function feeRecipient(uint256 tokenId) external view returns (address) {
+    // This is the most meta code in this contract
+    // If someone made the tokenId TRBL NFT troublesome, then the feeRecipient
+    // is only known by the dtForDTO, i.e. the troublesome collection corresponding to DTO
+    DoubleTrouble dtForDto = this.troublesomeCollection(address(this));
+    try dtForDto.ownerOf(tokenId) returns (address owner) {
+      return owner;
+    } catch (bytes memory /*lowLevelData*/) {
+      // If that's not the case then DTO itself knows the feeRecipient
+      return ownerOf(tokenId);
+    }
+  }
+
   function getOriginalCollectionName(uint256 tokenId) external view returns (string memory) {
     require(tokenId < _registeredCollections.length, "tokenId not present");
     return IERC721Metadata(_registeredCollections[tokenId]).name();
@@ -53,7 +66,6 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
     require(tokenId < _registeredCollections.length, "tokenId not present");
     return IERC721Metadata(_registeredCollections[tokenId]).symbol();
   }
-
 
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
     require(tokenId < _registeredCollections.length, "tokenId not present");
@@ -157,9 +169,9 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
 * See more on this here: https://ethereum.stackexchange.com/questions/41501/contract-code-size-and-how-to-work-around-it
 */
 contract DoubleTroubleFactory {
-  function makeNew(string memory name, string memory symbol, address nftCollection, address feeWallet)
+  function makeNew(string memory name, string memory symbol, address nftCollection, address feeWallet, address dto)
         external returns (DoubleTrouble) {
-    return new DoubleTrouble(name, symbol, nftCollection, feeWallet);
+    return new DoubleTrouble(name, symbol, nftCollection, feeWallet, dto);
   }
 }
 
