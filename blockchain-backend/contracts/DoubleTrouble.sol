@@ -23,43 +23,9 @@ contract DoubleTrouble is ERC721URIStorage {
     _dto = DoubleTroubleOrchestrator(dto);
   }
 
-  function makeTroublesome(uint256 tokenId, uint256 initialForSalePrice) external {
+  function listForSale(uint256 tokenId, uint256 forSalePrice) external {
     require(IERC721Metadata(_originalCollection).getApproved(tokenId) == address(this), "DoubleTrouble contract must be approved to operate this token");
-
-    // In the original collection, the owner forever becomes the DoubleTrouble contract
-    address owner = IERC721Metadata(_originalCollection).ownerOf(tokenId);
-    IERC721Metadata(_originalCollection).transferFrom(owner, address(this), tokenId);
-
-    // Mint an NFT in the DT contract so we start recording the true owner here
-    _mint(owner, tokenId);
-    _forSalePrices[tokenId] = initialForSalePrice;
-    _registeredTokens.push(tokenId);
-  }
-
-  function unmakeTroublesome(uint256 tokenId) external {
-    require(msg.sender == ownerOf(tokenId), "msg.sender should be current owner of NFT");
-    require(_lastPurchasePrices[tokenId] == 0, "Cannot remove NFT from DoubleTrouble if it was already bought by someone");
-
-    // Transfer ownership of the NFT
-    IERC721Metadata(_originalCollection).transferFrom(address(this), msg.sender, tokenId);
-    _burn(tokenId);
-    _removeRegistered(tokenId);
-  }
-
-  function _removeRegistered(uint256 tokenId) internal {
-    bool found = false;
-    for (uint256 i = 0; i < _registeredTokens.length - 1; i++) {
-      if (_registeredTokens[i] == tokenId) {
-        found = true;
-      }
-
-      if (found) {
-        _registeredTokens[i] = _registeredTokens[i + 1];
-      }
-    }
-
-    require(found || _registeredTokens[_registeredTokens.length - 1] == tokenId, "tokenId not found in remove");
-    _registeredTokens.pop();
+    _forSalePrices[tokenId] = forSalePrice;
   }
 
   function originalCollection() external view returns (address) {
@@ -100,6 +66,20 @@ contract DoubleTrouble is ERC721URIStorage {
   function buy(uint256 tokenId) payable external {
     require(_forSalePrices[tokenId] > 0, "NFT is not for sale");
     require(msg.value >= _forSalePrices[tokenId], "Value sent must be at least the for sale price");
+
+    // Make NFT troublesome if this is the first time it's being purchased
+    if (_lastPurchasePrice[tokenId] == 0) {
+      require(IERC721Metadata(_originalCollection).getApproved(tokenId) == address(this), "DoubleTrouble contract must be approved to operate this token");
+
+      // In the original collection, the owner forever becomes the DoubleTrouble contract
+      address owner = IERC721Metadata(_originalCollection).ownerOf(tokenId);
+      IERC721Metadata(_originalCollection).transferFrom(owner, address(this), tokenId);
+
+      // Mint an NFT in the DT contract so we start recording the true owner here
+      _mint(owner, tokenId);
+      _registeredTokens.push(tokenId);
+    }
+
     _completeBuy(msg.sender, tokenId, msg.value);
   }
 
