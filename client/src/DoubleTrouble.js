@@ -55,7 +55,7 @@ class DoubleTrouble extends Component {
                 </Navbar.Collapse>
             </Container>
             <Container>
-              { this.externalCache.web3 && `Connected wallet: ${this.externalCache.web3.accounts[0]}`} 
+              { this.externalCache.web3 && `Connected wallet: ${this.externalCache.web3.accounts[0]}`}
             </Container>
             </Navbar>
             {/* A <Switch> looks through its children <Route>s and
@@ -68,7 +68,7 @@ class DoubleTrouble extends Component {
               <Route path="/collections">
                 {
                   this.externalCache.web3
-                    ? 
+                    ?
                   <AllCollections web3={this.externalCache.web3} />
                     :
                   <Spinner animation="border" />
