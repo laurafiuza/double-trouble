@@ -119,10 +119,16 @@ contract DoubleTrouble is ERC721URIStorage {
 
     // Send ether to the old owner. Must be at the very end of the buy function to prevent reentrancy attacks
     // https://consensys.net/diligence/blog/2019/09/stop-using-soliditys-transfer-now/
-    (bool oldOwnersuccess, ) = oldOwner.call{value: amountPaid - feeToCharge}("");
-    // Send ether to the DT wallet
+    (bool oldOwnersuccess, ) = oldOwner.call{value: amountPaid - 2 * feeToCharge}("");
     require(oldOwnersuccess, "Transfer to owner failed.");
-    (bool feeWalletSuccess, ) = _feeWallet.call{value: feeToCharge}("");
+
+    // Send fee to owner of the TRBL token
+    address trblOwner = _dto.trblOwnerOf(tokenId);
+    (bool trblOwnerSuccess, ) = trblOwner.call{value: feeToCharge}("");
+
+    // Send rest of the fee to the DT wallet
+    uint256 rest = trblOwnerSuccess ? feeToCharge : 2 * feeToCharge;
+    (bool feeWalletSuccess, ) = _feeWallet.call{value: rest}("");
     require(feeWalletSuccess, "Transfer to DT wallet failed.");
   }
 

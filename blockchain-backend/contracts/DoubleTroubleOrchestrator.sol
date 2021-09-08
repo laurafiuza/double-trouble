@@ -44,17 +44,23 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
     return (original, address(_troublesomeCollections[original]));
   }
 
-  function feeRecipient(uint256 tokenId) external view returns (address) {
-    // This is the most meta code in this contract
-    // If someone made the tokenId TRBL NFT troublesome, then the feeRecipient
-    // is only known by the dtForDTO, i.e. the troublesome collection corresponding to DTO
+  // This is the most meta code in this contract
+  // If tokenId is owned by an externally owned account, trblOwnerOf returns that account
+  // if tokenId is owned by the troublesome contract of this DTO, return the owner per
+  // the troublesome contract
+  function trblOwnerOf(uint256 tokenId) external view returns (address) {
+    // Try to reach for a troublesomeCollection for this DTO
     DoubleTrouble dtForDto = this.troublesomeCollection(address(this));
-    try dtForDto.ownerOf(tokenId) returns (address owner) {
-      return owner;
-    } catch (bytes memory /*lowLevelData*/) {
-      // If that's not the case then DTO itself knows the feeRecipient
-      return ownerOf(tokenId);
+    if (address(dtForDto) != address(0)) {
+      try dtForDto.ownerOf(tokenId) returns (address owner) {
+        return owner;
+      } catch (bytes memory /*lowLevelData*/) {
+        // NOOP
+      }
     }
+
+    // If the above failed, it means DTO itself knows the trblOwner
+    return ownerOf(tokenId);
   }
 
   function getOriginalCollectionName(uint256 tokenId) external view returns (string memory) {
