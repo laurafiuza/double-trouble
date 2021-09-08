@@ -66,9 +66,13 @@ contract("DoubleTroubleOrchestrator", accounts => {
     assert.deepEqual(await dto.registeredCollection(1), expected, "Should have registered collection at index 1");
   });
 
-  it("makeTroublesomeCollection should have minted NFTs", async () => {
+  it("makeTroublesomeCollection should have minted TRBL NFTs", async () => {
     assert.equal(await dto.ownerOf(0), accounts[0], "Must have minted tokenId 0 for account 0");
     assert.equal(await dto.ownerOf(1), accounts[2], "Must have minted tokenId 1 for account 2");
     await assert.rejects(dto.ownerOf(2), /nonexistent token/);
+  });
+
+  it("should get tokenURI for TRBL NFTs", async () => {
+    console.log(await dto.tokenURI(0));
   });
 });
