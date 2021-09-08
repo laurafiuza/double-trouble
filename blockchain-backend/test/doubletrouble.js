@@ -5,6 +5,7 @@ const DoubleTrouble = artifacts.require("./DoubleTrouble.sol");
 
 const ZERO_ADDR = '0x0000000000000000000000000000000000000000';
 const NON_PRESENT_ID = 79;
+const TRBL_OWNER = 7;
 
 contract("DoubleTrouble", accounts => {
   // TODO: make tokenId the return value of the createNft function
@@ -18,7 +19,7 @@ contract("DoubleTrouble", accounts => {
     dto = await DoubleTroubleOrchestrator.deployed();
     assert.notEqual(dto, undefined, "DoubleTroubleOrchestrator contract instance is undefined.");
 
-    const ret = await dto.makeTroublesomeCollection(cp.address, "DTCryptoPunks", "DUNK");
+    const ret = await dto.makeTroublesomeCollection(cp.address, "DTCryptoPunks", "DUNK", {from: accounts[TRBL_OWNER]});
     assert(ret.receipt.status, true, "Transaction processing failed");
 
     const dt_address = await dto.troublesomeCollection(cp.address);
@@ -156,15 +157,20 @@ contract("DoubleTrouble", accounts => {
     let [balance0Before, balance1Before] =
       [await web3.eth.getBalance(accounts[0]), await web3.eth.getBalance(accounts[1])];
 
+    let balanceTrblOwnerBefore = await web3.eth.getBalance(accounts[TRBL_OWNER]);
     let buyTx = await dt.buy(tokenId, {from: accounts[1], value: price});
     assert(await dt.ownerOf(tokenId), accounts[1], "Ownership should now be accounts[1]");
 
     let [balance0After, balance1After] =
       [await web3.eth.getBalance(accounts[0]), await web3.eth.getBalance(accounts[1])];
     let gasUsed = multWei(buyTx.receipt.gasUsed, await web3.eth.getGasPrice());
-    let fee = divWei(price, 100);
-    assert.equal(balance0After.toString(), subWei(addWei(balance0Before, price), fee).toString(), "Balance of accounts[0] must be bigger after buy");
+    let feePaid = divWei(price, 100);
+    assert.equal(balance0After.toString(), subWei(addWei(balance0Before, price), feePaid).toString(), "Balance of accounts[0] must be bigger after buy");
     assert.equal(balance1After.toString(), subWei(subWei(balance1Before, price), gasUsed).toString(), "Balance of accounts[1] must be smaller after buy");
+
+    let feeGotten = divWei(price, 200);
+    let balanceTrblOwnerAfter = await web3.eth.getBalance(accounts[TRBL_OWNER]);
+    assert.equal(subWei(balanceTrblOwnerAfter, balanceTrblOwnerBefore).toString(), feeGotten.toString(), "TRBL owner must have gotten their fee");
 
     assert.equal(await dt.forSalePrice(tokenId), 0, "For sale price should be 0 after purchase");
     assert.equal(await dt.lastPurchasePrice(tokenId), price, "Last purchase price should be > 0 after purchase");
@@ -173,6 +179,7 @@ contract("DoubleTrouble", accounts => {
 
     const balance2Before = await web3.eth.getBalance(accounts[2]);
 
+    balanceTrblOwnerBefore = await web3.eth.getBalance(accounts[TRBL_OWNER]);
     buyTx = await dt.forceBuy(tokenId, {from: accounts[2], value: doublePrice});
     assert(await dt.ownerOf(tokenId), accounts[2], "Ownership should now be accounts[2]");
 
@@ -180,9 +187,13 @@ contract("DoubleTrouble", accounts => {
     let [balance1AfterAfter, balance2After] =
       [await web3.eth.getBalance(accounts[1]), await web3.eth.getBalance(accounts[2])];
 
-    fee = divWei(doublePrice, 100);
-    assert.equal(balance1AfterAfter.toString(), subWei(addWei(balance1After, doublePrice), fee).toString(), "Balance of accounts[0] must be bigger after buy");
+    feePaid = divWei(doublePrice, 100);
+    assert.equal(balance1AfterAfter.toString(), subWei(addWei(balance1After, doublePrice), feePaid).toString(), "Balance of accounts[0] must be bigger after buy");
     assert.equal(balance2After.toString(), subWei(subWei(balance2Before, doublePrice), gasUsed).toString(), "Balance of accounts[1] must be smaller after buy");
+
+    feeGotten = divWei(doublePrice, 200);
+    balanceTrblOwnerAfter = await web3.eth.getBalance(accounts[TRBL_OWNER]);
+    assert.equal(subWei(balanceTrblOwnerAfter, balanceTrblOwnerBefore).toString(), feeGotten.toString(), "TRBL owner must have gotten their fee");
 
     assert.equal(await dt.lastPurchasePrice(tokenId), price * 2, "Last purchase price should be twice as big");
     assert.equal(await dt.forSalePrice(tokenId), 0, "For sale price should be 0 after purchase");
