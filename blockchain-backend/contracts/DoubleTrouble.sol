@@ -12,7 +12,7 @@ contract DoubleTrouble is ERC721URIStorage {
   DoubleTroubleOrchestrator _dto;
   address _originalCollection;
   address _feeWallet;
-  uint256 _feeRate = 200;
+  uint256 _feeRate = 130;
   uint256[] _registeredTokens;
 
   constructor(string memory name, string memory symbol, address nftCollection, address feeWallet, address dto) ERC721(name, symbol) {
