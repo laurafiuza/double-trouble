@@ -235,7 +235,9 @@ class TroublesomeCollectionInspector extends Component {
               </Card.Text>
           }
           { !isTroublesome &&
-            <Card.Link href={`https://opensea.io/assets/${originalCollection._address}/${this.props.tokenId}`}>View it on OpenSea</Card.Link>
+            <div style={{marginTop: 10}}>
+              <Card.Link href={`https://opensea.io/assets/${originalCollection._address}/${this.props.tokenId}`}>View it on OpenSea</Card.Link>
+            </div>
           }
         </Card.Body>
       </Card>
