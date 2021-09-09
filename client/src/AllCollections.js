@@ -1,14 +1,12 @@
-import React, {Component} from "react";
+import React, { Component } from "react";
 import doubleTroubleOrchestrator from './orchestrator';
-import { Card, CardGroup } from "react-bootstrap";
-import ImageCard from './ImageCard';
-import DoubleTroubleContract from "./contracts/DoubleTrouble.json";
+import { Card, CardGroup, Spinner } from "react-bootstrap";
+import GenericNFTContract from "./contracts/IERC721Metadata.json";
 
 class AllCollections extends Component {
   constructor(props) {
     super(props);
-    // TODO: delete collections from externalCache, only use nfts
-    this.externalCache = {collections: [], nfts: {}, web3: null};
+    this.externalCache = {collections: undefined};
     this.localState = {};
 
     this.deriveAndRender();
@@ -26,24 +24,28 @@ class AllCollections extends Component {
   };
 
   deriveExternalCache = async () => {
+    // TODO: wrap in try catch?
     const dto = await doubleTroubleOrchestrator(this.props.web3);
-    const collections = await dto.methods.registeredCollections().call();
-    let nfts = {};
-    for (const collection of collections['1']) {
-      const troublesomeCollection = new this.props.web3.eth.Contract(
-        DoubleTroubleContract.abi,
+    const registeredCollections = await dto.methods.registeredCollections().call();
+    let collections = [];
+    for (const collection of registeredCollections['1']) {
+      const originalCollection = new this.props.web3.eth.Contract(
+        GenericNFTContract.abi,
         collection,
       );
-      const registeredTokens = await troublesomeCollection.methods.registeredTokens().call();
-      // TODO: registered tokens is not printing to console log, debug
-      //nfts[collection] = registeredTokens;
+
+      const name = await originalCollection.methods.name().call();
+      const symbol = await originalCollection.methods.symbol().call();
+      collections = [...collections, {address: collection, name, symbol}];
     }
-    return {nfts, collections, web3: this.props.web3};
+    return {collections};
   };
 
   render() {
-    const originalCollection = "boop";
-    const tokenId = 0;
+    if (this.externalCache.collections === undefined) {
+      return <Spinner animation='border'/>
+    }
+
     if (this.externalCache.collections.length === 0) {
       return <Card style={{width: "36rem"}}>
         <Card.Body>
@@ -55,46 +57,18 @@ class AllCollections extends Component {
     }
 
     return (
-      <>
       <CardGroup style={{width: "72rem"}}>
-        <Card style={{width: "24rem"}}>
-          <ImageCard tokenURI={"https://api.artblocks.io/token/0"}/>
-          <Card.Body>
-            <Card.Title>
-              Collection Title
-            </Card.Title>
-            <Card.Subtitle>
-              SYMB
-            </Card.Subtitle>
-            <Card.Link href={`/collections/${originalCollection}/${tokenId}`}>View it here</Card.Link>
-          </Card.Body>
-        </Card>
-        <Card style={{width: "24rem"}}>
-          <ImageCard tokenURI={"https://api.artblocks.io/token/1"}/>
-          <Card.Body>
-            <Card.Title>
-              Collection Title
-            </Card.Title>
-            <Card.Subtitle>
-              SYMB
-            </Card.Subtitle>
-            <Card.Link href={`/collections/${originalCollection}/${tokenId}`}>View it here</Card.Link>
-          </Card.Body>
-        </Card>
-        <Card style={{width: "24rem"}}>
-          <ImageCard tokenURI={"https://api.artblocks.io/token/2"}/>
-          <Card.Body>
-            <Card.Title>
-              Collection Title
-            </Card.Title>
-            <Card.Subtitle>
-              SYMB
-            </Card.Subtitle>
-            <Card.Link href={`/collections/${originalCollection}/${tokenId}`}>View it here</Card.Link>
-          </Card.Body>
-        </Card>
+        { this.externalCache.collections.map(collection => {
+          return (<Card style={{width: '24rem'}}>
+            <Card.Body>
+              <Card.Title>{collection.name}</Card.Title>
+              <Card.Subtitle>{collection.symbol}</Card.Subtitle>
+              <Card.Link href={`/collections/${collection.address}`}>View it here</Card.Link>
+            </Card.Body>
+              </Card>);
+          })
+        }
       </CardGroup>
-      </>
     );
   }
 }

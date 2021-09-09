@@ -11,6 +11,8 @@ import About from "./About";
 import Find from "./Find";
 import AllCollections from "./AllCollections";
 import { Badge, Spinner, Navbar, Container, Nav, Button } from 'react-bootstrap';
+import ErrorCard from "./ErrorCard";
+import AllNFTsInCollection from "./AllNFTsInCollection";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 class DoubleTrouble extends Component {
@@ -23,6 +25,7 @@ class DoubleTrouble extends Component {
       loaded: false,
       shouldLoadWeb3: false,
       onboarding: new MetaMaskOnboarding(),
+      error: undefined
     };
 
     this.deriveAndRender();
@@ -59,6 +62,9 @@ class DoubleTrouble extends Component {
 
   render() {
     const pleaseConnect = <div>Please connect to your wallet...</div>;
+    if (this.localState.error !== undefined) {
+      return <ErrorCard error={this.localState.error} />;
+    }
     return (
         <Router>
           <div>
@@ -98,6 +104,18 @@ class DoubleTrouble extends Component {
 
                 return <CollectionInspector web3={this.externalCache.web3}
                   collection={match.params.collection} tokenId={match.params.tokenId} />
+              }} />
+              <Route path="/collections/:collection" render={({match}) => {
+                return <>
+                {
+                  this.externalCache.web3
+                    ?
+                  <AllNFTsInCollection web3={this.externalCache.web3}
+                  collection={match.params.collection} />
+                  :
+                  <Spinner animation="border" />
+                }
+                  </>
               }} />
               <Route path="/collections">
                 {this.externalCache.web3
