@@ -29,19 +29,12 @@ class AllCollections extends Component {
     const dto = await doubleTroubleOrchestrator(this.props.web3);
     const collections = await dto.methods.registeredCollections().call();
     let nfts = {};
-    const flatCollections = Object.values(collections).flat();
-    for (const collection of flatCollections) {
-      console.log("collection");
-      console.log(collection);
+    for (const collection of collections['1']) {
       const troublesomeCollection = new this.props.web3.eth.Contract(
         DoubleTroubleContract.abi,
         collection,
       );
-      console.log("troublesomeCollection");
-      console.log(troublesomeCollection.methods.registeredTokens());
       const registeredTokens = await troublesomeCollection.methods.registeredTokens().call();
-      console.log("registeredTokens");
-      console.log(registeredTokens);
       // TODO: registered tokens is not printing to console log, debug
       //nfts[collection] = registeredTokens;
     }
