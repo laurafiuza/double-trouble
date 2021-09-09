@@ -102,9 +102,9 @@ class ERC721Inspector extends Component {
     if (this.externalCache.troublesomeCollection === ZERO_ADDR) {
       return (<Card style={{width: '36rem'}}>
         {loadedNft}
-        <Card.Text>You are the first one to bring an NFT from this collection to DoubleTrouble.</Card.Text>
+        <Card.Text>You are the first to bring this collection to DoubleTrouble. Click below to become its Patron and receive a % fee for any NFTs from this collection sold within Double Trouble.</Card.Text>
         <Button variant="outline-dark" onClick={this.makeTroublesomeCollection}>
-          Deploy a troublesome collection for it and claim your TRBL token
+          Innaugurate this troublesome collection and claim your TRBL token
         </Button>
       </Card>);
     }
