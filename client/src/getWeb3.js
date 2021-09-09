@@ -1,5 +1,28 @@
 import Web3 from "web3";
 
+const chains = {
+  // Ethereum Mainnet
+  "1": {
+    name: "Ethereum",
+    currency: "ETH",
+    orchestratorAddr: undefined,
+  },
+
+  // Polygon mainnet
+  "137": {
+    name: "Polygon",
+    currency: "MATIC",
+    orchestratorAddr: undefined,
+  },
+
+  // Local Ganache dev
+  "1337": {
+    name: "Ganache",
+    currency: "GNACH",
+    orchestratorAddr: process.env.REACT_APP_DTO_ADDR,
+  }
+}
+
 const _getWeb3 = () =>
   new Promise((resolve, reject) => {
     // Wait for loading completion to avoid race conditions with web3 injection timing.
@@ -37,9 +60,10 @@ const _getWeb3 = () =>
 
 const getWeb3 = async () => {
   const web3 = await _getWeb3();
-  const accounts = await web3.eth.getAccounts();
-  web3.accounts = accounts;
-  web3.defaultAccount = accounts[0];
+  web3.chainId = await web3.eth.getChainId();
+  web3.chain = chains[web3.chainId];
+  web3.accounts = await web3.eth.getAccounts();
+  web3.defaultAccount = web3.accounts[0];
   return web3;
 }
 

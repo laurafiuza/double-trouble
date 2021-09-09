@@ -9,7 +9,7 @@ import CollectionInspector from "./CollectionInspector";
 import About from "./About";
 import Find from "./Find";
 import AllCollections from "./AllCollections";
-import { Spinner, Navbar, Container, Nav, Button } from 'react-bootstrap';
+import { Badge, Spinner, Navbar, Container, Nav, Button } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 class DoubleTrouble extends Component {
@@ -54,9 +54,14 @@ class DoubleTrouble extends Component {
                   </Nav>
                 </Navbar.Collapse>
             </Container>
-            <Container>
-              { this.externalCache.web3 && `Connected wallet: ${this.externalCache.web3.accounts[0]}`}
-            </Container>
+              { this.externalCache.web3 &&
+                <Container style={{width: 330}}>
+                  <div style={{textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'}}>
+                    Wallet: {this.externalCache.web3.accounts[0]}
+                  </div>
+                  <Badge className="bg-info">{this.externalCache.web3.chain.name}</Badge>
+                </Container>
+              }
             </Navbar>
             {/* A <Switch> looks through its children <Route>s and
                 renders the first one that matches the current URL. */}
