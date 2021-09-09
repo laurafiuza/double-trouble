@@ -70,8 +70,8 @@ contract("DoubleTroubleOrchestrator", accounts => {
     assert.equal(await dto.ownerOf(0), accounts[6], "Must have minted tokenId 0 for account 6");
     assert.equal(await dto.ownerOf(1), accounts[2], "Must have minted tokenId 1 for account 2");
 
-    assert.equal(await dto.trblOwnerOf(0), accounts[6], "TRBL owner must be account 6");
-    assert.equal(await dto.trblOwnerOf(1), accounts[2], "TRBL owner must be account 2");
+    assert.equal(await dto.trblOwnerOfTokenId(0), accounts[6], "TRBL owner must be account 6");
+    assert.equal(await dto.trblOwnerOfTokenId(1), accounts[2], "TRBL owner must be account 2");
 
     await assert.rejects(dto.ownerOf(2), /nonexistent token/);
   });
@@ -98,16 +98,21 @@ contract("DoubleTroubleOrchestrator", accounts => {
     const metaDtAddr = await dto.troublesomeCollection(dto.address);
     const metaDt = await DoubleTrouble.at(metaDtAddr);
 
-    assert.equal(await dto.trblOwnerOf(0), accounts[6], "TRBL owner must be account 6");
-    assert.equal(await dto.trblOwnerOf(1), accounts[2], "TRBL owner must be account 2");
+    assert.equal(await dto.trblOwnerOfTokenId(0), accounts[6], "TRBL owner must be account 6");
+    assert.equal(await dto.trblOwnerOfTokenId(1), accounts[2], "TRBL owner must be account 2");
 
     assert.notEqual(await dto.approve(metaDt.address, 0, {from: accounts[6]}), undefined, "approval failed (undefined return value).");
-    assert.notEqual(await metaDt.makeTroublesome(0, 1234), undefined, "makeTroublesome failed (undefined return value).");
+    assert.notEqual(await metaDt.setPrice(0, 1234), undefined, "setPrice failed (undefined return value).");
+    assert.equal(await dto.trblOwnerOfTokenId(0), accounts[6], "TRBL owner must still be account 6");
+
+    assert.notEqual(await metaDt.buy(0, {from: accounts[5], value: 1234}), undefined, "buy failed (undefined return value).");
+    assert.equal(await dto.trblOwnerOfTokenId(0), accounts[5], "TRBL owner must now be account 5");
 
     assert.notEqual(await dto.approve(metaDt.address, 1, {from: accounts[2]}), undefined, "approval failed (undefined return value).");
-    assert.notEqual(await metaDt.makeTroublesome(1, 4567), undefined, "makeTroublesome failed (undefined return value).");
+    assert.notEqual(await metaDt.setPrice(1, 4567), undefined, "setPrice failed (undefined return value).");
+    assert.equal(await dto.trblOwnerOfTokenId(1), accounts[2], "TRBL owner must still be account 2");
 
-    assert.equal(await dto.trblOwnerOf(0), accounts[6], "TRBL owner must still be account 6");
-    assert.equal(await dto.trblOwnerOf(1), accounts[2], "TRBL owner must still be account 2");
+    assert.notEqual(await metaDt.buy(1, {from: accounts[6], value: 4567}), undefined, "buy failed (undefined return value).");
+    assert.equal(await dto.trblOwnerOfTokenId(1), accounts[6], "TRBL owner must now be account 6");
   });
 });

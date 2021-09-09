@@ -57,7 +57,7 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
   // If TRBL # tokenId is owned by an externally owned account, trblOwnerOf returns that account
   // if TRBL # tokenId is owned by the troublesome contract of this DTO, return the owner per
   // the troublesome contract
-  function trblOwnerOf(uint256 tokenId) external view returns (address) {
+  function trblOwnerOfTokenId(uint256 tokenId) external view returns (address) {
     // Try to reach for a troublesomeCollection for this DTO
     DoubleTrouble dtForDto = this.troublesomeCollection(address(this));
     if (address(dtForDto) != address(0)) {
@@ -70,6 +70,10 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
 
     // If the above failed, it means DTO itself knows the trblOwner
     return ownerOf(tokenId);
+  }
+
+  function trblOwnerOf(address troublesomeCollectionAddr) external view returns (address) {
+    return this.trblOwnerOfTokenId(this.tokenIdForTroublesomeCollection(troublesomeCollectionAddr));
   }
 
   function getOriginalCollectionName(uint256 tokenId) external view returns (string memory) {

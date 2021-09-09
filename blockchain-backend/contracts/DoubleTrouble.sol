@@ -23,11 +23,6 @@ contract DoubleTrouble is ERC721URIStorage {
     _dto = DoubleTroubleOrchestrator(dto);
   }
 
-  function listForSale(uint256 tokenId, uint256 forSalePrice) external {
-    require(IERC721Metadata(_originalCollection).getApproved(tokenId) == address(this), "DoubleTrouble contract must be approved to operate this token");
-    _forSalePrices[tokenId] = forSalePrice;
-  }
-
   function originalCollection() external view returns (address) {
     return _originalCollection;
   }
@@ -45,12 +40,10 @@ contract DoubleTrouble is ERC721URIStorage {
   }
 
   function forSalePrice(uint256 tokenId) external view returns (uint256) {
-    require(ownerOf(tokenId) != address(0), "collection and tokenId combination is not present in DT");
     return _forSalePrices[tokenId];
   }
 
   function lastPurchasePrice(uint256 tokenId) external view returns (uint256) {
-    require(ownerOf(tokenId) != address(0), "collection and tokenId combination is not present in DT");
     return _lastPurchasePrices[tokenId];
   }
 
@@ -59,7 +52,13 @@ contract DoubleTrouble is ERC721URIStorage {
   }
 
   function setPrice(uint256 tokenId, uint256 price) external {
-    require(msg.sender == ownerOf(tokenId), "msg.sender should be current owner of NFT");
+    // Putting up for sale for the first time
+    if (_lastPurchasePrices[tokenId] == 0) {
+      require(IERC721Metadata(_originalCollection).getApproved(tokenId) == address(this), "DoubleTrouble contract must be approved to operate this token");
+    // All times after
+    } else {
+      require(_isApprovedOrOwner(msg.sender, tokenId), "msg.sender should be approved or owner of NFT");
+    }
     _forSalePrices[tokenId] = price;
   }
 
@@ -68,7 +67,7 @@ contract DoubleTrouble is ERC721URIStorage {
     require(msg.value >= _forSalePrices[tokenId], "Value sent must be at least the for sale price");
 
     // Make NFT troublesome if this is the first time it's being purchased
-    if (_lastPurchasePrice[tokenId] == 0) {
+    if (_lastPurchasePrices[tokenId] == 0) {
       require(IERC721Metadata(_originalCollection).getApproved(tokenId) == address(this), "DoubleTrouble contract must be approved to operate this token");
 
       // In the original collection, the owner forever becomes the DoubleTrouble contract
@@ -102,8 +101,8 @@ contract DoubleTrouble is ERC721URIStorage {
     (bool oldOwnersuccess, ) = oldOwner.call{value: amountPaid - 2 * feeToCharge}("");
     require(oldOwnersuccess, "Transfer to owner failed.");
 
-    // Send fee to owner of the TRBL token
-    address trblOwner = _dto.trblOwnerOf(tokenId);
+    // Send fee to owner of the TRBL token corresponding to this troublesome Collection
+    address trblOwner = _dto.trblOwnerOf(address(this));
     (bool trblOwnerSuccess, ) = trblOwner.call{value: feeToCharge}("");
 
     // Send rest of the fee to the DT wallet
