@@ -14,3 +14,10 @@ TODO: npm install for packages? inside client?
 6. `cd ../client` and enter `REACT_APP_DTO_ADDR=[address] yarn start`
 7. Go to Ganache, click "Accounts", and find the address of `accounts[0]` (the first one that shows up), and import that account into your Metamask Chrome Extension.
 8. You should have your dev up and running!
+
+## Running tests
+`npm test` inside `blockchain-backend`
+
+## Running test coverage
+`truffle run coverage` inside `blockchain-backend`
+
