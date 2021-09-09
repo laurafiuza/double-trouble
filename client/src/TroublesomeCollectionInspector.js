@@ -127,16 +127,16 @@ class TroublesomeCollectionInspector extends Component {
           <Table striped bordered hover>
             <tbody>
               <tr>
-                <td>Original collection</td>
+                <td>Collection Address</td>
                 <td>{originalCollection._address}</td>
               </tr>
               <tr>
-                <td>Original owner</td>
-                <td>{originalOwner}</td>
+                <td>Token ID</td>
+                <td>{this.props.tokenId}</td>
               </tr>
               <tr>
-                <td>Troublesome owner</td>
-                <td>{troublesomeOwner}</td>
+                <td>Owner</td>
+                <td>{troublesomeOwner || originalOwner}</td>
               </tr>
               { forSalePrice > 0 &&
                 <tr>
@@ -194,7 +194,7 @@ class TroublesomeCollectionInspector extends Component {
           }
           { !isTroublesome && isOriginalOwner &&
               <>
-                You own this NFT.
+                <Card.Subtitle style={{color: "green"}}>You are the owner</Card.Subtitle>
                 {isDoubleTroubleApproved
                   ? <Card.Text>
                       <InputGroup className="mb-3">
@@ -205,16 +205,19 @@ class TroublesomeCollectionInspector extends Component {
                       </InputGroup>
                       <Button variant="outline-dark" onClick={() => this.makeTroublesome(this.localState.inputSalePrice)}>Put up for sale</Button>
                     </Card.Text>
-                  : <Card.Text>
-                      Please approve the Double Trouble contract before making your NFT Troublesome.
+                  : 
+                    <>
+                      <Card.Text>
+                        Please approve the Double Trouble contract before making your NFT Troublesome.
+                      </Card.Text>
                       <Button variant="outline-dark" onClick={this.approveDoubleTrouble}>Approve</Button>
-                    </Card.Text>
+                    </>
                 }
               </>
           }
           { !isTroublesome && !isOriginalOwner &&
               <Card.Text>
-                This NFT isn't Troublesome, and you don't own it.
+                This NFT isn't Troublesome yet, and you don't own it.
                 <Card.Link href={`/collections/${originalCollection._address}/${this.props.tokenId}`}>View it here</Card.Link>.
               </Card.Text>
           }
