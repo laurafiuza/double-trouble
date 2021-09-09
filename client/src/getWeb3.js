@@ -58,13 +58,16 @@ const _getWeb3 = () =>
     });
   });
 
+let loadedWeb3 = undefined;
 const getWeb3 = async () => {
-  const web3 = await _getWeb3();
-  web3.chainId = await web3.eth.getChainId();
-  web3.chain = chains[web3.chainId];
-  web3.accounts = await web3.eth.getAccounts();
-  web3.defaultAccount = web3.accounts[0];
-  return web3;
+  if (loadedWeb3 == undefined) {
+    loadedWeb3 = await _getWeb3();
+  }
+  loadedWeb3.chainId = await loadedWeb3.eth.getChainId();
+  loadedWeb3.chain = chains[loadedWeb3.chainId];
+  loadedWeb3.accounts = await loadedWeb3.eth.getAccounts();
+  loadedWeb3.defaultAccount = loadedWeb3.accounts[0];
+  return loadedWeb3;
 }
 
 export default getWeb3;

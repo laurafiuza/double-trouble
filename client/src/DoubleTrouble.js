@@ -18,9 +18,21 @@ class DoubleTrouble extends Component {
     this.externalCache = {
       web3: null
     };
+    this.localState = {};
 
     this.deriveAndRender();
   };
+
+  componentDidMount() {
+    // Listen to Metamask changes and refresh everything
+    window.ethereum.on('accountsChanged', this.deriveAndRender);
+    window.ethereum.on('chainChanged', this.deriveAndRender);
+
+    window.ethereum.on('disconnected', () => {
+      this.localState.error = 'Wallet disconnected. Please reconnect and refresh.'
+      this.forceUpdate();
+    });
+  }
 
   deriveAndRender = () => {
     this.deriveExternalCache().then((ret) => {
@@ -34,8 +46,7 @@ class DoubleTrouble extends Component {
   };
 
   deriveExternalCache = async () => {
-    const web3 = await getWeb3();
-    return {web3}
+    return {web3: await getWeb3()}
   };
 
   render() {
