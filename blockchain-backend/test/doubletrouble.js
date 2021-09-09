@@ -116,8 +116,8 @@ contract("DoubleTrouble", accounts => {
     assert.equal(newForSalePrice, 3456, "New for sale price should be 3456");
   });
 
-  it("should proxy tokenURI to original NFT", async () => {
-    let tokenURI = await dt.tokenURI(tokenId);
+  it("should proxy troublesomeTokenURI to original NFT", async () => {
+    let tokenURI = await dt.troublesomeTokenURI(tokenId);
     let originalURI = await cp.tokenURI(tokenId);
     assert.equal(tokenURI, originalURI);
     assert.equal(tokenURI, "https://api.artblocks.io/token/0");
