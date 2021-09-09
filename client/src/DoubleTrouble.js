@@ -1,3 +1,4 @@
+import MetaMaskOnboarding from '@metamask/onboarding';
 import React, { Component } from "react";
 import getWeb3 from "./getWeb3";
 import {
@@ -18,20 +19,27 @@ class DoubleTrouble extends Component {
     this.externalCache = {
       web3: null
     };
-    this.localState = {};
+    this.localState = {
+      loaded: false,
+      shouldLoadWeb3: false,
+      onboarding: new MetaMaskOnboarding(),
+    };
 
     this.deriveAndRender();
   };
 
-  componentDidMount() {
-    // Listen to Metamask changes and refresh everything
-    window.ethereum.on('accountsChanged', this.deriveAndRender);
-    window.ethereum.on('chainChanged', this.deriveAndRender);
+  useEffect() {
+    if (this.externalCache.web3 && !this.localState.loaded) {
+      // Listen to Metamask changes and refresh everything
+      window.ethereum.on('accountsChanged', this.deriveAndRender);
+      window.ethereum.on('chainChanged', this.deriveAndRender);
 
-    window.ethereum.on('disconnected', () => {
-      this.localState.error = 'Wallet disconnected. Please reconnect and refresh.'
-      this.forceUpdate();
-    });
+      window.ethereum.on('disconnected', () => {
+        this.localState.error = 'Wallet disconnected. Please reconnect and refresh.'
+        this.forceUpdate();
+      });
+      this.localState.loaded = true;
+    }
   }
 
   deriveAndRender = () => {
@@ -46,7 +54,7 @@ class DoubleTrouble extends Component {
   };
 
   deriveExternalCache = async () => {
-    return {web3: await getWeb3()}
+    return {web3: this.localState.shouldLoadWeb3 ? (await getWeb3()) : null}
   };
 
   render() {
@@ -65,14 +73,19 @@ class DoubleTrouble extends Component {
                   </Nav>
                 </Navbar.Collapse>
             </Container>
-              { this.externalCache.web3 &&
-                <Container style={{width: 330}}>
-                  <div style={{textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'}}>
-                    Wallet: {this.externalCache.web3.accounts[0]}
-                  </div>
-                  <Badge className="bg-info">{this.externalCache.web3.chain.name}</Badge>
-                </Container>
+            <Container style={{width: 330}}>
+              { this.externalCache.web3
+                ?
+                  <>
+                    <div style={{textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'}}>
+                      Wallet: {this.externalCache.web3.accounts[0]}
+                    </div>
+                    <Badge className="bg-info">{this.externalCache.web3.chain.name}</Badge>
+                  </>
+                :
+                <Button disabled={this.localState.shouldLoadWeb3} onClick={this.connect}>Connect with Metamask</Button>
               }
+            </Container>
             </Navbar>
             {/* A <Switch> looks through its children <Route>s and
                 renders the first one that matches the current URL. */}
@@ -100,6 +113,16 @@ class DoubleTrouble extends Component {
           </div>
         </Router>
     );
+  }
+
+  connect = () => {
+    if (MetaMaskOnboarding.isMetaMaskInstalled()) {
+      this.localState.shouldLoadWeb3 = true;
+      this.forceUpdate();
+      this.deriveAndRender();
+    } else {
+      this.localState.onboarding.startOnboarding();
+    }
   }
 }
 

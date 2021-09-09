@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@metamask/onboarding": "^1.0.1",
     "bootstrap": "^5.1.0",
     "react": "16.11.0",
     "react-bootstrap": "^1.6.1",
