@@ -128,6 +128,7 @@ class TroublesomeCollectionInspector extends Component {
     const forSalePriceEth = forSalePrice && this.props.web3.utils.fromWei(forSalePrice.toString(), 'ether');
     const lastPurchasePriceEth = lastPurchasePrice && this.props.web3.utils.fromWei(lastPurchasePrice.toString(), 'ether');
     const isOwner = isTroublesomeOwner || isOriginalOwner;
+    const currency = this.props.web3.chain.currency;
     return (
       <Card style={{width: '36rem'}}>
         <Card.Body>
@@ -161,13 +162,13 @@ class TroublesomeCollectionInspector extends Component {
               { forSalePrice > 0 &&
                 <tr>
                   <td>For sale price</td>
-                  <td>{forSalePriceEth} ETH</td>
+                  <td>{forSalePriceEth} {currency}</td>
                 </tr>
               }
               { lastPurchasePrice > 0 &&
                 <tr>
                   <td>Last purchase price</td>
-                  <td>{lastPurchasePriceEth} ETH</td>
+                  <td>{lastPurchasePriceEth} {currency}</td>
                 </tr>
               }
             </tbody>
@@ -184,7 +185,7 @@ class TroublesomeCollectionInspector extends Component {
                     <ListGroup.Item>
                     <InputGroup className="mb-3">
                       <InputGroup.Text id="basic-addon3">
-                        New price in ETH
+                        New price in {currency}
                       </InputGroup.Text>
                       <FormControl id="new-price" aria-describedby="basic-addon3" onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
                     </InputGroup>
@@ -209,10 +210,10 @@ class TroublesomeCollectionInspector extends Component {
             </>
           }
           { forSalePrice > 0 && !isOwner &&
-              <Button variant="outline-dark" onClick={this.buy}>Buy for {forSalePriceEth} ETH</Button>
+              <Button variant="outline-dark" onClick={this.buy}>Buy for {forSalePriceEth} {currency}</Button>
           }
           { lastPurchasePrice > 0 && !isOwner &&
-              <Button variant="outline-dark" onClick={this.forceBuy}>Force buy for {lastPurchasePriceEth * 2} ETH</Button>
+              <Button variant="outline-dark" onClick={this.forceBuy}>Force buy for {lastPurchasePriceEth * 2} {currency}</Button>
           }
           { !isTroublesome && !isOwner &&
               <Card.Text>
