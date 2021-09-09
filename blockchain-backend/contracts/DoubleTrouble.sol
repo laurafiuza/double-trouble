@@ -53,7 +53,6 @@ contract DoubleTrouble is ERC721URIStorage {
   }
 
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
-    require(_lastPurchasePrices[tokenId] > 0, "tokenId not present");
     string memory output = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">You are in trouble</text></svg>';
 
     string memory originalAddr = Stringify.toString(_originalCollection);
