@@ -250,4 +250,24 @@ contract("DoubleTrouble", accounts => {
     registeredTokens = (await dt.registeredTokens()).map(t => { return t.words[0] });
     assert.deepEqual(registeredTokens, [0, 2, 1], "Number of registered tokens does not match");
   });
+
+  it("tokenURI should output metadata pointing to double-trouble.io", async () => {
+    let [nix, b64] = (await dt.tokenURI(0)).split(',');
+    let metadata = JSON.parse(Buffer.from(b64, 'base64').toString());
+    assert.equal(metadata.name, 'DEADBEEF', "Name must be DEADBEEF");
+    assert.equal(metadata.originalCollection.toUpperCase(), cp.address.toUpperCase(), "original collection in metadata must match");
+    assert.equal(metadata.troublesomeCollection.toUpperCase(), dt.address.toUpperCase(), "troublesome collection in metadata must match");
+
+    let externalLink = `https://double-trouble.io/collections/${dt.address.toLowerCase()}/0`;
+    assert.equal(metadata.external_link, externalLink, 'External link must match');
+
+    [nix, b64] = (await dt.tokenURI(1)).split(',');
+    metadata = JSON.parse(Buffer.from(b64, 'base64').toString());
+    assert.equal(metadata.name, 'DEADBEEF', "Name must be DEADBEEF");
+    assert.equal(metadata.originalCollection, cp.address.toLowerCase(), "original collection in metadata must match");
+    assert.equal(metadata.troublesomeCollection, dt.address.toLowerCase(), "troublesome collection in metadata must match");
+
+    externalLink = `https://double-trouble.io/collections/${dt.address.toLowerCase()}/1`;
+    assert.equal(metadata.external_link, externalLink, 'External link must match');
+  });
 });

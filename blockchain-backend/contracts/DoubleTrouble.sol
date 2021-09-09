@@ -60,7 +60,7 @@ contract DoubleTrouble is ERC721URIStorage {
     string memory troublesomeAddr = Stringify.toString(address(this));
     string memory strTokenId = Stringify.toString(tokenId);
     string memory externalLink = string(abi.encodePacked('https://double-trouble.io/collections/', troublesomeAddr, '/', strTokenId));
-    string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "DoubleTrouble", "external_link": "',
+    string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "DEADBEEF", "external_link": "',
                                                                       externalLink, '", "originalCollection": "',
                                                                       originalAddr, '", "troublesomeCollection": "',
                                                                       troublesomeAddr, '", "description": "This NFT is only for sale in Double Trouble. Visit double-trouble.io to learn more.", "image": "data:image/svg+xml;base64,',
