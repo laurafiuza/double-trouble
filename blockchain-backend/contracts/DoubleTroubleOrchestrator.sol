@@ -12,7 +12,7 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
   address _feeWallet;
   address[] _registeredCollections;
 
-  constructor(DoubleTroubleFactory dtFactory, address feeWallet) ERC721("Double Trouble", "TRBL") {
+  constructor(DoubleTroubleFactory dtFactory, address feeWallet) ERC721("Patron Tokens", "PTRN") {
     _feeWallet = feeWallet;
     _dtFactory = dtFactory;
   }
@@ -55,10 +55,10 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
   }
 
   // This is the most meta code in this contract
-  // If TRBL # tokenId is owned by an externally owned account, trblOwnerOf returns that account
-  // if TRBL # tokenId is owned by the troublesome contract of this DTO, return the owner per
+  // If PTRN # tokenId is owned by an externally owned account, patronOfTokenId returns that account
+  // if PTRN # tokenId is owned by the troublesome contract of this DTO, return the owner per
   // the troublesome contract
-  function trblOwnerOfTokenId(uint256 tokenId) external view returns (address) {
+  function patronOfTokenId(uint256 tokenId) external view returns (address) {
     // Try to reach for a troublesomeCollection for this DTO
     DoubleTrouble dtForDto = this.troublesomeCollection(address(this));
     if (address(dtForDto) != address(0)) {
@@ -69,12 +69,12 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
       }
     }
 
-    // If the above failed, it means DTO itself knows the trblOwner
+    // If the above failed, it means DTO itself knows the patron
     return ownerOf(tokenId);
   }
 
-  function trblOwnerOf(address troublesomeCollectionAddr) external view returns (address) {
-    return this.trblOwnerOfTokenId(this.tokenIdForTroublesomeCollection(troublesomeCollectionAddr));
+  function patronOf(address troublesomeCollectionAddr) external view returns (address) {
+    return this.patronOfTokenId(this.tokenIdForTroublesomeCollection(troublesomeCollectionAddr));
   }
 
   function getOriginalCollectionName(uint256 tokenId) external view returns (string memory) {
@@ -100,7 +100,7 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
     uint256 lastPart = 0;
     parts[lastPart++] = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 400 400"><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">';
 
-    parts[lastPart++] = string(abi.encodePacked('TRBL #', strTokenId));
+    parts[lastPart++] = string(abi.encodePacked('PTRN #', strTokenId));
     parts[lastPart++] = '</text>';
 
     try this.getOriginalCollectionName(tokenId) returns (string memory name) {
@@ -131,9 +131,9 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
       output = string(abi.encodePacked(output, parts[i]));
     }
 
-    string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "TRBL #', strTokenId, '", "originalCollection": "',
+    string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "PTRN #', strTokenId, '", "originalCollection": "',
                                                                       originalAddr, '", "troublesomeCollection": "',
-                                                                      troublesomeAddr, '", "description": "There is one TRBL NFT for each collection made troublesome by our community. Whoever arrives first and makes an NFT collection troublesome gets the unique TRBL NFT for that collection as a prize. Feel free to use and interpret TRBL NFTs in any way you want.", "image": "data:image/svg+xml;base64,',
+                                                                      troublesomeAddr, '", "description": "Whoever owns this PTRN token is the Patron for this collection. Patrons automatically get a % fee for any NFT from this collection sold within Double Trouble.", "image": "data:image/svg+xml;base64,',
                                                                       Base64.encode(bytes(output)), '"}'))));
     output = string(abi.encodePacked('data:application/json;base64,', json));
 

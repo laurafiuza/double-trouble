@@ -118,12 +118,12 @@ contract DoubleTrouble is ERC721URIStorage {
     (bool oldOwnersuccess, ) = oldOwner.call{value: amountPaid - 2 * feeToCharge}("");
     require(oldOwnersuccess, "Transfer to owner failed.");
 
-    // Send fee to owner of the TRBL token corresponding to this troublesome Collection
-    address trblOwner = _dto.trblOwnerOf(address(this));
-    (bool trblOwnerSuccess, ) = trblOwner.call{value: feeToCharge}("");
+    // Send fee to patron of this troublesome Collection
+    address patron = _dto.patronOf(address(this));
+    (bool patronSuccess, ) = patron.call{value: feeToCharge}("");
 
     // Send rest of the fee to the DT wallet
-    uint256 rest = trblOwnerSuccess ? feeToCharge : 2 * feeToCharge;
+    uint256 rest = patronSuccess ? feeToCharge : 2 * feeToCharge;
     (bool feeWalletSuccess, ) = _feeWallet.call{value: rest}("");
     require(feeWalletSuccess, "Transfer to DT wallet failed.");
   }

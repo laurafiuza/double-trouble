@@ -5,7 +5,7 @@ const DoubleTrouble = artifacts.require("./DoubleTrouble.sol");
 
 const ZERO_ADDR = '0x0000000000000000000000000000000000000000';
 const NON_PRESENT_ID = 79;
-const TRBL_OWNER = 7;
+const PATRON = 7;
 
 contract("DoubleTrouble", accounts => {
   // TODO: make tokenId the return value of the createNft function
@@ -19,7 +19,7 @@ contract("DoubleTrouble", accounts => {
     dto = await DoubleTroubleOrchestrator.deployed();
     assert.notEqual(dto, undefined, "DoubleTroubleOrchestrator contract instance is undefined.");
 
-    let ret = await dto.makeTroublesomeCollection(cp.address, "DTCryptoPunks", "DUNK", {from: accounts[TRBL_OWNER]});
+    let ret = await dto.makeTroublesomeCollection(cp.address, "DTCryptoPunks", "DUNK", {from: accounts[PATRON]});
     assert(ret.receipt.status, true, "Transaction processing failed");
 
     const dt_address = await dto.troublesomeCollection(cp.address);
@@ -170,7 +170,7 @@ contract("DoubleTrouble", accounts => {
     let [sellerBalanceBefore, buyerBalanceBefore] =
       [await web3.eth.getBalance(accounts[0]), await web3.eth.getBalance(accounts[1])];
 
-    let balanceTrblOwnerBefore = await web3.eth.getBalance(accounts[TRBL_OWNER]);
+    let balanceTrblOwnerBefore = await web3.eth.getBalance(accounts[PATRON]);
     let buyTx = await dt.buy(tokenId, {from: accounts[1], value: price});
     assert(await dt.ownerOf(tokenId), accounts[1], "Ownership should now be accounts[1]");
 
@@ -189,8 +189,8 @@ contract("DoubleTrouble", accounts => {
     assert_almost_equal(buyerBalanceAfter, subWei(subWei(buyerBalanceBefore, price), gasUsed), "Balance of accounts[1] must be smaller after buy");
 
     let feeGotten = divWei(price, 130);
-    let balanceTrblOwnerAfter = await web3.eth.getBalance(accounts[TRBL_OWNER]);
-    assert.equal(subWei(balanceTrblOwnerAfter, balanceTrblOwnerBefore).toString(), feeGotten.toString(), "TRBL owner must have gotten their fee");
+    let balanceTrblOwnerAfter = await web3.eth.getBalance(accounts[PATRON]);
+    assert.equal(subWei(balanceTrblOwnerAfter, balanceTrblOwnerBefore).toString(), feeGotten.toString(), "Patron must have gotten their fee");
 
     assert.equal(await dt.forSalePrice(tokenId), 0, "For sale price should be 0 after purchase");
     assert.equal(await dt.lastPurchasePrice(tokenId), price, "Last purchase price should be > 0 after purchase");
@@ -200,7 +200,7 @@ contract("DoubleTrouble", accounts => {
     [sellerBalanceBefore, buyerBalanceBefore] =
       [await web3.eth.getBalance(accounts[1]), await web3.eth.getBalance(accounts[2])];
 
-    balanceTrblOwnerBefore = await web3.eth.getBalance(accounts[TRBL_OWNER]);
+    balanceTrblOwnerBefore = await web3.eth.getBalance(accounts[PATRON]);
     buyTx = await dt.forceBuy(tokenId, {from: accounts[2], value: doublePrice});
     assert(await dt.ownerOf(tokenId), accounts[2], "Ownership should now be accounts[2]");
 
@@ -213,8 +213,8 @@ contract("DoubleTrouble", accounts => {
     assert.equal(buyerBalanceAfter, subWei(subWei(buyerBalanceBefore, doublePrice), gasUsed), "Balance of accounts[2] must be smaller after buy");
 
     feeGotten = divWei(doublePrice, 130);
-    balanceTrblOwnerAfter = await web3.eth.getBalance(accounts[TRBL_OWNER]);
-    assert.equal(subWei(balanceTrblOwnerAfter, balanceTrblOwnerBefore).toString(), feeGotten.toString(), "TRBL owner must have gotten their fee");
+    balanceTrblOwnerAfter = await web3.eth.getBalance(accounts[PATRON]);
+    assert.equal(subWei(balanceTrblOwnerAfter, balanceTrblOwnerBefore).toString(), feeGotten.toString(), "Patron must have gotten their fee");
 
     assert.equal(await dt.lastPurchasePrice(tokenId), price * 2, "Last purchase price should be twice as big");
     assert.equal(await dt.forSalePrice(tokenId), 0, "For sale price should be 0 after purchase");

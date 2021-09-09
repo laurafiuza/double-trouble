@@ -66,53 +66,65 @@ contract("DoubleTroubleOrchestrator", accounts => {
     assert.deepEqual(await dto.registeredCollection(1), expected, "Should have registered collection at index 1");
   });
 
-  it("makeTroublesomeCollection should have minted TRBL NFTs", async () => {
+  it("makeTroublesomeCollection should have minted PTRN NFTs", async () => {
     assert.equal(await dto.ownerOf(0), accounts[6], "Must have minted tokenId 0 for account 6");
     assert.equal(await dto.ownerOf(1), accounts[2], "Must have minted tokenId 1 for account 2");
 
-    assert.equal(await dto.trblOwnerOfTokenId(0), accounts[6], "TRBL owner must be account 6");
-    assert.equal(await dto.trblOwnerOfTokenId(1), accounts[2], "TRBL owner must be account 2");
+    assert.equal(await dto.patronOfTokenId(0), accounts[6], "patron must be account 6");
+    assert.equal(await dto.patronOfTokenId(1), accounts[2], "patron must be account 2");
+
+    const nonNftTroublesomeAddr = await dto.troublesomeCollection(NON_NFT_CONTRACT_ADDRESS);
+    assert.equal(await dto.patronOf(dt.address), accounts[6], "patron must be account 6");
+    assert.equal(await dto.patronOf(nonNftTroublesomeAddr), accounts[2], "patron must be account 2");
 
     await assert.rejects(dto.ownerOf(2), /nonexistent token/);
   });
 
-  it("should parse tokenURI and get TRBL NFTs", async () => {
+  it("should parse tokenURI and get PTRN NFTs", async () => {
     let [nix, b64] = (await dto.tokenURI(0)).split(',');
     let metadata = JSON.parse(Buffer.from(b64, 'base64').toString());
-    assert.equal(metadata.name, 'TRBL #0', "Name must be TRBL #0");
+    assert.equal(metadata.name, 'PTRN #0', "Name must be PTRN #0");
     assert.equal(metadata.originalCollection, cp.address.toLowerCase(), "original collection in metadata must match");
     assert.equal(metadata.troublesomeCollection, dt.address.toLowerCase(), "troublesome collection in metadata must match");
 
     [nix, b64] = (await dto.tokenURI(1)).split(',');
     metadata = JSON.parse(Buffer.from(b64, 'base64').toString());
-    assert.equal(metadata.name, 'TRBL #1', "Name must be TRBL #1");
+    assert.equal(metadata.name, 'PTRN #1', "Name must be PTRN #1");
     assert.equal(metadata.originalCollection, NON_NFT_CONTRACT_ADDRESS.toLowerCase(), "original collection in metadata must match");
     const troublesomeAddr = await dto.troublesomeCollection(NON_NFT_CONTRACT_ADDRESS)
     assert.equal(metadata.troublesomeCollection, troublesomeAddr.toLowerCase(), "troublesome collection in metadata must match");
   });
 
-  it("trblOwnerOf should work when TRBL tokens also become troublesome", async () => {
-    const ret = await dto.makeTroublesomeCollection(dto.address, "Double Trouble", "TRBL");
+  it("patronOf should work when PTRN tokens also become troublesome", async () => {
+    const ret = await dto.makeTroublesomeCollection(dto.address, dto.name(), dto.symbol());
     assert.equal(ret.receipt.status, true, "Transaction processing failed");
 
     const metaDtAddr = await dto.troublesomeCollection(dto.address);
     const metaDt = await DoubleTrouble.at(metaDtAddr);
 
-    assert.equal(await dto.trblOwnerOfTokenId(0), accounts[6], "TRBL owner must be account 6");
-    assert.equal(await dto.trblOwnerOfTokenId(1), accounts[2], "TRBL owner must be account 2");
+    const nonNftTroublesomeAddr = await dto.troublesomeCollection(NON_NFT_CONTRACT_ADDRESS);
+
+    assert.equal(await dto.patronOfTokenId(0), accounts[6], "PTRN owner must be account 6");
+    assert.equal(await dto.patronOf(dt.address), accounts[6], "PTRN owner must be account 6");
+    assert.equal(await dto.patronOfTokenId(1), accounts[2], "PTRN owner must be account 2");
+    assert.equal(await dto.patronOf(nonNftTroublesomeAddr), accounts[2], "PTRN owner must be account 2");
 
     assert.notEqual(await dto.approve(metaDt.address, 0, {from: accounts[6]}), undefined, "approval failed (undefined return value).");
     assert.notEqual(await metaDt.setPrice(0, 1234), undefined, "setPrice failed (undefined return value).");
-    assert.equal(await dto.trblOwnerOfTokenId(0), accounts[6], "TRBL owner must still be account 6");
+    assert.equal(await dto.patronOfTokenId(0), accounts[6], "PTRN owner must still be account 6");
+    assert.equal(await dto.patronOf(dt.address), accounts[6], "PTRN owner must be account 6");
 
     assert.notEqual(await metaDt.buy(0, {from: accounts[5], value: 1234}), undefined, "buy failed (undefined return value).");
-    assert.equal(await dto.trblOwnerOfTokenId(0), accounts[5], "TRBL owner must now be account 5");
+    assert.equal(await dto.patronOfTokenId(0), accounts[5], "PTRN owner must now be account 5");
+    assert.equal(await dto.patronOf(dt.address), accounts[5], "PTRN owner must be account 5");
 
     assert.notEqual(await dto.approve(metaDt.address, 1, {from: accounts[2]}), undefined, "approval failed (undefined return value).");
     assert.notEqual(await metaDt.setPrice(1, 4567), undefined, "setPrice failed (undefined return value).");
-    assert.equal(await dto.trblOwnerOfTokenId(1), accounts[2], "TRBL owner must still be account 2");
+    assert.equal(await dto.patronOfTokenId(1), accounts[2], "PTRN owner must still be account 2");
+    assert.equal(await dto.patronOf(nonNftTroublesomeAddr), accounts[2], "PTRN owner must be account 2");
 
     assert.notEqual(await metaDt.buy(1, {from: accounts[6], value: 4567}), undefined, "buy failed (undefined return value).");
-    assert.equal(await dto.trblOwnerOfTokenId(1), accounts[6], "TRBL owner must now be account 6");
+    assert.equal(await dto.patronOfTokenId(1), accounts[6], "PTRN owner must now be account 6");
+    assert.equal(await dto.patronOf(nonNftTroublesomeAddr), accounts[6], "PTRN owner must be account 6");
   });
 });
