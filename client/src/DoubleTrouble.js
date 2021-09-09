@@ -28,7 +28,9 @@ class DoubleTrouble extends Component {
       error: undefined
     };
 
-    this.deriveAndRender();
+    // Keep connected to Metamask after user connected once
+    // FIXME what if window.ethereum doesnt exist here?
+    window.ethereum.on('connect', this.connect);
   };
 
   useEffect() {
