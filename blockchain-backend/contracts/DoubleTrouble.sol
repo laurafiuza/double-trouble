@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import "./DoubleTroubleOrchestrator.sol";
+import "./Libraries.sol";
 
 // SPDX-License-Identifier: MIT
 contract DoubleTrouble is ERC721URIStorage {
@@ -52,7 +53,19 @@ contract DoubleTrouble is ERC721URIStorage {
   }
 
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
-    revert("TODO");
+    require(_lastPurchasePrices[tokenId] > 0, "tokenId not present");
+    string memory output = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.base { fill: white; font-family: serif; font-size: 14px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">You are in trouble</text></svg>';
+
+    string memory originalAddr = Stringify.toString(_originalCollection);
+    string memory troublesomeAddr = Stringify.toString(address(this));
+    string memory strTokenId = Stringify.toString(tokenId);
+    string memory externalLink = string(abi.encodePacked('https://double-trouble.io/collections/', troublesomeAddr, '/', strTokenId));
+    string memory json = Base64.encode(bytes(string(abi.encodePacked('{"name": "DoubleTrouble", "external_link": "',
+                                                                      externalLink, '", "originalCollection": "',
+                                                                      originalAddr, '", "troublesomeCollection": "',
+                                                                      troublesomeAddr, '", "description": "This NFT is only for sale in Double Trouble. Visit double-trouble.io to learn more.", "image": "data:image/svg+xml;base64,',
+                                                                      Base64.encode(bytes(output)), '"}'))));
+    return string(abi.encodePacked('data:application/json;base64,', json));
   }
 
   function setPrice(uint256 tokenId, uint256 price) external {
