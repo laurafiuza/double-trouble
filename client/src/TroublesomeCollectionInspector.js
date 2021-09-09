@@ -71,11 +71,12 @@ class TroublesomeCollectionInspector extends Component {
     var originalAddr, tokenURI, troublesomeOwner, forSalePrice = 0, lastPurchasePrice = 0, isTroublesome = false;
     try {
       originalAddr = await troublesomeCollection.methods.originalCollection().call();
-      tokenURI = await troublesomeCollection.methods.tokenURI(this.props.tokenId).call();
+      tokenURI = await troublesomeCollection.methods.troublesomeTokenURI(this.props.tokenId).call();
 
-      troublesomeOwner = await troublesomeCollection.methods.ownerOf(this.props.tokenId).call();
       forSalePrice = parseInt(await troublesomeCollection.methods.forSalePrice(this.props.tokenId).call());
       lastPurchasePrice = parseInt(await troublesomeCollection.methods.lastPurchasePrice(this.props.tokenId).call());
+
+      troublesomeOwner = await troublesomeCollection.methods.ownerOf(this.props.tokenId).call();
       isTroublesome = true;
     } catch(err) {
       isTroublesome = false;
@@ -124,10 +125,9 @@ class TroublesomeCollectionInspector extends Component {
       isTroublesome, forSalePrice, lastPurchasePrice, originalCollection, troublesomeCollection,
       originalOwner, troublesomeOwner, metadata,
     } = this.externalCache;
-    const isForSale = forSalePrice > 0;
-    const canForceBuy = lastPurchasePrice > 0;
     const forSalePriceEth = forSalePrice && this.props.web3.utils.fromWei(forSalePrice.toString(), 'ether');
     const lastPurchasePriceEth = lastPurchasePrice && this.props.web3.utils.fromWei(lastPurchasePrice.toString(), 'ether');
+    const isOwner = isTroublesomeOwner || isOriginalOwner;
     return (
       <Card style={{width: '36rem'}}>
         <Card.Body>
@@ -173,11 +173,13 @@ class TroublesomeCollectionInspector extends Component {
             </tbody>
           </Table>
           { isTroublesome &&
+            <Card.Title>This NFT is troublesome!</Card.Title>
+          }
+          { isOwner &&
             <>
-              <Card.Title>This NFT is troublesome!</Card.Title>
-              { isTroublesomeOwner &&
-                <>
-                  <Card.Subtitle style={{color: "green"}}>You are the owner</Card.Subtitle>
+              <Card.Subtitle style={{color: "green"}}>You are the owner</Card.Subtitle>
+              { (isTroublesome || isDoubleTroubleApproved)
+                ?
                   <ListGroup>
                     <ListGroup.Item>
                     <InputGroup className="mb-3">
@@ -187,49 +189,32 @@ class TroublesomeCollectionInspector extends Component {
                       <FormControl id="new-price" aria-describedby="basic-addon3" onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
                     </InputGroup>
                     <Button variant="outline-dark" onClick={() => this.setPrice(parseInt(this.localState.inputSalePrice))}>
-                      { forSalePrice === 0 ? "Put up for sale" : "Change price"}
+                      { forSalePrice == 0 ? "Put up for sale" : "Change price"}
                     </Button>
                   { forSalePrice > 0 &&
                     <Button variant="outline-dark" onClick={() => this.setPrice(0)}>
-                      Remove from sale (someone can still force buy it)
+                      Remove from sale { isTroublesome && "(someone can still force buy it)" }
                     </Button>
                   }
                   </ListGroup.Item>
                   </ListGroup>
-                </>
+                :
+                  <>
+                    <Card.Text>
+                      Please approve the Double Trouble contract before putting your NFT up for sale on our platform.
+                    </Card.Text>
+                    <Button variant="outline-dark" onClick={this.approveDoubleTrouble}>Approve</Button>
+                  </>
               }
             </>
           }
-          { !isTroublesomeOwner && isForSale &&
+          { forSalePrice > 0 && !isOwner &&
               <Button variant="outline-dark" onClick={this.buy}>Buy for {forSalePriceEth} ETH</Button>
           }
-          { !isTroublesomeOwner && canForceBuy &&
+          { lastPurchasePrice > 0 && !isOwner &&
               <Button variant="outline-dark" onClick={this.forceBuy}>Force buy for {lastPurchasePriceEth * 2} ETH</Button>
           }
-          { !isTroublesome && isOriginalOwner &&
-              <>
-                <Card.Subtitle style={{color: "green"}}>You are the owner</Card.Subtitle>
-                {isDoubleTroubleApproved
-                  ? <Card.Text>
-                      <InputGroup className="mb-3">
-                        <InputGroup.Text id="basic-addon3">
-                          New price in ETH
-                        </InputGroup.Text>
-                        <FormControl onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
-                      </InputGroup>
-                      <Button variant="outline-dark" onClick={() => this.setPrice(this.localState.inputSalePrice)}>Put up for sale</Button>
-                    </Card.Text>
-                  :
-                    <>
-                      <Card.Text>
-                        Please approve the Double Trouble contract before putting your NFT up for sale on Double Trouble.
-                      </Card.Text>
-                      <Button variant="outline-dark" onClick={this.approveDoubleTrouble}>Approve</Button>
-                    </>
-                }
-              </>
-          }
-          { !isTroublesome && !isOriginalOwner &&
+          { !isTroublesome && !isOwner &&
               <Card.Text>
                 <div>This NFT isn't Troublesome yet, and you don't own it.</div>
               </Card.Text>
