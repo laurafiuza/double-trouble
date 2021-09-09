@@ -217,8 +217,8 @@ class TroublesomeCollectionInspector extends Component {
           }
           { !isTroublesome && !isOriginalOwner &&
               <Card.Text>
-                This NFT isn't Troublesome yet, and you don't own it.
-                <Card.Link href={`/collections/${originalCollection._address}/${this.props.tokenId}`}>View it here</Card.Link>.
+                <div>This NFT isn't Troublesome yet, and you don't own it.</div>
+                <Card.Link href={`https://opensea.io/assets/${originalCollection._address}/${this.props.tokenId}`}>View it on OpenSea</Card.Link>.
               </Card.Text>
           }
         </Card.Body>
