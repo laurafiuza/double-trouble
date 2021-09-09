@@ -81,6 +81,13 @@ class TroublesomeCollectionInspector extends Component {
       isTroublesome = false;
     }
 
+    var metadata = undefined;
+    try {
+      metadata = await fetch(tokenURI).then(resp => resp.json());
+    } catch(err) {
+      // NOOP
+    }
+
     const isTroublesomeOwner = troublesomeOwner && troublesomeOwner === this.props.web3.defaultAccount;
 
     const originalCollection = new this.props.web3.eth.Contract(
@@ -100,6 +107,7 @@ class TroublesomeCollectionInspector extends Component {
     return {
       tokenURI, originalCollection, isOriginalOwner, isDoubleTroubleApproved, troublesomeCollection,
       isTroublesomeOwner, isTroublesome, forSalePrice, lastPurchasePrice, originalOwner, troublesomeOwner,
+      metadata,
     }
   };
 
@@ -113,8 +121,8 @@ class TroublesomeCollectionInspector extends Component {
     }
 
     const { tokenURI, isOriginalOwner, isTroublesomeOwner, isDoubleTroubleApproved,
-      isTroublesome, forSalePrice, lastPurchasePrice, originalCollection,
-      originalOwner, troublesomeOwner,
+      isTroublesome, forSalePrice, lastPurchasePrice, originalCollection, troublesomeCollection,
+      originalOwner, troublesomeOwner, metadata,
     } = this.externalCache;
     const isForSale = forSalePrice > 0;
     const canForceBuy = lastPurchasePrice > 0;
@@ -127,9 +135,15 @@ class TroublesomeCollectionInspector extends Component {
           <Table striped bordered hover>
             <tbody>
               <tr>
-                <td>Collection Address</td>
+                <td>Original Collection</td>
                 <td>{originalCollection._address}</td>
               </tr>
+              { troublesomeCollection &&
+                <tr>
+                  <td>Troublesome Collection</td>
+                  <td>{troublesomeCollection._address}</td>
+                </tr>
+              }
               <tr>
                 <td>Token ID</td>
                 <td>{this.props.tokenId}</td>
@@ -138,6 +152,12 @@ class TroublesomeCollectionInspector extends Component {
                 <td>Owner</td>
                 <td>{troublesomeOwner || originalOwner}</td>
               </tr>
+              { metadata && metadata.description &&
+                <tr>
+                  <td>Description</td>
+                  <td>{metadata.description}</td>
+                </tr>
+              }
               { forSalePrice > 0 &&
                 <tr>
                   <td>For sale price</td>
@@ -171,14 +191,8 @@ class TroublesomeCollectionInspector extends Component {
                     </Button>
                   { forSalePrice > 0 &&
                     <Button variant="outline-dark" onClick={() => this.setPrice(0)}>
-                      Remove from sale
+                      Remove from sale (someone can still force buy it)
                     </Button>
-                  }
-                  { lastPurchasePrice === 0 &&
-                      <Card.Text>
-                        <div>No one bought it yet. You can still remove it from the DoubleTrouble contract if you want.</div>
-                        <Button variant="outline-dark" onClick={this.unmakeTroublesome}>Untrouble</Button>
-                      </Card.Text>
                   }
                   </ListGroup.Item>
                   </ListGroup>
@@ -203,12 +217,12 @@ class TroublesomeCollectionInspector extends Component {
                         </InputGroup.Text>
                         <FormControl onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
                       </InputGroup>
-                      <Button variant="outline-dark" onClick={() => this.makeTroublesome(this.localState.inputSalePrice)}>Put up for sale</Button>
+                      <Button variant="outline-dark" onClick={() => this.setPrice(this.localState.inputSalePrice)}>Put up for sale</Button>
                     </Card.Text>
-                  : 
+                  :
                     <>
                       <Card.Text>
-                        Please approve the Double Trouble contract before making your NFT Troublesome.
+                        Please approve the Double Trouble contract before putting your NFT up for sale on Double Trouble.
                       </Card.Text>
                       <Button variant="outline-dark" onClick={this.approveDoubleTrouble}>Approve</Button>
                     </>
@@ -218,8 +232,10 @@ class TroublesomeCollectionInspector extends Component {
           { !isTroublesome && !isOriginalOwner &&
               <Card.Text>
                 <div>This NFT isn't Troublesome yet, and you don't own it.</div>
-                <Card.Link href={`https://opensea.io/assets/${originalCollection._address}/${this.props.tokenId}`}>View it on OpenSea</Card.Link>.
               </Card.Text>
+          }
+          { !isTroublesome &&
+            <Card.Link href={`https://opensea.io/assets/${originalCollection._address}/${this.props.tokenId}`}>View it on OpenSea</Card.Link>
           }
         </Card.Body>
       </Card>
@@ -229,34 +245,6 @@ class TroublesomeCollectionInspector extends Component {
     try {
       const { originalCollection } = this.externalCache;
       await originalCollection.methods.approve(this.props.collection, this.props.tokenId)
-        .send({from: this.props.web3.defaultAccount});
-      this.deriveAndRender();
-    } catch(err) {
-      console.warn(err);
-      this.localState.error = err.message;
-      this.forceUpdate();
-    }
-  };
-
-  makeTroublesome = async (priceInEth) => {
-    try {
-      assert(priceInEth > 0, "Price must be > 0");
-      const { troublesomeCollection } = this.externalCache;
-      const priceInWei = this.props.web3.utils.toWei(priceInEth.toString(), 'ether')
-      await troublesomeCollection.methods.makeTroublesome(this.props.tokenId, priceInWei)
-        .send({from: this.props.web3.defaultAccount});
-      this.deriveAndRender();
-    } catch(err) {
-      console.warn(err);
-      this.localState.error = err.message;
-      this.forceUpdate();
-    }
-  };
-
-  unmakeTroublesome = async () => {
-    try {
-      const { troublesomeCollection } = this.externalCache;
-      await troublesomeCollection.methods.unmakeTroublesome(this.props.tokenId)
         .send({from: this.props.web3.defaultAccount});
       this.deriveAndRender();
     } catch(err) {

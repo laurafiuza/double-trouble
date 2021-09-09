@@ -38,7 +38,7 @@ class ImageCard extends Component {
       .then(resp => resp.json())
       .then(data => data.image);
 
-    return { image }; 
+    return { image };
   };
 
   handleImgError = () => {
@@ -57,10 +57,10 @@ class ImageCard extends Component {
     }
     return (
       <Card.Img
-        onError={() => this.handleImgError()} 
+        onError={() => this.handleImgError()}
         variant="top"
         src={this.externalCache.image}
-        />); 
+        />);
   };
 }
 
