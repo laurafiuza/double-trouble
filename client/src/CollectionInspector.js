@@ -55,7 +55,7 @@ class CollectionInspector extends Component {
       await nftCollection.methods.symbol().call();
       isERC721 = true;
     } catch(err) {
-      throw new Error(`Invalid ERC721 address ${this.props.collection}`);
+      throw new Error(`Invalid ERC721 address ${this.props.collection} in Network ${this.props.web3.chain.name}. Are you connected to the right Network?`);
     }
 
     try {
