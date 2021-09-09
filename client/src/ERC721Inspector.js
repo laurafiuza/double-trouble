@@ -97,7 +97,7 @@ class ERC721Inspector extends Component {
       return <ErrorCard error={this.localState.error}/>
     }
 
-    if (this.externalCache.troublesomeCollection && this.externalCache.troublesomeCollection != ZERO_ADDR) {
+    if (this.externalCache.troublesomeCollection && this.externalCache.troublesomeCollection !== ZERO_ADDR) {
       return (<Redirect to={`/collections/${this.externalCache.troublesomeCollection}/${this.props.tokenId}`} />)
     }
 

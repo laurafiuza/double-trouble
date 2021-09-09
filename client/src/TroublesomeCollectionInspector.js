@@ -5,12 +5,6 @@ import ErrorCard from './ErrorCard';
 import ImageCard from './ImageCard';
 import { Card, Button, Spinner, Table, ListGroup, InputGroup, FormControl } from "react-bootstrap";
 
-const assert = (bool, msg) => {
-  if (!bool) {
-    throw new Error(msg || "Assertion failed");
-  }
-};
-
 class TroublesomeCollectionInspector extends Component {
   constructor() {
     super();
@@ -190,7 +184,7 @@ class TroublesomeCollectionInspector extends Component {
                       <FormControl id="new-price" aria-describedby="basic-addon3" onChange={this.localStateLink('inputSalePrice').onChange} value={this.localState.inputSalePrice} />
                     </InputGroup>
                     <Button variant="outline-dark" onClick={() => this.setPrice(parseInt(this.localState.inputSalePrice))}>
-                      { forSalePrice == 0 ? "Put up for sale" : "Change price"}
+                      { forSalePrice === 0 ? "Put up for sale" : "Change price"}
                     </Button>
                   { forSalePrice > 0 &&
                     <Button variant="outline-dark" onClick={() => this.setPrice(0)}>

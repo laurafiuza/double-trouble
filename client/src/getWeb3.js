@@ -57,7 +57,7 @@ const _getWeb3 = () =>
 
 let loadedWeb3 = undefined;
 const getWeb3 = async () => {
-  if (loadedWeb3 == undefined) {
+  if (loadedWeb3 === undefined) {
     loadedWeb3 = await _getWeb3();
   }
   loadedWeb3.chainId = await loadedWeb3.eth.getChainId();
