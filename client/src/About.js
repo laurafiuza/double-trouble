@@ -36,7 +36,7 @@ class About extends Component {
                 If you're the first person to bring a new NFT collection to DoubleTrouble, we'll mint a special PTRN token just for you. The owner of a PTRN token is the Patron of the collection, and will automatically get ~0.75% of the value of all NFT sales in Double Trouble corresponding to that collection.
               </ListGroup.Item>
               <ListGroup.Item>
-              Patronage can change hands. PTRN tokens are also ERC-721 NFTs, so they can be bought and sold in regular NFT exchanges, as well as of course in the Double Trouble platform.
+              Patronage can change hands. PTRN tokens are also ERC-721 NFTs, so they can be bought and sold in regular NFT exchanges, as well as of course in Double Trouble.
               </ListGroup.Item>
             </ListGroup>
           </ListGroup.Item>
