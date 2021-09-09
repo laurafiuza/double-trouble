@@ -4,6 +4,7 @@ import GenericNFTContract from "./contracts/IERC721Metadata.json";
 import ErrorCard from './ErrorCard';
 import ImageCard from './ImageCard';
 import { Card, Button, Spinner } from "react-bootstrap";
+import { Redirect } from "react-router-dom";
 
 const ZERO_ADDR = "0x0000000000000000000000000000000000000000";
 
@@ -111,14 +112,7 @@ class ERC721Inspector extends Component {
     if (this.externalCache.troublesomeCollection === undefined) {
       return <ErrorCard error={this.localState.error} />;
     }
-    return (<Card style={{width: "36rem"}}>
-      <ImageCard tokenURI={this.externalCache.tokenURI} />
-        <Card.Body>
-      <Card.Subtitle>{this.externalCache.collectionName} ({this.externalCache.collectionSymbol})</Card.Subtitle>
-      <Card.Text>This NFT already has a troublesome Collection.</Card.Text>
-      <Card.Link href={`/collections/${this.externalCache.troublesomeCollection}/${this.props.tokenId}`}>View it</Card.Link>
-    </Card.Body>
-    </Card>);
+    return (<Redirect to={`/collections/${this.externalCache.troublesomeCollection}/${this.props.tokenId}`} />)
   }
 
   makeTroublesomeCollection = async () => {
