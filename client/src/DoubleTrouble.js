@@ -58,6 +58,7 @@ class DoubleTrouble extends Component {
   };
 
   render() {
+    const pleaseConnect = <div>Please connect to your wallet...</div>;
     return (
         <Router>
           <div>
@@ -91,20 +92,24 @@ class DoubleTrouble extends Component {
                 renders the first one that matches the current URL. */}
             <Switch>
               <Route path="/collections/:collection/:tokenId" render={({match}) => {
+                if (!this.externalCache.web3) {
+                  return pleaseConnect;
+                }
+
                 return <CollectionInspector web3={this.externalCache.web3}
                   collection={match.params.collection} tokenId={match.params.tokenId} />
               }} />
               <Route path="/collections">
-                {
-                  this.externalCache.web3
-                    ?
-                  <AllCollections web3={this.externalCache.web3} />
-                    :
-                  <Spinner animation="border" />
+                {this.externalCache.web3
+                  ? <AllCollections web3={this.externalCache.web3} />
+                  : pleaseConnect
                 }
               </Route>
               <Route path="/find">
-                <Find />
+                {this.externalCache.web3
+                  ? <Find />
+                  : pleaseConnect
+                }
               </Route>
               <Route path="/">
                 <About />
