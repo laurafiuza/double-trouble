@@ -3,6 +3,8 @@ const CryptoPunks = artifacts.require("./CryptoPunks.sol");
 const DoubleTroubleOrchestrator = artifacts.require("./DoubleTroubleOrchestrator.sol");
 const DoubleTrouble = artifacts.require("./DoubleTrouble.sol");
 const truffleAssert = require('truffle-assertions');
+const { time } = require("@openzeppelin/test-helpers");
+
 
 const ZERO_ADDR = '0x0000000000000000000000000000000000000000';
 const NON_PRESENT_ID = 79;
@@ -70,8 +72,6 @@ contract("DoubleTrouble", accounts => {
     assert.equal(await dt.forSalePrice(tokenId), 0, "For sale price should now be 0");
     assert.equal(await dt.lastPurchasePrice(tokenId), initialPrice * 2, "Last purchase price should now be > 0");
   });
-
-
 
   it("setPrice should fail for tokenID that doesn't exist", async () => {
     const nonExistentTokenId = 555;
@@ -241,6 +241,15 @@ contract("DoubleTrouble", accounts => {
     assert.equal(await dt.forSalePrice(tokenId), 0, "For sale price should be 0 after purchase");
   });
 
+  it("non owner should not withdraw NFT", async () => {
+    await assert.rejects(dt.withdraw(0, {from: accounts[5]}), /approved or owner/);
+  });
+
+  it("owner should not withdraw NFT before deadline", async () => {
+    await time.increase(time.duration.days(20));
+    await assert.rejects(dt.withdraw(0, {from: accounts[2]}), /NFT not yet available/);
+  });
+
   it("should return the correct registered tokens in a given collection", async () => {
     let registeredTokens = (await dt.registeredTokens()).map(t => { return t.words[0] });
     assert.deepEqual(registeredTokens, [0], "Number of registered tokens does not match");
@@ -270,6 +279,20 @@ contract("DoubleTrouble", accounts => {
 
     registeredTokens = (await dt.registeredTokens()).map(t => { return t.words[0] });
     assert.deepEqual(registeredTokens, [0, 2, 1], "Number of registered tokens does not match");
+
+    await time.increase(time.duration.days(31));
+
+    // Withdraw token 2
+    await dt.withdraw(2, {from: accounts[1], value: Math.floor(initialPrice / 65)});
+
+    registeredTokens = (await dt.registeredTokens()).map(t => { return t.words[0] });
+    assert.deepEqual(registeredTokens, [0, 1], "Number of registered tokens does not match");
+
+    // Withdraw token 1
+    await dt.withdraw(1, {from: accounts[1], value: Math.floor(initialPrice / 65)});
+
+    registeredTokens = (await dt.registeredTokens()).map(t => { return t.words[0] });
+    assert.deepEqual(registeredTokens, [0], "Number of registered tokens does not match");
   });
 
   it("tokenURI should output metadata pointing to double-trouble.io", async () => {
@@ -290,5 +313,16 @@ contract("DoubleTrouble", accounts => {
 
     externalLink = `https://double-trouble.io/collections/${dt.address.toLowerCase()}/1`;
     assert.equal(metadata.external_link, externalLink, 'External link must match');
+  });
+
+  it("owner should withdraw NFT after deadline", async () => {
+    await time.increase(time.duration.days(30));
+    await assert.rejects(dt.withdraw(0, {from: accounts[2]}), /Must pay fee/);
+    const lastPurchasePrice = await dt.lastPurchasePrice(0);
+    await assert.notEqual(await dt.withdraw(0, {from: accounts[2], value: lastPurchasePrice / 65}), undefined, "Must withdraw after deadline");
+
+    assert.equal(await cp.ownerOf(0), accounts[2], "accounts 2 must be the owner of the Crypto Punk");
+    await assert.rejects(dt.ownerOf(0), /nonexistent token/);
+    assert.equal(await dt.lastPurchasePrice(0), 0, "lastPurchasePrice must now be 0");
   });
 });
