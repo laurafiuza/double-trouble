@@ -35,11 +35,12 @@ class ImageCard extends Component {
   };
 
   deriveExternalCache = async () => {
-    const image = await axios.get(this.props.tokenURI)
-      .then(resp => resp.json())
-      .then(data => data.image);
+    if (!this.props.tokenURI) {
+      return {image: undefined};
+    }
+    const ret = await axios.get(this.props.tokenURI);
 
-    return { image };
+    return { image: ret.data.image };
   };
 
   handleImgError = () => {

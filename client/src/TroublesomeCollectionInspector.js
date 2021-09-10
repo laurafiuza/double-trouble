@@ -70,10 +70,12 @@ class TroublesomeCollectionInspector extends Component {
       forSalePrice = parseInt(await troublesomeCollection.methods.forSalePrice(this.props.tokenId).call());
       lastPurchasePrice = parseInt(await troublesomeCollection.methods.lastPurchasePrice(this.props.tokenId).call());
 
-      troublesomeOwner = await troublesomeCollection.methods.ownerOf(this.props.tokenId).call();
-      isTroublesome = true;
+      if (lastPurchasePrice > 0) {
+        troublesomeOwner = await troublesomeCollection.methods.ownerOf(this.props.tokenId).call();
+        isTroublesome = true;
+      }
     } catch(err) {
-      isTroublesome = false;
+      // NOOP
     }
 
     var metadata = undefined;
