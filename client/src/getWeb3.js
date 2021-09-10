@@ -10,7 +10,7 @@ const chains = {
   "5": {
     name: "Goerli Test Network",
     currency: "GOR",
-    orchestratorAddr: undefined,
+    orchestratorAddr: "0x149b12591592b6beB359dd1C19Dca80Dc63A29dC",
   },
   "137": {
     name: "Polygon",
