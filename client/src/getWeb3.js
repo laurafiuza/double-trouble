@@ -9,7 +9,7 @@ const chains = {
   "4": {
     name: "Rinkeby Testnet",
     currency: "RIN",
-    orchestratorAddr: undefined,
+    orchestratorAddr: "0x43dEcC964C9c125d335dcC920E1AF273eaF14fE0",
   },
   "5": {
     name: "Goerli Testnet",
