@@ -209,7 +209,7 @@ class TroublesomeCollectionInspector extends Component {
           { lastPurchasePrice > 0 && !isOwner &&
               <Button variant="outline-dark" onClick={this.forceBuy}>Force buy for {lastPurchasePriceEth * 2} {currency}</Button>
           }
-          { !isTroublesome && !isOwner && forSalePrice == 0 &&
+          { !isTroublesome && !isOwner && forSalePrice === 0 &&
               <Card.Text>
                 This NFT isn't listed in DoubleTrouble yet, and you don't own it.
               </Card.Text>
