@@ -12,6 +12,9 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
   address _feeWallet;
   address[] _registeredCollections;
 
+  event MakeTroublesomeCollection(address msgSender, address originalCollection, address troublesomeCollection,
+                                  string name, string symbol);
+
   constructor(DoubleTroubleFactory dtFactory, address feeWallet) ERC721("Patron Tokens", "PTRN") {
     _feeWallet = feeWallet;
     _dtFactory = dtFactory;
@@ -24,6 +27,8 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
     _troublesomeCollections[nftCollection] = _dtFactory.makeNew(name, symbol, nftCollection, _feeWallet, address(this));
     _mint(msg.sender, _registeredCollections.length);
     _registeredCollections.push(nftCollection);
+
+    emit MakeTroublesomeCollection(msg.sender, nftCollection, address(_troublesomeCollections[nftCollection]), name, symbol);
   }
 
   function troublesomeCollection(address nftCollection) external view returns (DoubleTrouble) {

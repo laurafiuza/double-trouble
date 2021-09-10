@@ -2,6 +2,7 @@ const assert = require('assert');
 const DoubleTroubleOrchestrator = artifacts.require("./DoubleTroubleOrchestrator.sol");
 const DoubleTrouble = artifacts.require("./DoubleTrouble.sol");
 const CryptoPunks = artifacts.require("./CryptoPunks.sol");
+const truffleAssert = require('truffle-assertions');
 
 const ZERO_ADDR = '0x0000000000000000000000000000000000000000';
 const NAME = "DTCryptoPunks";
@@ -38,6 +39,11 @@ contract("DoubleTroubleOrchestrator", accounts => {
 
     const dt_address = await dto.troublesomeCollection(cp.address);
     assert.notEqual(dt_address, undefined, "dt_address is undefined.");
+
+    truffleAssert.eventEmitted(ret, 'MakeTroublesomeCollection', (ev) => {
+      return ev.msgSender == accounts[6] && ev.originalCollection == cp.address && ev.troublesomeCollection == dt_address &&
+        ev.name == NAME && ev.symbol == SYMBOL;
+    });
 
     dt = await DoubleTrouble.at(dt_address);
     assert.equal(dt_address, dt.address, "Address returned by orchestrator must match dt.deployed().");
