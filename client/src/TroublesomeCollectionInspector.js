@@ -62,10 +62,11 @@ class TroublesomeCollectionInspector extends Component {
       throw new Error(`Address supplied ${this.props.collection} doesn't refer to a Troublesome NFT collection.`);
     }
 
-    var originalAddr, tokenURI, troublesomeOwner, forSalePrice = 0, lastPurchasePrice = 0, isTroublesome = false;
+    var originalAddr, tokenURI, troublesomeOwner, forSalePrice = 0, lastPurchasePrice = 0, isTroublesome = false, collectionName;
     try {
       originalAddr = await troublesomeCollection.methods.originalCollection().call();
       tokenURI = await troublesomeCollection.methods.troublesomeTokenURI(this.props.tokenId).call();
+      collectionName = await troublesomeCollection.methods.name().call();
 
       forSalePrice = parseInt(await troublesomeCollection.methods.forSalePrice(this.props.tokenId).call());
       lastPurchasePrice = parseInt(await troublesomeCollection.methods.lastPurchasePrice(this.props.tokenId).call());
@@ -104,7 +105,7 @@ class TroublesomeCollectionInspector extends Component {
     return {
       tokenURI, originalCollection, isOriginalOwner, isDoubleTroubleApproved, troublesomeCollection,
       isTroublesomeOwner, isTroublesome, forSalePrice, lastPurchasePrice, originalOwner, troublesomeOwner,
-      metadata,
+      metadata, collectionName,
     }
   };
 
@@ -119,7 +120,7 @@ class TroublesomeCollectionInspector extends Component {
 
     const { tokenURI, isOriginalOwner, isTroublesomeOwner, isDoubleTroubleApproved,
       isTroublesome, forSalePrice, lastPurchasePrice, originalCollection, troublesomeCollection,
-      originalOwner, troublesomeOwner, metadata,
+      originalOwner, troublesomeOwner, metadata, collectionName,
     } = this.externalCache;
     const forSalePriceEth = forSalePrice && this.props.web3.utils.fromWei(forSalePrice.toString(), 'ether');
     const lastPurchasePriceEth = lastPurchasePrice && this.props.web3.utils.fromWei(lastPurchasePrice.toString(), 'ether');
@@ -128,6 +129,9 @@ class TroublesomeCollectionInspector extends Component {
     return (
       <Card style={{width: '36rem'}}>
         <Card.Body>
+          {collectionName &&
+            <h1>{collectionName} #{this.props.tokenId}</h1>
+          }
           <ImageCard tokenURI={tokenURI}/>
           <Table striped bordered hover>
             <tbody>
@@ -141,10 +145,6 @@ class TroublesomeCollectionInspector extends Component {
                   <td>{troublesomeCollection._address}</td>
                 </tr>
               }
-              <tr>
-                <td>Token ID</td>
-                <td>{this.props.tokenId}</td>
-              </tr>
               <tr>
                 <td>Owner</td>
                 <td>{troublesomeOwner || originalOwner}</td>
@@ -167,6 +167,10 @@ class TroublesomeCollectionInspector extends Component {
                   <td>{lastPurchasePriceEth} {currency}</td>
                 </tr>
               }
+              <tr>
+                <td></td>
+                <td><a href={tokenURI}>Metadata</a></td>
+              </tr>
             </tbody>
           </Table>
           { isTroublesome &&
