@@ -8,10 +8,11 @@ import "./Libraries.sol";
 // SPDX-License-Identifier: MIT
 contract DoubleTrouble is ERC721URIStorage {
   // nested mapping that keeps track of who owns the NFTs
-  mapping (uint256 => uint256) public _forSalePrices;
-  mapping (uint256 => uint256) public _lastPurchasePrices;
+  mapping (uint256 => uint256) _forSalePrices;
+  mapping (uint256 => uint256) _lastPurchasePrices;
+  mapping (uint256 => uint256) _lastPurchaseTimes;
   DoubleTroubleOrchestrator _dto;
-  IERC721Metadata _originalCollection;
+  IERC721Metadata public _originalCollection;
   address _feeWallet;
   uint256 public _feeRate;
   uint256 public _daysForWithdraw;
@@ -22,6 +23,7 @@ contract DoubleTrouble is ERC721URIStorage {
   event Buy(address oldOwner, address newOwner, uint256 tokenId, uint256 valuePaid, uint256 forSalePrice);
   event ForceBuy(address oldOwner, address newOwner, uint256 tokenId, uint256 valuePaid, uint256 lastPurchasePrice);
   event SetPrice(address msgSender, uint256 tokenId, uint256 price);
+  event Withdraw(address owner, uint256 tokenId, uint256 lastPurchasePrice);
 
   constructor(string memory name, string memory symbol, address nftCollection, address feeWallet, address dto,
               uint256 daysForWithdraw, uint256 dtNumerator, uint256 dtDenominator, uint256 feeRate) ERC721(name, symbol) {
@@ -58,6 +60,18 @@ contract DoubleTrouble is ERC721URIStorage {
 
   function lastPurchasePrice(uint256 tokenId) external view returns (uint256) {
     return _lastPurchasePrices[tokenId];
+  }
+
+  function lastPurchaseTime(uint256 tokenId) external view returns (uint256) {
+    return _lastPurchaseTimes[tokenId];
+  }
+
+  function availableToWithdraw(uint256 tokenId) external view returns (uint256) {
+    return _lastPurchaseTimes[tokenId] + (_daysForWithdraw * 1 days);
+  }
+
+  function timeToWithdraw(uint256 tokenId) external view returns (int256) {
+    return int256(this.availableToWithdraw(tokenId) - block.timestamp);
   }
 
   function troublesomeTokenURI(uint256 tokenId) external view returns (string memory) {
@@ -114,6 +128,44 @@ contract DoubleTrouble is ERC721URIStorage {
     _completeBuy(msg.sender, tokenId, msg.value);
   }
 
+  function withdraw(uint256 tokenId) payable external {
+    require(_isApprovedOrOwner(msg.sender, tokenId), "msg.sender should be approved or owner of NFT");
+    require(block.timestamp > this.availableToWithdraw(tokenId), "NFT not yet available to withdraw from Double Trouble");
+    require(msg.value >= _lastPurchasePrices[tokenId] / _feeRate * 2, "Must pay fee to withdraw");
+
+    uint256 pricePaid = _lastPurchasePrices[tokenId];
+    emit Withdraw(ownerOf(tokenId), tokenId, pricePaid);
+
+    // Transfer original NFT back to owner, and burn troublesome NFT
+    _originalCollection.transferFrom(address(this), ownerOf(tokenId), tokenId);
+    _burn(tokenId);
+    _removeRegistered(tokenId);
+
+    // Reset DT state for tokenId
+    _lastPurchasePrices[tokenId] = 0;
+    _forSalePrices[tokenId] = 0;
+    _lastPurchaseTimes[tokenId] = 0;
+
+    _sendFees(pricePaid / _feeRate);
+  }
+
+  function _removeRegistered(uint256 tokenId) internal {
+    bool found = false;
+    for (uint256 i = 0; i < _registeredTokens.length - 1; i++) {
+      if (_registeredTokens[i] == tokenId) {
+        found = true;
+      }
+
+      if (found) {
+        _registeredTokens[i] = _registeredTokens[i + 1];
+      }
+    }
+
+    require(found || _registeredTokens[_registeredTokens.length - 1] == tokenId, "tokenId not found in remove");
+    _registeredTokens.pop();
+  }
+
+
   function forceBuy(uint256 tokenId) payable external {
     require(_lastPurchasePrices[tokenId] > 0, "NFT was not yet purchased within DoubleTrouble");
     require(msg.value >= (_dtNumerator * _lastPurchasePrices[tokenId] / _dtDenominator), "Value sent must be at least twice the last purchase price");
@@ -127,6 +179,7 @@ contract DoubleTrouble is ERC721URIStorage {
     address oldOwner = ownerOf(tokenId);
     _transfer(oldOwner, newOwner, tokenId);
     _lastPurchasePrices[tokenId] = amountPaid;
+    _lastPurchaseTimes[tokenId] = block.timestamp;
     _forSalePrices[tokenId] = 0;
     uint256 feeToCharge = amountPaid / _feeRate;
 
@@ -135,6 +188,10 @@ contract DoubleTrouble is ERC721URIStorage {
     (bool oldOwnersuccess, ) = oldOwner.call{value: amountPaid - 2 * feeToCharge}("");
     require(oldOwnersuccess, "Transfer to owner failed.");
 
+    _sendFees(feeToCharge);
+  }
+
+  function _sendFees(uint256 feeToCharge) internal virtual {
     // Send fee to patron of this troublesome Collection
     address patron = _dto.patronOf(address(this));
     (bool patronSuccess, ) = patron.call{value: feeToCharge}("");
