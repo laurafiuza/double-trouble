@@ -13,19 +13,27 @@ contract DoubleTrouble is ERC721URIStorage {
   DoubleTroubleOrchestrator _dto;
   IERC721Metadata _originalCollection;
   address _feeWallet;
-  uint256 _feeRate = 130;
+  uint256 public _feeRate;
+  uint256 public _daysForWithdraw;
+  uint256 public _dtNumerator;
+  uint256 public _dtDenominator;
   uint256[] _registeredTokens;
 
   event Buy(address oldOwner, address newOwner, uint256 tokenId, uint256 valuePaid, uint256 forSalePrice);
   event ForceBuy(address oldOwner, address newOwner, uint256 tokenId, uint256 valuePaid, uint256 lastPurchasePrice);
   event SetPrice(address msgSender, uint256 tokenId, uint256 price);
 
-  constructor(string memory name, string memory symbol, address nftCollection, address feeWallet, address dto) ERC721(name, symbol) {
+  constructor(string memory name, string memory symbol, address nftCollection, address feeWallet, address dto,
+              uint256 daysForWithdraw, uint256 dtNumerator, uint256 dtDenominator, uint256 feeRate) ERC721(name, symbol) {
     require(nftCollection != address(0), "collection address cannot be zero");
     require(dto != address(0), "dto address cannot be zero");
     _originalCollection = IERC721Metadata(nftCollection);
     _feeWallet = feeWallet;
     _dto = DoubleTroubleOrchestrator(dto);
+    _daysForWithdraw = daysForWithdraw;
+    _dtNumerator = dtNumerator;
+    _dtDenominator = dtDenominator;
+    _feeRate = feeRate;
   }
 
   function originalCollection() external view returns (address) {
@@ -108,7 +116,7 @@ contract DoubleTrouble is ERC721URIStorage {
 
   function forceBuy(uint256 tokenId) payable external {
     require(_lastPurchasePrices[tokenId] > 0, "NFT was not yet purchased within DoubleTrouble");
-    require(msg.value >= (2 * _lastPurchasePrices[tokenId]), "Value sent must be at least twice the last purchase price");
+    require(msg.value >= (_dtNumerator * _lastPurchasePrices[tokenId] / _dtDenominator), "Value sent must be at least twice the last purchase price");
 
     emit ForceBuy(ownerOf(tokenId), msg.sender, tokenId, msg.value, _lastPurchasePrices[tokenId]);
     _completeBuy(msg.sender, tokenId, msg.value);

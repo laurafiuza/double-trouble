@@ -24,7 +24,7 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
     require(address(_troublesomeCollections[nftCollection]) == address(0), "Collection is already Troublesome");
 
     // Deploy troublesome contract for nftCollection
-    _troublesomeCollections[nftCollection] = _dtFactory.makeNew(name, symbol, nftCollection, _feeWallet, address(this));
+    _troublesomeCollections[nftCollection] = _dtFactory.makeNew(name, symbol, nftCollection, _feeWallet, address(this), 30, 2, 1, 130);
     _mint(msg.sender, _registeredCollections.length);
     _registeredCollections.push(nftCollection);
 
@@ -154,8 +154,10 @@ contract DoubleTroubleOrchestrator is ERC721URIStorage {
 * See more on this here: https://ethereum.stackexchange.com/questions/41501/contract-code-size-and-how-to-work-around-it
 */
 contract DoubleTroubleFactory {
-  function makeNew(string memory name, string memory symbol, address nftCollection, address feeWallet, address dto)
+  function makeNew(string memory name, string memory symbol, address nftCollection, address feeWallet, address dto,
+                  uint256 daysForWithdraw, uint256 dtNumerator, uint256 dtDenominator, uint256 feeRate)
         external returns (DoubleTrouble) {
-    return new DoubleTrouble(name, symbol, nftCollection, feeWallet, dto);
+    return new DoubleTrouble(name, symbol, nftCollection, feeWallet, dto,
+                             daysForWithdraw, dtNumerator, dtDenominator, feeRate);
   }
 }
