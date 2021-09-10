@@ -2,8 +2,11 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
-import "./DoubleTroubleOrchestrator.sol";
 import "./Libraries.sol";
+
+interface PatronCollection {
+   function patronOf(address troublesomeCollectionAddr) external view returns (address);
+}
 
 // SPDX-License-Identifier: MIT
 contract DoubleTrouble is ERC721URIStorage {
@@ -11,7 +14,7 @@ contract DoubleTrouble is ERC721URIStorage {
   mapping (uint256 => uint256) _forSalePrices;
   mapping (uint256 => uint256) _lastPurchasePrices;
   mapping (uint256 => uint256) _lastPurchaseTimes;
-  DoubleTroubleOrchestrator _dto;
+  PatronCollection _dto;
   IERC721Metadata public _originalCollection;
   address _feeWallet;
   uint256 public _feeRate;
@@ -31,7 +34,7 @@ contract DoubleTrouble is ERC721URIStorage {
     require(dto != address(0), "dto address cannot be zero");
     _originalCollection = IERC721Metadata(nftCollection);
     _feeWallet = feeWallet;
-    _dto = DoubleTroubleOrchestrator(dto);
+    _dto = PatronCollection(dto);
     _daysForWithdraw = daysForWithdraw;
     _dtNumerator = dtNumerator;
     _dtDenominator = dtDenominator;
