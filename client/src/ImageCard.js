@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Card, Spinner } from 'react-bootstrap';
+import axios from 'axios';
 
 class ImageCard extends Component {
   constructor(props) {
@@ -34,7 +35,7 @@ class ImageCard extends Component {
   };
 
   deriveExternalCache = async () => {
-    const image = await fetch(this.props.tokenURI)
+    const image = await axios.get(this.props.tokenURI)
       .then(resp => resp.json())
       .then(data => data.image);
 
