@@ -11,21 +11,25 @@ contract DoubleTrouble is ERC721URIStorage {
   mapping (uint256 => uint256) public _forSalePrices;
   mapping (uint256 => uint256) public _lastPurchasePrices;
   DoubleTroubleOrchestrator _dto;
-  address _originalCollection;
+  IERC721Metadata _originalCollection;
   address _feeWallet;
   uint256 _feeRate = 130;
   uint256[] _registeredTokens;
 
+  event Buy(address oldOwner, address newOwner, uint256 tokenId, uint256 valuePaid, uint256 forSalePrice);
+  event ForceBuy(address oldOwner, address newOwner, uint256 tokenId, uint256 valuePaid, uint256 lastPurchasePrice);
+  event SetPrice(address msgSender, uint256 tokenId, uint256 price);
+
   constructor(string memory name, string memory symbol, address nftCollection, address feeWallet, address dto) ERC721(name, symbol) {
     require(nftCollection != address(0), "collection address cannot be zero");
     require(dto != address(0), "dto address cannot be zero");
-    _originalCollection = nftCollection;
+    _originalCollection = IERC721Metadata(nftCollection);
     _feeWallet = feeWallet;
     _dto = DoubleTroubleOrchestrator(dto);
   }
 
   function originalCollection() external view returns (address) {
-    return _originalCollection;
+    return address(_originalCollection);
   }
 
   function safeTransferFrom(address, address, uint256, bytes memory) public override pure {
@@ -49,13 +53,13 @@ contract DoubleTrouble is ERC721URIStorage {
   }
 
   function troublesomeTokenURI(uint256 tokenId) external view returns (string memory) {
-    return IERC721Metadata(_originalCollection).tokenURI(tokenId);
+    return _originalCollection.tokenURI(tokenId);
   }
 
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
     string memory output = '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.base { fill: white; font-family: serif; font-size: 16px; }</style><rect width="100%" height="100%" fill="black" /><text x="10" y="20" class="base">You are in trouble</text></svg>';
 
-    string memory originalAddr = Stringify.toString(_originalCollection);
+    string memory originalAddr = Stringify.toString(address(_originalCollection));
     string memory troublesomeAddr = Stringify.toString(address(this));
     string memory strTokenId = Stringify.toString(tokenId);
     string memory externalLink = string(abi.encodePacked('https://double-trouble.io/collections/', troublesomeAddr, '/', strTokenId));
@@ -70,12 +74,15 @@ contract DoubleTrouble is ERC721URIStorage {
   function setPrice(uint256 tokenId, uint256 price) external {
     // Putting up for sale for the first time
     if (_lastPurchasePrices[tokenId] == 0) {
-      require(IERC721Metadata(_originalCollection).getApproved(tokenId) == address(this), "DoubleTrouble contract must be approved to operate this token");
+      require(_originalCollection.getApproved(tokenId) == msg.sender ||
+              _originalCollection.ownerOf(tokenId) == msg.sender, "msg.sender should be approved or owner of original NFT");
     // All times after
     } else {
       require(_isApprovedOrOwner(msg.sender, tokenId), "msg.sender should be approved or owner of NFT");
     }
     _forSalePrices[tokenId] = price;
+
+    emit SetPrice(msg.sender, tokenId, price);
   }
 
   function buy(uint256 tokenId) payable external {
@@ -84,23 +91,26 @@ contract DoubleTrouble is ERC721URIStorage {
 
     // Make NFT troublesome if this is the first time it's being purchased
     if (_lastPurchasePrices[tokenId] == 0) {
-      require(IERC721Metadata(_originalCollection).getApproved(tokenId) == address(this), "DoubleTrouble contract must be approved to operate this token");
+      require(_originalCollection.getApproved(tokenId) == address(this), "DoubleTrouble contract must be approved to operate this token");
 
       // In the original collection, the owner forever becomes the DoubleTrouble contract
-      address owner = IERC721Metadata(_originalCollection).ownerOf(tokenId);
-      IERC721Metadata(_originalCollection).transferFrom(owner, address(this), tokenId);
+      address owner = _originalCollection.ownerOf(tokenId);
+      _originalCollection.transferFrom(owner, address(this), tokenId);
 
       // Mint an NFT in the DT contract so we start recording the true owner here
       _mint(owner, tokenId);
       _registeredTokens.push(tokenId);
     }
 
+    emit Buy(ownerOf(tokenId), msg.sender, tokenId, msg.value, _forSalePrices[tokenId]);
     _completeBuy(msg.sender, tokenId, msg.value);
   }
 
   function forceBuy(uint256 tokenId) payable external {
     require(_lastPurchasePrices[tokenId] > 0, "NFT was not yet purchased within DoubleTrouble");
     require(msg.value >= (2 * _lastPurchasePrices[tokenId]), "Value sent must be at least twice the last purchase price");
+
+    emit ForceBuy(ownerOf(tokenId), msg.sender, tokenId, msg.value, _lastPurchasePrices[tokenId]);
     _completeBuy(msg.sender, tokenId, msg.value);
   }
 

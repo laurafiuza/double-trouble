@@ -110,7 +110,7 @@ contract("DoubleTroubleOrchestrator", accounts => {
     assert.equal(await dto.patronOf(nonNftTroublesomeAddr), accounts[2], "PTRN owner must be account 2");
 
     assert.notEqual(await dto.approve(metaDt.address, 0, {from: accounts[6]}), undefined, "approval failed (undefined return value).");
-    assert.notEqual(await metaDt.setPrice(0, 1234), undefined, "setPrice failed (undefined return value).");
+    assert.notEqual(await metaDt.setPrice(0, 1234, {from: accounts[6]}), undefined, "setPrice failed (undefined return value).");
     assert.equal(await dto.patronOfTokenId(0), accounts[6], "PTRN owner must still be account 6");
     assert.equal(await dto.patronOf(dt.address), accounts[6], "PTRN owner must be account 6");
 
@@ -119,7 +119,7 @@ contract("DoubleTroubleOrchestrator", accounts => {
     assert.equal(await dto.patronOf(dt.address), accounts[5], "PTRN owner must be account 5");
 
     assert.notEqual(await dto.approve(metaDt.address, 1, {from: accounts[2]}), undefined, "approval failed (undefined return value).");
-    assert.notEqual(await metaDt.setPrice(1, 4567), undefined, "setPrice failed (undefined return value).");
+    assert.notEqual(await metaDt.setPrice(1, 4567, {from: accounts[2]}), undefined, "setPrice failed (undefined return value).");
     assert.equal(await dto.patronOfTokenId(1), accounts[2], "PTRN owner must still be account 2");
     assert.equal(await dto.patronOf(nonNftTroublesomeAddr), accounts[2], "PTRN owner must be account 2");
 

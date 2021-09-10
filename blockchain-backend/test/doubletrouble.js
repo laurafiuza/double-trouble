@@ -59,13 +59,21 @@ contract("DoubleTrouble", accounts => {
   });
 
 
-  it("setPrice should fail without approval", async () => {
-    await assert.rejects(dt.setPrice(1, 1234), /must be approved/);
-  });
 
   it("setPrice should fail for tokenID that doesn't exist", async () => {
     const nonExistentTokenId = 555;
     await assert.rejects(dt.setPrice(nonExistentTokenId, 1234), /nonexistent token/);
+  });
+
+  it("buy should fail without approval", async () => {
+    assert.notEqual(await dt.setPrice(1, 1234), undefined, "setPrice failed (undefined return value).");
+    await assert.rejects(dt.buy(1, {from: accounts[4], value: 1234}), /must be approved/);
+  });
+
+  it("setPrice should fail if msg.sender doesnt own NFT", async () => {
+    assert.notEqual(await cp.approve(dt.address, 1), undefined, "approval failed (undefined return value).");
+    await assert.rejects(dt.setPrice(1, 1, {from: accounts[4]}), /approved or owner/);
+    await assert.rejects(dt.buy(1, {from: accounts[4], value: 1}), /at least the for sale price/);
   });
 
   it("DT contract records the original Collection", async () => {
