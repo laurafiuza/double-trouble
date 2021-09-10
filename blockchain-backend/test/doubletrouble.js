@@ -2,6 +2,7 @@ const assert = require('assert');
 const CryptoPunks = artifacts.require("./CryptoPunks.sol");
 const DoubleTroubleOrchestrator = artifacts.require("./DoubleTroubleOrchestrator.sol");
 const DoubleTrouble = artifacts.require("./DoubleTrouble.sol");
+const truffleAssert = require('truffle-assertions');
 
 const ZERO_ADDR = '0x0000000000000000000000000000000000000000';
 const NON_PRESENT_ID = 79;
@@ -38,20 +39,32 @@ contract("DoubleTrouble", accounts => {
     ret = await dt.setPrice(tokenId, initialPrice);
     assert.notEqual(ret, undefined, "setPrice failed (undefined return value).");
 
+    truffleAssert.eventEmitted(ret, 'SetPrice', (ev) => {
+      return ev.msgSender == accounts[0] && ev.tokenId == tokenId && ev.price == initialPrice;
+    });
+
     const forSalePrice = await dt.forSalePrice(tokenId);
     assert.equal(forSalePrice, initialPrice, "Initial for sale price should be > 0");
 
     const lastPurchasePrice = await dt.lastPurchasePrice(tokenId);
     assert.equal(lastPurchasePrice, 0, "Initial last purchase should be 0");
 
-    await dt.buy(tokenId, {from: accounts[1], value: initialPrice});
+    let tx = await dt.buy(tokenId, {from: accounts[1], value: initialPrice});
+    truffleAssert.eventEmitted(tx, 'Buy', (ev) => {
+      return ev.oldOwner == accounts[0] && ev.newOwner == accounts[1] && ev.tokenId == tokenId &&
+        ev.valuePaid == initialPrice && ev.forSalePrice == initialPrice;
+    });
 
     assert.equal(await dt.ownerOf(tokenId), accounts[1], "owner must be accounts[1].");
 
     assert.equal(await dt.forSalePrice(tokenId), 0, "For sale price should now be 0");
     assert.equal(await dt.lastPurchasePrice(tokenId), initialPrice, "Last purchase price should now be > 0");
 
-    await dt.forceBuy(tokenId, {from: accounts[0], value: initialPrice * 2});
+    tx = await dt.forceBuy(tokenId, {from: accounts[0], value: initialPrice * 2});
+    truffleAssert.eventEmitted(tx, 'ForceBuy', (ev) => {
+      return ev.oldOwner == accounts[1] && ev.newOwner == accounts[0] && ev.tokenId == tokenId &&
+        ev.valuePaid == initialPrice * 2 && ev.lastPurchasePrice == initialPrice;
+    });
 
     assert.equal(await dt.ownerOf(tokenId), accounts[0], "owner must be accounts[0].");
     assert.equal(await dt.forSalePrice(tokenId), 0, "For sale price should now be 0");
