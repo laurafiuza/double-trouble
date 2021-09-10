@@ -36,11 +36,16 @@ class ImageCard extends Component {
 
   deriveExternalCache = async () => {
     if (!this.props.tokenURI) {
-      return {image: undefined};
+      return {};
     }
-    const ret = await axios.get(this.props.tokenURI);
-
-    return { image: ret.data.image };
+    try {
+      const ret = await axios.get(this.props.tokenURI);
+      this.localState.state = 'loaded';
+      return { image: ret.data.image };
+    } catch(err) {
+      this.localState.state = 'failed';
+      return {}
+    }
   };
 
   handleImgError = () => {
@@ -50,12 +55,12 @@ class ImageCard extends Component {
 
   render() {
     /* Loading */
-    if (this.externalCache.image === undefined) {
+    if (this.localState.state === 'loading') {
       return <Spinner animation="border" />;
     }
     /* Image source is not valid */
-    if (this.externalCache.image === null) {
-      return null;
+    if (this.localState.state === 'failed') {
+      return <div>Unable to load image. See <a href={this.props.tokenURI}>metadata</a></div>
     }
     return (
       <Card.Img
