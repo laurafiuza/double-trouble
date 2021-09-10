@@ -71,7 +71,10 @@ contract DoubleTrouble is ERC721URIStorage {
   }
 
   function timeToWithdraw(uint256 tokenId) external view returns (int256) {
-    return int256(this.availableToWithdraw(tokenId) - block.timestamp);
+    // Allow uints to underflow per https://ethereum-blockchain-developer.com/010-solidity-basics/03-integer-overflow-underflow/
+    unchecked {
+      return int256(this.availableToWithdraw(tokenId) - block.timestamp);
+    }
   }
 
   function troublesomeTokenURI(uint256 tokenId) external view returns (string memory) {

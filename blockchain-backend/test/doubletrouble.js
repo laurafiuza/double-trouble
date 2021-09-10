@@ -280,7 +280,9 @@ contract("DoubleTrouble", accounts => {
     registeredTokens = (await dt.registeredTokens()).map(t => { return t.words[0] });
     assert.deepEqual(registeredTokens, [0, 2, 1], "Number of registered tokens does not match");
 
+    assert(await dt.timeToWithdraw(2) > 0, "Still have some time to Withdraw");
     await time.increase(time.duration.days(31));
+    assert(await dt.timeToWithdraw(2) < 0, "Can already withdraw");
 
     // Withdraw token 2
     await dt.withdraw(2, {from: accounts[1], value: Math.floor(initialPrice / 65)});
