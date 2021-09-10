@@ -54,7 +54,7 @@ contract("DoubleTrouble", accounts => {
     let tx = await dt.buy(tokenId, {from: accounts[1], value: initialPrice});
     truffleAssert.eventEmitted(tx, 'Buy', (ev) => {
       return ev.oldOwner == accounts[0] && ev.newOwner == accounts[1] && ev.tokenId == tokenId &&
-        ev.valuePaid == initialPrice && ev.forSalePrice == initialPrice;
+        ev.valueSent == initialPrice && ev.amountPaid == initialPrice;
     });
 
     assert.equal(await dt.ownerOf(tokenId), accounts[1], "owner must be accounts[1].");
@@ -65,7 +65,7 @@ contract("DoubleTrouble", accounts => {
     tx = await dt.forceBuy(tokenId, {from: accounts[0], value: initialPrice * 2});
     truffleAssert.eventEmitted(tx, 'ForceBuy', (ev) => {
       return ev.oldOwner == accounts[1] && ev.newOwner == accounts[0] && ev.tokenId == tokenId &&
-        ev.valuePaid == initialPrice * 2 && ev.lastPurchasePrice == initialPrice;
+        ev.valueSent == initialPrice * 2 && ev.lastPurchasePrice == initialPrice;
     });
 
     assert.equal(await dt.ownerOf(tokenId), accounts[0], "owner must be accounts[0].");

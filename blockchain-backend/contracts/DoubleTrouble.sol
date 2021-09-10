@@ -20,8 +20,8 @@ contract DoubleTrouble is ERC721URIStorage {
   uint256 public _dtDenominator;
   uint256[] _registeredTokens;
 
-  event Buy(address oldOwner, address newOwner, uint256 tokenId, uint256 valuePaid, uint256 forSalePrice);
-  event ForceBuy(address oldOwner, address newOwner, uint256 tokenId, uint256 valuePaid, uint256 lastPurchasePrice);
+  event Buy(address oldOwner, address newOwner, uint256 tokenId, uint256 valueSent, uint256 amountPaid);
+  event ForceBuy(address oldOwner, address newOwner, uint256 tokenId, uint256 valueSent, uint256 lastPurchasePrice, uint256 amountPaid);
   event SetPrice(address msgSender, uint256 tokenId, uint256 price);
   event Withdraw(address owner, uint256 tokenId, uint256 lastPurchasePrice);
 
@@ -128,7 +128,7 @@ contract DoubleTrouble is ERC721URIStorage {
     }
 
     emit Buy(ownerOf(tokenId), msg.sender, tokenId, msg.value, _forSalePrices[tokenId]);
-    _completeBuy(msg.sender, tokenId, msg.value);
+    _completeBuy(msg.sender, tokenId, _forSalePrices[tokenId]);
   }
 
   function withdraw(uint256 tokenId) payable external {
@@ -149,7 +149,7 @@ contract DoubleTrouble is ERC721URIStorage {
     _forSalePrices[tokenId] = 0;
     _lastPurchaseTimes[tokenId] = 0;
 
-    _sendFees(pricePaid / _feeRate);
+    _sendFees(pricePaid / _feeRate, msg.value);
   }
 
   function _removeRegistered(uint256 tokenId) internal {
@@ -171,36 +171,38 @@ contract DoubleTrouble is ERC721URIStorage {
 
   function forceBuy(uint256 tokenId) payable external {
     require(_lastPurchasePrices[tokenId] > 0, "NFT was not yet purchased within DoubleTrouble");
-    require(msg.value >= (_dtNumerator * _lastPurchasePrices[tokenId] / _dtDenominator), "Value sent must be at least twice the last purchase price");
+    uint256 amountToPay = _dtNumerator * _lastPurchasePrices[tokenId] / _dtDenominator;
+    require(msg.value >= amountToPay, "Value sent must be at least twice the last purchase price");
 
-    emit ForceBuy(ownerOf(tokenId), msg.sender, tokenId, msg.value, _lastPurchasePrices[tokenId]);
-    _completeBuy(msg.sender, tokenId, msg.value);
+    emit ForceBuy(ownerOf(tokenId), msg.sender, tokenId, msg.value, _lastPurchasePrices[tokenId], amountToPay);
+    _completeBuy(msg.sender, tokenId, amountToPay);
   }
 
-  function _completeBuy(address newOwner, uint256 tokenId, uint256 amountPaid) internal virtual {
+  function _completeBuy(address newOwner, uint256 tokenId, uint256 amountToPay) internal virtual {
     // Change owner, set last purchase price, and remove from sale
     address oldOwner = ownerOf(tokenId);
     _transfer(oldOwner, newOwner, tokenId);
-    _lastPurchasePrices[tokenId] = amountPaid;
+    _lastPurchasePrices[tokenId] = amountToPay;
     _lastPurchaseTimes[tokenId] = block.timestamp;
     _forSalePrices[tokenId] = 0;
-    uint256 feeToCharge = amountPaid / _feeRate;
+    uint256 patronFee = amountToPay / _feeRate;
 
     // Send ether to the old owner. Must be at the very end of the buy function to prevent reentrancy attacks
     // https://consensys.net/diligence/blog/2019/09/stop-using-soliditys-transfer-now/
-    (bool oldOwnersuccess, ) = oldOwner.call{value: amountPaid - 2 * feeToCharge}("");
+    uint256 amountSent = amountToPay - 2 * patronFee;
+    (bool oldOwnersuccess, ) = oldOwner.call{value: amountSent}("");
     require(oldOwnersuccess, "Transfer to owner failed.");
 
-    _sendFees(feeToCharge);
+    _sendFees(patronFee, msg.value - amountSent);
   }
 
-  function _sendFees(uint256 feeToCharge) internal virtual {
+  function _sendFees(uint256 patronFee, uint256 valueLeft) internal virtual {
     // Send fee to patron of this troublesome Collection
     address patron = _dto.patronOf(address(this));
-    (bool patronSuccess, ) = patron.call{value: feeToCharge}("");
+    (bool patronSuccess, ) = patron.call{value: patronFee}("");
 
     // Send rest of the fee to the DT wallet
-    uint256 rest = patronSuccess ? feeToCharge : 2 * feeToCharge;
+    uint256 rest = patronSuccess ? valueLeft - patronFee : valueLeft;
     (bool feeWalletSuccess, ) = _feeWallet.call{value: rest}("");
     require(feeWalletSuccess, "Transfer to DT wallet failed.");
   }
