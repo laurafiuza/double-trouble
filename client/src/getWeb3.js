@@ -1,21 +1,27 @@
 import Web3 from "web3";
 
 const chains = {
-  // Ethereum Mainnet
   "1": {
     name: "Ethereum",
     currency: "ETH",
     orchestratorAddr: undefined,
   },
 
-  // Polygon mainnet
+  "5": {
+    name: "Goerli Test Network",
+    currency: "GOR",
+    orchestratorAddr: undefined,
+  },
   "137": {
     name: "Polygon",
     currency: "MATIC",
     orchestratorAddr: undefined,
   },
-
-  // Local Ganache dev
+  "8001": {
+    name: "Polygon Mumbai",
+    currency: "tMATIC",
+    orchestratorAddr: undefined,
+  },
   "1337": {
     name: "Ganache",
     currency: "GNACH",
