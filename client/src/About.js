@@ -4,14 +4,14 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 class About extends Component {
   render() {
-    return <Card style={{width: '36rem'}}>
+    return <Card>
       <Card.Body>
           <ListGroup>
           <ListGroup.Item>
             <Card.Title>About</Card.Title>
             <ListGroup variant="flush">
               <ListGroup.Item>
-                Double Trouble is an NFT exchange platform with a catch: you can force buy any NFT in the platform as long as you're willing to pay 2x what the current owner paid for it.
+                Double Trouble is an NFT exchange platform with a catch: you can "force buy" any NFT in the platform - i.e. force someone to sell it as long as you're willing to pay 2x what the current owner paid for it.
               </ListGroup.Item>
               <ListGroup.Item>
                 You can list existing NFTs you own for sale in Double Trouble. Our platform works for any NFT that implements the <a href="https://ethereum.org/en/developers/docs/standards/tokens/erc-721/">ERC-721 interface</a>.
@@ -22,10 +22,7 @@ class About extends Component {
           <Card.Title>How it works</Card.Title>
           <ListGroup variant="flush">
             <ListGroup.Item>
-              Under the hood, we create a new Troublesome contract (i.e. Troublesome Collection) out of any existing NFT contract (i.e. Original Collection). Once you buy an NFT within DoubleTrouble, you own it in the Troublesome Collection, but the Troublesome Contract itself owns it from the perspective of the Original Collection. This way, you are still the only de facto (human) owner of the NFT.
-            </ListGroup.Item>
-            <ListGroup.Item>
-              You can list an existing NFT for sale within Double Trouble without any commitments. However, as soon as someone purchases it, that NFT becomes forever locked in the platform - so anyone wanting to buy it from the new owner needs to do so in Double Trouble moving forward - so as to forever preserve the 2x force buy functionality for that NFT.
+              Under the hood, we create a new Troublesome contract (i.e. Troublesome Collection) out of any existing NFT contract (i.e. Original Collection). Once you buy an NFT within DoubleTrouble, the NFT gets locked in escrow for 30 days in the Troublesome collection in order to preserve the 2x force buy functionality. The NFT is still 100% yours. You can still sell it (or someone else can still force buy it) while it's in escrow. But if you want to withdraw the NFT from DoubleTrouble for any utility purposes, you need to wait 30 days after purchasing it.
             </ListGroup.Item>
           </ListGroup>
           </ListGroup.Item>
