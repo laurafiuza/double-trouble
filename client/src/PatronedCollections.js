@@ -78,35 +78,38 @@ class PatronedCollections extends Component {
     }
 
     return (
-      <CardGroup style={{width: "72rem"}}>
-        { this.externalCache.patronedCollections.map(collection => {
-          return (<Card key={collection.troublesomeAddr} style={{width: '24rem'}}>
-            <Card.Body>
-              <Card.Title>{collection.name}</Card.Title>
-              <Card.Subtitle>{collection.symbol}</Card.Subtitle>
-              <ImageCard tokenURI={collection.tokenURI}/>
+      <>
+        <h1>All collections innaugurated in DoubleTrouble</h1>
+        <CardGroup style={{width: "72rem"}}>
+          { this.externalCache.patronedCollections.map(collection => {
+            return (<Card key={collection.troublesomeAddr} style={{width: '24rem'}}>
+              <Card.Body>
+                <Card.Title>{collection.name}</Card.Title>
+                <Card.Subtitle>{collection.symbol}</Card.Subtitle>
+                <ImageCard tokenURI={collection.tokenURI}/>
 
-              <div>
-                <Card.Link href={`/collections/${collection.troublesomeAddr}`}>View collection</Card.Link>
-                <Card.Link href={`/collections/${this.externalCache.dto._address}/${collection.tokenId}`}>View PTRN token</Card.Link>
-              </div>
-              <Table striped bordered hover>
-                <tbody>
-                  <tr>
-                    <td>Patron</td>
-                    <td className="ellipsis-overflow">{truncAddr(collection.patron, 8)}</td>
-                  </tr>
-                  <tr>
-                    <td>NFTs in DoubleTrouble</td>
-                    <td>{(collection.registeredTokens ? collection.registeredTokens : []).length}</td>
-                  </tr>
-                </tbody>
-              </Table>
-            </Card.Body>
-              </Card>);
-          })
-        }
-      </CardGroup>
+                <div>
+                  <Card.Link href={`/collections/${collection.troublesomeAddr}`}>View collection</Card.Link>
+                  <Card.Link href={`/collections/${this.externalCache.dto._address}/${collection.tokenId}`}>View PTRN token</Card.Link>
+                </div>
+                <Table striped bordered hover>
+                  <tbody>
+                    <tr>
+                      <td>Patron</td>
+                      <td className="ellipsis-overflow">{truncAddr(collection.patron, 8)}</td>
+                    </tr>
+                    <tr>
+                      <td>NFTs in DoubleTrouble</td>
+                      <td>{(collection.registeredTokens ? collection.registeredTokens : []).length}</td>
+                    </tr>
+                  </tbody>
+                </Table>
+              </Card.Body>
+                </Card>);
+            })
+          }
+        </CardGroup>
+      </>
     );
   }
 }
