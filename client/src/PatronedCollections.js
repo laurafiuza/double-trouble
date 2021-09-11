@@ -4,14 +4,8 @@ import { Table, Card, CardGroup, Spinner } from "react-bootstrap";
 import DoubleTrouble from "./contracts/DoubleTrouble.json";
 import ErrorCard from './ErrorCard';
 import ImageCard from './ImageCard';
+import { truncAddr } from './utils';
 
-
-function truncAddr(str, num) {
-  if (str.length <= num) {
-    return str
-  }
-  return str.slice(0, num) + '...'
-}
 
 class PatronedCollections extends Component {
   constructor(props) {

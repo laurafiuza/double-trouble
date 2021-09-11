@@ -3,7 +3,9 @@ import ErrorCard from "./ErrorCard";
 import ImageCard from "./ImageCard";
 import DoubleTroubleContract from "./contracts/DoubleTrouble.json";
 import GenericNFTContract from "./contracts/IERC721Metadata.json";
-import { Spinner, CardGroup, Card } from "react-bootstrap";
+import { Table, Spinner, CardGroup, Card } from "react-bootstrap";
+import { derivePrice, truncAddr } from './utils';
+
 
 class AllNFTsInCollection extends Component {
   constructor(props) {
@@ -35,30 +37,54 @@ class AllNFTsInCollection extends Component {
       this.props.collection,
     );
 
-    let nfts = [];
-
+    let originalCollection, collectionName, collectionSymbol, nfts = [];
     try {
-      const tokenIds = await troublesomeCollection.methods.registeredTokens().call();
-      for (const id of tokenIds) {
-        const tokenURI = await troublesomeCollection.methods.troublesomeTokenURI(id).call();
-        const originalAddr = await troublesomeCollection.methods.originalCollection().call();
-        const originalCollection = new this.props.web3.eth.Contract(
-          GenericNFTContract.abi,
-          originalAddr,
-        );
-        const name = await originalCollection.methods.name().call();
-        const symbol = await originalCollection.methods.symbol().call();
-        nfts = [...nfts, {tokenId: id, tokenURI, name, symbol}];
-      }
+      // Fetch collection metadata
+      collectionName = await troublesomeCollection.methods.name().call();
+      collectionSymbol = await troublesomeCollection.methods.symbol().call();
+      const originalAddr = await troublesomeCollection.methods.originalCollection().call();
+      originalCollection = new this.props.web3.eth.Contract(
+        GenericNFTContract.abi,
+        originalAddr,
+      );
+
+      // Fetch all NFTs known to Double Trouble
+      const allKnownTokens = (await troublesomeCollection.methods.allKnownTokens().call()).map((t) => {
+        return {tokenId: parseInt(t.tokenId), lastPurchasePrice: parseInt(t.lastPurchasePrice), forSalePrice: parseInt(t.forSalePrice)}
+      });
+      nfts = (await Promise.allSettled(allKnownTokens.map(async (t) => {
+        const tokenURI = await troublesomeCollection.methods.troublesomeTokenURI(t.tokenId).call();
+        let owner;
+
+        // Troublesome NFT
+        if (t.lastPurchasePrice > 0) {
+          owner = await troublesomeCollection.methods.ownerOf(t.tokenId).call();
+
+        // Regular NFT
+        } else {
+          owner = await originalCollection.methods.ownerOf(t.tokenId).call();
+        }
+
+        return {
+          tokenURI, owner,
+          tokenId: t.tokenId, lastPurchasePrice: t.lastPurchasePrice, forSalePrice: t.forSalePrice
+        }
+
+      // Filter out the NFTs that failed to fetch
+      }))).filter((ret) => ret.status == 'fulfilled').map((ret) => ret.value);
 
     } catch(err) {
-      throw new Error('Error retrieving registered tokens in this collection.');
+      throw new Error('Error retrieving tokens in this collection.');
     }
 
-    return {nfts};
+    return {collectionName, collectionSymbol, nfts};
   }
 
   render() {
+    if (!this.props.web3) {
+      return <div>Please connect to a wallet</div>
+    }
+
     if (this.externalCache.nfts === undefined) {
       return <Spinner animation="border"/>
     }
@@ -66,21 +92,45 @@ class AllNFTsInCollection extends Component {
     if (this.localState.error !== undefined) {
       return <ErrorCard error={this.localState.error} />
     }
+    const {collectionName, collectionSymbol, nfts} = this.externalCache;
 
-    return (<CardGroup style={{width: '72rem'}}>
-      { this.externalCache.nfts.map(nft => {
-        return (
-          <Card style={{width: '24rem'}}>
-            <Card.Body>
-              <ImageCard tokenURI={nft.tokenURI}/>
-              <Card.Title>{nft.name}</Card.Title>
-              <Card.Subtitle>{nft.symbol}</Card.Subtitle>
-              <Card.Link href={`/collections/${this.props.collection}/${nft.tokenId}`}>View it here</Card.Link>
-            </Card.Body>
-          </Card>
-        )
-      })}
-      </CardGroup>);
+    return (
+      <>
+        <h1>{collectionName} {collectionSymbol}</h1>
+        <CardGroup style={{width: '72rem'}}>
+        { nfts.map(nft => {
+
+          const price = derivePrice(nft.forSalePrice, nft.lastPurchasePrice, 2);
+          const priceEth = this.props.web3.utils.fromWei(price.toString(), 'ether');
+          const currency = this.props.web3.chain.currency;
+
+          return (
+            <Card key={nft.tokenId} style={{width: '24rem'}}>
+              <Card.Body>
+                <Card.Title>{collectionName} #{nft.tokenId}</Card.Title>
+                <ImageCard tokenURI={nft.tokenURI}/>
+                <Card.Link href={`/collections/${this.props.collection}/${nft.tokenId}`}>View it here</Card.Link>
+              </Card.Body>
+              <Table striped bordered hover>
+                <tbody>
+                  <tr>
+                    <td>Owner</td>
+                    <td>{truncAddr(nft.owner, 8)} {nft.owner == this.props.web3.defaultAccount && "(You!)"}</td>
+                  </tr>
+                  {price > 0 &&
+                    <tr>
+                      <td>Price</td>
+                      <td>{priceEth} {currency}</td>
+                    </tr>
+                  }
+                </tbody>
+              </Table>
+            </Card>
+          )
+        })}
+        </CardGroup>
+      </>
+    );
   };
 }
 
