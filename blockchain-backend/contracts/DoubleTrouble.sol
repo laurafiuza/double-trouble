@@ -8,6 +8,12 @@ interface PatronCollection {
    function patronOf(address troublesomeCollectionAddr) external view returns (address);
 }
 
+// Cannot include more than these two fields because otherwise the contract size gets above the 24k limit
+struct TokenInfo {
+   uint256 tokenId;
+   uint256 lastPurchasePrice;
+}
+
 // SPDX-License-Identifier: MIT
 contract DoubleTrouble is ERC721URIStorage {
   // nested mapping that keeps track of who owns the NFTs
@@ -21,7 +27,10 @@ contract DoubleTrouble is ERC721URIStorage {
   uint256 public _daysForWithdraw;
   uint256 public _dtNumerator;
   uint256 public _dtDenominator;
-  uint256[] _registeredTokens;
+
+  // Implement EnumerableSet so we dont go above the 24k contract size
+  uint256[] _allKnownTokens;
+  mapping (uint256 => bool) _allKnownTokensSet;
 
   event Buy(address oldOwner, address newOwner, uint256 tokenId, uint256 valueSent, uint256 amountPaid);
   event ForceBuy(address oldOwner, address newOwner, uint256 tokenId, uint256 valueSent, uint256 lastPurchasePrice, uint256 amountPaid);
@@ -100,6 +109,8 @@ contract DoubleTrouble is ERC721URIStorage {
   }
 
   function setPrice(uint256 tokenId, uint256 price) external {
+    _addKnownToken(tokenId);
+
     // Putting up for sale for the first time
     if (_lastPurchasePrices[tokenId] == 0) {
       require(_originalCollection.getApproved(tokenId) == msg.sender ||
@@ -116,6 +127,7 @@ contract DoubleTrouble is ERC721URIStorage {
   function buy(uint256 tokenId) payable external {
     require(_forSalePrices[tokenId] > 0, "NFT is not for sale");
     require(msg.value >= _forSalePrices[tokenId], "Value sent must be at least the for sale price");
+    _addKnownToken(tokenId);
 
     // Make NFT troublesome if this is the first time it's being purchased
     if (_lastPurchasePrices[tokenId] == 0) {
@@ -127,7 +139,6 @@ contract DoubleTrouble is ERC721URIStorage {
 
       // Mint an NFT in the DT contract so we start recording the true owner here
       _mint(owner, tokenId);
-      _registeredTokens.push(tokenId);
     }
 
     emit Buy(ownerOf(tokenId), msg.sender, tokenId, msg.value, _forSalePrices[tokenId]);
@@ -145,7 +156,6 @@ contract DoubleTrouble is ERC721URIStorage {
     // Transfer original NFT back to owner, and burn troublesome NFT
     _originalCollection.transferFrom(address(this), ownerOf(tokenId), tokenId);
     _burn(tokenId);
-    _removeRegistered(tokenId);
 
     // Reset DT state for tokenId
     _lastPurchasePrices[tokenId] = 0;
@@ -155,27 +165,11 @@ contract DoubleTrouble is ERC721URIStorage {
     _sendFees(pricePaid / _feeRate, msg.value);
   }
 
-  function _removeRegistered(uint256 tokenId) internal {
-    bool found = false;
-    for (uint256 i = 0; i < _registeredTokens.length - 1; i++) {
-      if (_registeredTokens[i] == tokenId) {
-        found = true;
-      }
-
-      if (found) {
-        _registeredTokens[i] = _registeredTokens[i + 1];
-      }
-    }
-
-    require(found || _registeredTokens[_registeredTokens.length - 1] == tokenId, "tokenId not found in remove");
-    _registeredTokens.pop();
-  }
-
-
   function forceBuy(uint256 tokenId) payable external {
     require(_lastPurchasePrices[tokenId] > 0, "NFT was not yet purchased within DoubleTrouble");
     uint256 amountToPay = _dtNumerator * _lastPurchasePrices[tokenId] / _dtDenominator;
     require(msg.value >= amountToPay, "Value sent must be at least twice the last purchase price");
+    _addKnownToken(tokenId);
 
     emit ForceBuy(ownerOf(tokenId), msg.sender, tokenId, msg.value, _lastPurchasePrices[tokenId], amountToPay);
     _completeBuy(msg.sender, tokenId, amountToPay);
@@ -214,7 +208,19 @@ contract DoubleTrouble is ERC721URIStorage {
     return interfaceId == 0xdeadbeef || super.supportsInterface(interfaceId);
   }
 
-  function registeredTokens() external view returns (uint256[] memory) {
-    return _registeredTokens;
+  function allKnownTokens() external view returns (TokenInfo[] memory) {
+    TokenInfo[] memory ret = new TokenInfo[](_allKnownTokens.length);
+    for (uint256 i = 0; i < _allKnownTokens.length; i++) {
+      uint256 id = _allKnownTokens[i];
+      ret[i] = TokenInfo(id, this.lastPurchasePrice(id));
+    }
+    return ret;
+  }
+
+  function _addKnownToken(uint256 tokenId) internal {
+    if (!_allKnownTokensSet[tokenId]) {
+      _allKnownTokensSet[tokenId] = true;
+      _allKnownTokens.push(tokenId);
+    }
   }
 }
