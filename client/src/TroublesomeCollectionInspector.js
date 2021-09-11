@@ -173,7 +173,7 @@ class TroublesomeCollectionInspector extends Component {
               { isTroublesome &&
                 <tr>
                   <td>Time to withdraw</td>
-                  <td>{countdownToWithdraw.toString()}</td>
+                  <td>{secondsToWithdraw <= 0 ? '0 seconds' : countdownToWithdraw.toString()}</td>
                 </tr>
               }
               <tr>
@@ -185,6 +185,7 @@ class TroublesomeCollectionInspector extends Component {
           { isTroublesome &&
             <Card.Title>This NFT is troublesome!</Card.Title>
           }
+
           { isOwner &&
             <>
               <Card.Subtitle style={{color: "green"}}>You are the owner</Card.Subtitle>
@@ -234,7 +235,7 @@ class TroublesomeCollectionInspector extends Component {
               <Card.Link href={`https://opensea.io/assets/${originalCollection._address}/${this.props.tokenId}`}>View it on OpenSea</Card.Link>
             </div>
           }
-          {secondsToWithdraw <= 0 &&
+          {isTroublesome && isOwner && secondsToWithdraw <= 0 &&
             <Button variant="success" onClick={this.withdraw}>Withdraw from DoubleTrouble</Button>
           }
         </Card.Body>
