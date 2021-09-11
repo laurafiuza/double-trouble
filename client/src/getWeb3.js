@@ -9,12 +9,12 @@ const chains = {
   "4": {
     name: "Rinkeby Testnet",
     currency: "RIN",
-    orchestratorAddr: "0x43dEcC964C9c125d335dcC920E1AF273eaF14fE0",
+    orchestratorAddr: "0xf3C55eB3774749484D36e975D8085Ebe99Aa1819",
   },
   "5": {
     name: "Goerli Testnet",
     currency: "GOR",
-    orchestratorAddr: "0x149b12591592b6beB359dd1C19Dca80Dc63A29dC",
+    orchestratorAddr: undefined,
   },
   "137": {
     name: "Polygon",
