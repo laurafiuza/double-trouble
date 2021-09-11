@@ -9,7 +9,7 @@ import {
 import CollectionInspector from "./CollectionInspector";
 import About from "./About";
 import Find from "./Find";
-import AllCollections from "./AllCollections";
+import PatronedCollections from "./PatronedCollections";
 import { Badge, Spinner, Navbar, Container, Nav, Button } from 'react-bootstrap';
 import ErrorCard from "./ErrorCard";
 import AllNFTsInCollection from "./AllNFTsInCollection";
@@ -136,7 +136,7 @@ class DoubleTrouble extends Component {
               }} />
               <Route path="/collections">
                 {this.externalCache.web3
-                  ? <AllCollections web3={this.externalCache.web3} />
+                  ? <PatronedCollections web3={this.externalCache.web3} />
                   : pleaseConnect
                 }
               </Route>
