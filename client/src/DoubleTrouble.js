@@ -79,7 +79,7 @@ class DoubleTrouble extends Component {
                   <Nav className="me-auto">
                     <Nav.Link href="/">Home</Nav.Link>
                     <Nav.Link href="/collections">All collections</Nav.Link>
-                    <Button><a style={{textDecoration: "none", color: "white"}} href="/find">Find your NFT</a></Button>
+                    <Button><a style={{textDecoration: "none", color: "white"}} href="/find">List your NFT in Double Trouble</a></Button>
                   </Nav>
                 </Navbar.Collapse>
             </Container>
