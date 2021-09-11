@@ -4,7 +4,7 @@ const chains = {
   "1": {
     name: "Ethereum",
     currency: "ETH",
-    orchestratorAddr: undefined,
+    orchestratorAddr: "0x3Ad40c13b138E8bb11700e4562B71a9860a0FE78",
   },
   "4": {
     name: "Rinkeby Testnet",
