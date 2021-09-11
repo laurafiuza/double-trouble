@@ -15,6 +15,21 @@ import ErrorCard from "./ErrorCard";
 import AllNFTsInCollection from "./AllNFTsInCollection";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+function EnsureConnected(props) {
+  if (!props.web3) {
+    return <div>Please connect to your wallet...</div>;
+  }
+
+  if (props.web3.chain === undefined || props.web3.chain.orchestratorAddr === undefined) {
+    return <>
+      <h2>Ops</h2>
+      <div>Network with Chain ID {props.web3.chainId} not supported. Please connect your wallet to a different network.</div>
+      </>;
+  }
+
+  return props.children;
+}
+
 class DoubleTrouble extends Component {
   constructor() {
     super();
@@ -64,10 +79,11 @@ class DoubleTrouble extends Component {
   };
 
   render() {
-    const pleaseConnect = <div>Please connect to your wallet...</div>;
     if (this.localState.error !== undefined) {
       return <ErrorCard error={this.localState.error} />;
     }
+
+
     return (
         <Router>
           <div>
@@ -101,36 +117,28 @@ class DoubleTrouble extends Component {
                 renders the first one that matches the current URL. */}
             <Switch>
               <Route path="/collections/:collection/:tokenId" render={({match}) => {
-                if (!this.externalCache.web3) {
-                  return pleaseConnect;
-                }
-
-                return <CollectionInspector web3={this.externalCache.web3}
-                  collection={match.params.collection} tokenId={match.params.tokenId} />
+                return (
+                  <EnsureConnected web3={this.externalCache.web3}>
+                    <CollectionInspector web3={this.externalCache.web3} collection={match.params.collection} tokenId={match.params.tokenId} />
+                  </EnsureConnected>
+                );
               }} />
               <Route path="/collections/:collection" render={({match}) => {
-                return <>
-                {
-                  this.externalCache.web3
-                    ?
-                  <AllNFTsInCollection web3={this.externalCache.web3}
-                  collection={match.params.collection} />
-                  :
-                  <Spinner animation="border" />
-                }
-                  </>
+                return (
+                  <EnsureConnected web3={this.externalCache.web3}>
+                    <AllNFTsInCollection web3={this.externalCache.web3} collection={match.params.collection} />
+                  </EnsureConnected>
+                );
               }} />
               <Route path="/collections">
-                {this.externalCache.web3
-                  ? <PatronedCollections web3={this.externalCache.web3} />
-                  : pleaseConnect
-                }
+                <EnsureConnected web3={this.externalCache.web3}>
+                  <PatronedCollections web3={this.externalCache.web3} />
+                </EnsureConnected>
               </Route>
               <Route path="/find">
-                {this.externalCache.web3
-                  ? <Find />
-                  : pleaseConnect
-                }
+                <EnsureConnected web3={this.externalCache.web3}>
+                  <Find />
+                </EnsureConnected>
               </Route>
               <Route path="/">
                 <About />
