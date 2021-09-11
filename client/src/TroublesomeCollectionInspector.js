@@ -234,6 +234,9 @@ class TroublesomeCollectionInspector extends Component {
               <Card.Link href={`https://opensea.io/assets/${originalCollection._address}/${this.props.tokenId}`}>View it on OpenSea</Card.Link>
             </div>
           }
+          {secondsToWithdraw <= 0 &&
+            <Button variant="success" onClick={this.withdraw}>Withdraw from DoubleTrouble</Button>
+          }
         </Card.Body>
       </Card>
     );
@@ -273,6 +276,20 @@ class TroublesomeCollectionInspector extends Component {
       const { troublesomeCollection, forSalePrice } = this.externalCache;
       await troublesomeCollection.methods.buy(this.props.tokenId)
         .send({from: this.props.web3.defaultAccount, value: forSalePrice});
+      this.deriveAndRender();
+    } catch (err) {
+      console.warn(err);
+      this.localState.error = err.message;
+      this.forceUpdate();
+    }
+  };
+
+  withdraw = async () => {
+    try {
+      const { troublesomeCollection, lastPurchasePrice } = this.externalCache;
+      const fee = Math.ceil(lastPurchasePrice / 130) * 2;
+      await troublesomeCollection.methods.withdraw(this.props.tokenId)
+        .send({from: this.props.web3.defaultAccount, value: fee});
       this.deriveAndRender();
     } catch (err) {
       console.warn(err);
