@@ -6,7 +6,7 @@ export const truncAddr = (str, num) => {
 }
 
 export const derivePrice = (forSalePrice, lastPurchasePrice, dtFactor) => {
-  if (forSalePrice == 0 && lastPurchasePrice == 0) {
+  if (forSalePrice === 0 && lastPurchasePrice === 0) {
     return 0;
   } else if (forSalePrice > 0 && lastPurchasePrice > 0) {
     return Math.min(forSalePrice, lastPurchasePrice * dtFactor);

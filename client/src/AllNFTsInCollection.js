@@ -71,7 +71,7 @@ class AllNFTsInCollection extends Component {
         }
 
       // Filter out the NFTs that failed to fetch
-      }))).filter((ret) => ret.status == 'fulfilled').map((ret) => ret.value);
+      }))).filter((ret) => ret.status === 'fulfilled').map((ret) => ret.value);
 
     } catch(err) {
       throw new Error('Error retrieving tokens in this collection.');
@@ -115,7 +115,7 @@ class AllNFTsInCollection extends Component {
                 <tbody>
                   <tr>
                     <td>Owner</td>
-                    <td>{truncAddr(nft.owner, 8)} {nft.owner == this.props.web3.defaultAccount && "(You!)"}</td>
+                    <td>{truncAddr(nft.owner, 8)} {nft.owner === this.props.web3.defaultAccount && "(You!)"}</td>
                   </tr>
                   {price > 0 &&
                     <tr>
