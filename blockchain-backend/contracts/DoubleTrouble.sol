@@ -12,6 +12,8 @@ interface PatronCollection {
 struct TokenInfo {
    uint256 tokenId;
    uint256 lastPurchasePrice;
+   uint256 forSalePrice;
+   uint256 availableToWithdraw;
 }
 
 // SPDX-License-Identifier: MIT
@@ -212,7 +214,8 @@ contract DoubleTrouble is ERC721URIStorage {
     TokenInfo[] memory ret = new TokenInfo[](_allKnownTokens.length);
     for (uint256 i = 0; i < _allKnownTokens.length; i++) {
       uint256 id = _allKnownTokens[i];
-      ret[i] = TokenInfo(id, this.lastPurchasePrice(id));
+      ret[i] = TokenInfo(id, _lastPurchasePrices[id], _forSalePrices[id],
+                         _lastPurchaseTimes[id] + (_daysForWithdraw * 1 days));
     }
     return ret;
   }
