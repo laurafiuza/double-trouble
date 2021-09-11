@@ -31,6 +31,8 @@ contract("DoubleTrouble", accounts => {
     dt = await DoubleTrouble.at(dt_address);
     assert.equal(dt_address, dt.address, "Address returned by orchestrator must match dt.deployed().");
 
+    assert.deepEqual(await dt.registeredTokens(), [], "Must return empty registered tokens");
+
     tokenId = 0;
     web3.eth.defaultAccount = accounts[0];
 
