@@ -42,18 +42,20 @@ class PatronedCollections extends Component {
         troublesomeAddr,
       );
 
-      let name, symbol, tokenURI, patron, registeredTokens;
+      let name, symbol, tokenURI, patron, allKnownTokens = [];
       try {
         name = await troublesomeCollection.methods.name().call();
         symbol = await troublesomeCollection.methods.symbol().call();
         tokenURI = await dto.methods.tokenURI(i).call();
         patron = await dto.methods.patronOfTokenId(i).call();
-        registeredTokens = await troublesomeCollection.methods.registeredTokens().call();
+        allKnownTokens = await troublesomeCollection.methods.allKnownTokens().call();
       } catch(err) {
         // NOOP
       }
 
-      return {name, symbol, tokenURI, patron, troublesomeAddr, registeredTokens, tokenId: i};
+      const tokensForSale = allKnownTokens.filter((t) => {return parseInt(t.forSalePrice) > 0 || parseInt(t.lastPurchasePrice) > 0});
+
+      return {name, symbol, tokenURI, patron, troublesomeAddr, tokensForSale, tokenId: i};
     }));
     return {dto, patronedCollections};
   };
@@ -99,8 +101,8 @@ class PatronedCollections extends Component {
                       <td className="ellipsis-overflow">{truncAddr(collection.patron, 8)}</td>
                     </tr>
                     <tr>
-                      <td>NFTs in DoubleTrouble</td>
-                      <td>{(collection.registeredTokens ? collection.registeredTokens : []).length}</td>
+                      <td>Tokens for Sale</td>
+                      <td>{collection.tokensForSale.length}</td>
                     </tr>
                   </tbody>
                 </Table>
