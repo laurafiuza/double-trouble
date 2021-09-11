@@ -10,7 +10,7 @@ import CollectionInspector from "./CollectionInspector";
 import About from "./About";
 import Find from "./Find";
 import PatronedCollections from "./PatronedCollections";
-import { Badge, Spinner, Navbar, Container, Nav, Button } from 'react-bootstrap';
+import { Badge, Navbar, Container, Nav, Button } from 'react-bootstrap';
 import ErrorCard from "./ErrorCard";
 import AllNFTsInCollection from "./AllNFTsInCollection";
 import 'bootstrap/dist/css/bootstrap.min.css';
