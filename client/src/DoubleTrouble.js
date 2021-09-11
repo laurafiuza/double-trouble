@@ -61,17 +61,7 @@ class DoubleTrouble extends Component {
 
   deriveExternalCache = async () => {
     const web3 = this.localState.shouldLoadWeb3 ? (await getWeb3()) : null;
-    let troublesomePatronCollection = undefined;
-    if (web3) {
-      try {
-        const dto = await doubleTroubleOrchestrator(web3);
-        troublesomePatronCollection = await dto.methods.troublesomeCollection(web3.chain.orchestratorAddr).call();
-      } catch(err) {
-        // NOOP
-      }
-    }
-
-    return {web3, troublesomePatronCollection};
+    return {web3};
   };
 
   render() {
@@ -89,9 +79,6 @@ class DoubleTrouble extends Component {
                 <Navbar.Collapse id="basic-navbar-nav">
                   <Nav className="me-auto">
                     <Nav.Link href="/">Home</Nav.Link>
-                    { this.externalCache.troublesomePatronCollection &&
-                      <Nav.Link href={`/collections/${this.externalCache.troublesomePatronCollection}`}>Patron collection</Nav.Link>
-                    }
                     <Nav.Link href="/collections">All collections</Nav.Link>
                     <Button><a style={{textDecoration: "none", color: "white"}} href="/find">Find your NFT</a></Button>
                   </Nav>
