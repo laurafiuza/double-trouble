@@ -4,6 +4,7 @@ import GenericNFTContract from "./contracts/IERC721Metadata.json";
 import ErrorCard from './ErrorCard';
 import ImageCard from './ImageCard';
 import { Card, Button, Spinner, Table, ListGroup, InputGroup, FormControl } from "react-bootstrap";
+import countdown from 'countdown';
 
 class TroublesomeCollectionInspector extends Component {
   constructor() {
@@ -62,7 +63,7 @@ class TroublesomeCollectionInspector extends Component {
       throw new Error(`Address supplied ${this.props.collection} doesn't refer to a Troublesome NFT collection.`);
     }
 
-    var originalAddr, tokenURI, troublesomeOwner, forSalePrice = 0, lastPurchasePrice = 0, isTroublesome = false, collectionName;
+    let originalAddr, tokenURI, troublesomeOwner, secondsToWithdraw, forSalePrice = 0, lastPurchasePrice = 0, isTroublesome = false, collectionName;
     try {
       originalAddr = await troublesomeCollection.methods.originalCollection().call();
       tokenURI = await troublesomeCollection.methods.troublesomeTokenURI(this.props.tokenId).call();
@@ -70,6 +71,7 @@ class TroublesomeCollectionInspector extends Component {
 
       forSalePrice = parseInt(await troublesomeCollection.methods.forSalePrice(this.props.tokenId).call());
       lastPurchasePrice = parseInt(await troublesomeCollection.methods.lastPurchasePrice(this.props.tokenId).call());
+      secondsToWithdraw = parseInt(await troublesomeCollection.methods.secondsToWithdraw(this.props.tokenId).call());
 
       if (lastPurchasePrice > 0) {
         troublesomeOwner = await troublesomeCollection.methods.ownerOf(this.props.tokenId).call();
@@ -105,7 +107,7 @@ class TroublesomeCollectionInspector extends Component {
     return {
       tokenURI, originalCollection, isOriginalOwner, isDoubleTroubleApproved, troublesomeCollection,
       isTroublesomeOwner, isTroublesome, forSalePrice, lastPurchasePrice, originalOwner, troublesomeOwner,
-      metadata, collectionName,
+      metadata, collectionName, secondsToWithdraw,
     }
   };
 
@@ -120,12 +122,13 @@ class TroublesomeCollectionInspector extends Component {
 
     const { tokenURI, isOriginalOwner, isTroublesomeOwner, isDoubleTroubleApproved,
       isTroublesome, forSalePrice, lastPurchasePrice, originalCollection, troublesomeCollection,
-      originalOwner, troublesomeOwner, metadata, collectionName,
+      originalOwner, troublesomeOwner, metadata, collectionName, secondsToWithdraw,
     } = this.externalCache;
     const forSalePriceEth = forSalePrice && this.props.web3.utils.fromWei(forSalePrice.toString(), 'ether');
     const lastPurchasePriceEth = lastPurchasePrice && this.props.web3.utils.fromWei(lastPurchasePrice.toString(), 'ether');
     const isOwner = isTroublesomeOwner || isOriginalOwner;
     const currency = this.props.web3.chain.currency;
+    const countdownToWithdraw = countdown(Date.now() + secondsToWithdraw * 1000);
     return (
       <Card style={{width: '36rem'}}>
         <Card.Body>
@@ -165,6 +168,12 @@ class TroublesomeCollectionInspector extends Component {
                 <tr>
                   <td>Last purchase price</td>
                   <td>{lastPurchasePriceEth} {currency}</td>
+                </tr>
+              }
+              { isTroublesome &&
+                <tr>
+                  <td>Time to withdraw</td>
+                  <td>{countdownToWithdraw.toString()}</td>
                 </tr>
               }
               <tr>

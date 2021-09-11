@@ -84,7 +84,7 @@ contract DoubleTrouble is ERC721URIStorage {
     return _lastPurchaseTimes[tokenId] + (_daysForWithdraw * 1 days);
   }
 
-  function timeToWithdraw(uint256 tokenId) external view returns (int256) {
+  function secondsToWithdraw(uint256 tokenId) external view returns (int256) {
     // Allow uints to underflow per https://ethereum-blockchain-developer.com/010-solidity-basics/03-integer-overflow-underflow/
     unchecked {
       return int256(this.availableToWithdraw(tokenId) - block.timestamp);
