@@ -14,7 +14,6 @@ import { Badge, Spinner, Navbar, Container, Nav, Button } from 'react-bootstrap'
 import ErrorCard from "./ErrorCard";
 import AllNFTsInCollection from "./AllNFTsInCollection";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import doubleTroubleOrchestrator from './orchestrator.js';
 
 class DoubleTrouble extends Component {
   constructor() {
