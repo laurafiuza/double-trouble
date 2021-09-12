@@ -1,7 +1,7 @@
 const assert = require('assert');
 const { time } = require("@openzeppelin/test-helpers");
 const { ethers } = require("hardhat");
-
+const { expect } = require("chai");
 
 const ZERO_ADDR = '0x0000000000000000000000000000000000000000';
 const NON_PRESENT_ID = 79;
@@ -20,22 +20,19 @@ describe("DoubleTrouble", () => {
   // TODO: make tokenId the return value of the createNft function
   // currently, the return value is a transaction object for some reason,
   // how do we retrieve the return value?
-  var cp, dt, nft, tokenId, accounts, signers;
+  let cp, dt, nft, tokenId, accounts, signers;
 
   before(async () => {
     // Deploy contracts
     const cpFactory = await ethers.getContractFactory('CryptoPunks');
-    const cp = await cpFactory.deploy();
-    await cp.deployed();
+    cp = await cpFactory.deploy();
     assert.notEqual(cp, undefined, "CryptoPunks contract instance is undefined.");
 
     const ptdFactory = await ethers.getContractFactory('PatronTokensDeployer');
     const ptd = await ptdFactory.deploy();
-    await ptd.deployed();
 
     const dtFactory = await ethers.getContractFactory('DoubleTrouble');
     dt = await dtFactory.deploy(ptd.address, 30, 2, 1, 130, "0xB5646985e2b562349D308090adb66Bb302a71634");
-    await dt.deployed();
 
     signers = await ethers.getSigners();
     accounts = signers.map(s => s.address);
@@ -51,11 +48,9 @@ describe("DoubleTrouble", () => {
     const approval = await cp.approve(dt.address, tokenId);
     assert.notEqual(approval, undefined, "approval failed (undefined return value).");
 
-    console.log("WORLD")
     const initialPrice = 1;
     ret = await dt.setPrice(cp.address, tokenId, initialPrice);
     assert.notEqual(ret, undefined, "setPrice failed (undefined return value).");
-    console.log(accounts);
 /*
     truffleAssert.eventEmitted(ret, 'SetPrice', (ev) => {
       return ev.msgSender == accounts[0] && ev.tokenId == tokenId && ev.price == initialPrice;
@@ -68,9 +63,7 @@ describe("DoubleTrouble", () => {
     const lastPurchasePrice = await dt.lastPurchasePrice(cp.address, tokenId);
     assert.equal(lastPurchasePrice, 0, "Initial last purchase should be 0");
 
-    console.log("Prebuy")
     let tx = await dt.connect(signers[1]).buy(cp.address, tokenId, {value: initialPrice});
-    console.log("Postbuy")
     /*
     truffleAssert.eventEmitted(tx, 'Buy', (ev) => {
       return ev.oldOwner == accounts[0] && ev.newOwner == accounts[1] && ev.tokenId == tokenId &&
@@ -78,12 +71,12 @@ describe("DoubleTrouble", () => {
     });
     */
 
-    assert.equal(await dt.ownerOf(tokenId), accounts[1], "owner must be accounts[1].");
+    assert.equal(await dt.ownerOf(cp.address, tokenId), accounts[1], "owner must be accounts[1].");
 
     assert.equal(await dt.forSalePrice(cp.address, tokenId), 0, "For sale price should now be 0");
     assert.equal(await dt.lastPurchasePrice(cp.address, tokenId), initialPrice, "Last purchase price should now be > 0");
 
-    tx = await dt.forceBuy(cp.address, tokenId, {from: accounts[0], value: initialPrice * 2});
+    tx = await dt.forceBuy(cp.address, tokenId, {value: initialPrice * 2});
     /*
     truffleAssert.eventEmitted(tx, 'ForceBuy', (ev) => {
       return ev.oldOwner == accounts[1] && ev.newOwner == accounts[0] && ev.tokenId == tokenId &&
@@ -91,9 +84,10 @@ describe("DoubleTrouble", () => {
     });
     */
 
-    assert.equal(await dt.ownerOf(tokenId), accounts[0], "owner must be accounts[0].");
+    assert.equal(await dt.ownerOf(cp.address, tokenId), accounts[0], "owner must be accounts[0].");
     assert.equal(await dt.forSalePrice(cp.address, tokenId), 0, "For sale price should now be 0");
     assert.equal(await dt.lastPurchasePrice(cp.address, tokenId), initialPrice * 2, "Last purchase price should now be > 0");
+    console.log(cp.address);
   });
 
   it("setPrice should fail for tokenID that doesn't exist", async () => {
@@ -103,17 +97,13 @@ describe("DoubleTrouble", () => {
 
   it("buy should fail without approval", async () => {
     assert.notEqual(await dt.setPrice(cp.address, 1, 1234), undefined, "setPrice failed (undefined return value).");
-    await assert.rejects(dt.buy(cp.address, 1, {from: accounts[4], value: 1234}), /must be approved/);
+    await assert.rejects(dt.connect(signers[4]).buy(cp.address, 1, {value: 1234}), /must be approved/);
   });
 
   it("setPrice should fail if msg.sender doesnt own NFT", async () => {
     assert.notEqual(await cp.approve(dt.address, 1), undefined, "approval failed (undefined return value).");
-    await assert.rejects(dt.setPrice(cp.address, 1, 1, {from: accounts[4]}), /approved or owner/);
-    await assert.rejects(dt.buy(cp.address, 1, {from: accounts[4], value: 1}), /at least the for sale price/);
-  });
-
-  it("DT contract records the original Collection", async () => {
-    assert.equal(await dt.originalCollection(), cp.address, "Original Collection must match CryptoPunks address");
+    await assert.rejects(dt.connect(signers[4]).setPrice(cp.address, 1, 1), /approved or owner/);
+    await assert.rejects(dt.connect(signers[4]).buy(cp.address, 1, {value: 1}), /at least the for sale price/);
   });
 
   it("DT supports 0xdeadbeef interface (DoubleTrouble)", async () => {
@@ -125,12 +115,12 @@ describe("DoubleTrouble", () => {
   });
 
   it("DT should own the NFT after makeTroublesome", async () => {
-    const cpOwnerAfter = await cp.ownerOf(tokenId);
+    const cpOwnerAfter = await cp.ownerOf(cp.address, tokenId);
     assert.equal(cpOwnerAfter, dt.address, "DT contract must be the owner of the Crypto Punk");
   });
 
   it("accounts[0] should own the NFT within DT", async () => {
-    assert.equal(await dt.ownerOf(tokenId), accounts[0], "ownerAfter making DTable does not equal accounts[0].");
+    assert.equal(await dt.ownerOf(cp.address, tokenId), accounts[0], "ownerAfter making DTable does not equal accounts[0].");
   });
 
   it("shouldn't allow transfering NFTs within DT", async () => {
@@ -138,7 +128,7 @@ describe("DoubleTrouble", () => {
   });
 
   it("ownerOf should revert if we pass in a non present NFT", async () => {
-    await assert.rejects(dt.ownerOf(NON_PRESENT_ID), /revert ERC721/);
+    await assert.rejects(dt.ownerOf(cp.address, NON_PRESENT_ID), /revert ERC721/);
   });
 
   it("should not transfer if the NFT is not DTable", async () => {
@@ -172,7 +162,7 @@ describe("DoubleTrouble", () => {
     assert.equal(await dt.forSalePrice(cp.address, tokenId), 0, "Initial for sale price should be  0");
 
     await assert.rejects(dt.buy(cp.address, tokenId, {from: accounts[1], value: 2000}), /NFT is not for sale/);
-    assert(await dt.ownerOf(tokenId), accounts[0], "Ownership should still be accounts[0]");
+    assert(await dt.ownerOf(cp.address, tokenId), accounts[0], "Ownership should still be accounts[0]");
   });
 
   it("should not buy NFT if paying less than the forSalePrice", async () => {
@@ -180,14 +170,14 @@ describe("DoubleTrouble", () => {
     assert(ret.receipt.status, true, "Transaction processing failed");
 
     await assert.rejects(dt.buy(cp.address, tokenId, {from: accounts[1], value: 2000}), /must be at least/);
-    assert(await dt.ownerOf(tokenId), accounts[0], "Ownership should still be accounts[0]");
+    assert(await dt.ownerOf(cp.address, tokenId), accounts[0], "Ownership should still be accounts[0]");
   });
 
   it("should not force buy NFT if lastPurchasePrice is 0", async () => {
     assert.equal(await dt.lastPurchasePrice(cp.address, 1), 0, "Initial last purchase price should be  0");
 
     await assert.rejects(dt.forceBuy(cp.address, 1, {from: accounts[2], value: 2000}), /NFT was not yet purchased/);
-    assert(await dt.ownerOf(tokenId), accounts[0], "Ownership should still be accounts[0]");
+    assert(await dt.ownerOf(cp.address, tokenId), accounts[0], "Ownership should still be accounts[0]");
   });
 
   it("should buy and force buy NFTs, and distribute balances correctly", async () => {
@@ -216,7 +206,7 @@ describe("DoubleTrouble", () => {
 
     let balanceTrblOwnerBefore = await web3.eth.getBalance(accounts[PATRON]);
     let buyTx = await dt.buy(cp.address, tokenId, {from: accounts[1], value: price});
-    assert(await dt.ownerOf(tokenId), accounts[1], "Ownership should now be accounts[1]");
+    assert(await dt.ownerOf(cp.address, tokenId), accounts[1], "Ownership should now be accounts[1]");
 
     let [sellerBalanceAfter, buyerBalanceAfter] =
       [await web3.eth.getBalance(accounts[0]), await web3.eth.getBalance(accounts[1])];
@@ -246,7 +236,7 @@ describe("DoubleTrouble", () => {
 
     balanceTrblOwnerBefore = await web3.eth.getBalance(accounts[PATRON]);
     buyTx = await dt.forceBuy(cp.address, tokenId, {from: accounts[2], value: doublePrice});
-    assert(await dt.ownerOf(tokenId), accounts[2], "Ownership should now be accounts[2]");
+    assert(await dt.ownerOf(cp.address, tokenId), accounts[2], "Ownership should now be accounts[2]");
 
     gasUsed = multWei(buyTx.receipt.gasUsed, await web3.eth.getGasPrice());
     [sellerBalanceAfter, buyerBalanceAfter] =
@@ -356,8 +346,8 @@ describe("DoubleTrouble", () => {
     const lastPurchasePrice = await dt.lastPurchasePrice(cp.address, 0);
     await assert.notEqual(await dt.withdraw(cp.address, 0, {from: accounts[2], value: lastPurchasePrice / 65}), undefined, "Must withdraw after deadline");
 
-    assert.equal(await cp.ownerOf(0), accounts[2], "accounts 2 must be the owner of the Crypto Punk");
-    await assert.rejects(dt.ownerOf(0), /nonexistent token/);
+    assert.equal(await cp.ownerOf(cp.address, 0), accounts[2], "accounts 2 must be the owner of the Crypto Punk");
+    await assert.rejects(dt.ownerOf(cp.address, 0), /nonexistent token/);
     assert.equal(await dt.lastPurchasePrice(cp.address, 0), 0, "lastPurchasePrice must now be 0");
   });
 
