@@ -10,7 +10,9 @@
     "url": "git+https://github.com/laurafiuza/double-trouble.git"
   },
   "scripts": {
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "node": "npx hardhat node",
+    "deploy-local": "npx hardhat run scripts/deploy.js --network localhost"
   },
   "author": "",
   "license": "ISC",

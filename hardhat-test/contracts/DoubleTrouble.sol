@@ -35,6 +35,10 @@ contract DoubleTrouble {
     _pt = PatronTokensDeployer(ptdAddr).deployIdempotently(address(this));
   }
 
+  function patronTokensCollection() external view returns (address) {
+    return address(_pt);
+  }
+
   function forSalePrice(address collection, uint256 tokenId) external view returns (uint256) {
     return _forSalePrices[collection][tokenId];
   }
