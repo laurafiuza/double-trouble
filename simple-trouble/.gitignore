@@ -1,3 +1,3 @@
-coverage.json
-coverage/*
-out/
+artifacts/
+cache/
+build/
