@@ -3,9 +3,13 @@ import { NavLink } from 'react-router-dom'
 import styled from 'styled-components'
 import { Colors, Shadows, Sizes, Transitions } from '../global/styles'
 import { HeaderContainer } from './base/base'
+import { Button } from './base/Button'
 import { injectedConnector } from '../App';
+import { useWeb3React } from '@web3-react/core'
+import { Badge } from 'react-bootstrap';
 
 export function TopBar() {
+  const { chainId, account, activate, active } = useWeb3React()
   return (
     <Header>
       <HeaderContainer>
@@ -28,6 +32,17 @@ export function TopBar() {
             </HeaderLink>
           </HeaderNavLinks>
           <div style={{width: 150, position: 'absolute', right: 50}}>
+          { active
+            ?
+              <>
+                <div style={{textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'}}>
+                  Wallet: {account}
+                </div>
+                <Badge style={{width: '100%'}} className="bg-info">{chainId}</Badge>
+              </>
+            :
+            <Button onClick={activate(injectedConnector)}>Connect with Metamask</Button>
+          }
         </div>
         </HeaderNav>
       </HeaderContainer>
