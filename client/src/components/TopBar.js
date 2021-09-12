@@ -8,8 +8,8 @@ import { injectedConnector } from '../App';
 import { useWeb3React } from '@web3-react/core'
 import { Badge } from 'react-bootstrap';
 
-export function TopBar() {
-  const { chainId, account, activate, active } = useWeb3React()
+export function TopBar(props) {
+  const { chainId, account, active, activate } = useWeb3React()
   return (
     <Header>
       <HeaderContainer>

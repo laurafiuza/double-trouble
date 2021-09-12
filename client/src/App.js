@@ -73,23 +73,28 @@ export const Wallet = () => {
   );
 }
 
+const Everything = () => {
+  const { active } = useWeb3React()
+  return (
+    <Page>
+      <GlobalStyle />
+      <BrowserRouter>
+        <TopBar />
+        { active &&
+          <Switch>
+            <Route exact path="/" component={Wallet} />
+          </Switch>
+        }
+      </BrowserRouter>
+    </Page>
+  );
+}
 
 export const App = () => {
-  const { active } = useWeb3React()
   return (
     <Web3ReactProvider getLibrary={getLibrary}>
       <MetamaskProvider>
-        <Page>
-          <GlobalStyle />
-          <BrowserRouter>
-            <TopBar />
-            { active &&
-              <Switch>
-                <Route exact path="/" component={Wallet} />
-              </Switch>
-            }
-          </BrowserRouter>
-        </Page>
+        <Everything/>
       </MetamaskProvider>
     </Web3ReactProvider>
   )
