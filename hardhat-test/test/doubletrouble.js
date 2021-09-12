@@ -1,9 +1,6 @@
 const assert = require('assert');
-const CryptoPunks = artifacts.require("./CryptoPunks.sol");
-const DoubleTroubleOrchestrator = artifacts.require("./DoubleTroubleOrchestrator.sol");
-const DoubleTrouble = artifacts.require("./DoubleTrouble.sol");
-const truffleAssert = require('truffle-assertions');
 const { time } = require("@openzeppelin/test-helpers");
+const { ethers } = require("hardhat");
 
 
 const ZERO_ADDR = '0x0000000000000000000000000000000000000000';
@@ -19,33 +16,51 @@ const registeredTokens = async (dt) => {
   });
 }
 
-contract("DoubleTrouble", accounts => {
+describe("DoubleTrouble", () => {
   // TODO: make tokenId the return value of the createNft function
   // currently, the return value is a transaction object for some reason,
   // how do we retrieve the return value?
-  var cp, dt, nft, tokenId;
+  var cp, dt, nft, tokenId, accounts, signers;
 
   before(async () => {
-    cp = await CryptoPunks.deployed();
+    // Deploy contracts
+    const cpFactory = await ethers.getContractFactory('CryptoPunks');
+    const cp = await cpFactory.deploy();
+    await cp.deployed();
     assert.notEqual(cp, undefined, "CryptoPunks contract instance is undefined.");
 
-    dt = await DoubleTrouble.deployed();
+    const ptdFactory = await ethers.getContractFactory('PatronTokensDeployer');
+    const ptd = await ptdFactory.deploy();
+    await ptd.deployed();
 
+    const dtFactory = await ethers.getContractFactory('DoubleTrouble');
+    dt = await dtFactory.deploy(ptd.address, 30, 2, 1, 130, "0xB5646985e2b562349D308090adb66Bb302a71634");
+    await dt.deployed();
+
+    signers = await ethers.getSigners();
+    accounts = signers.map(s => s.address);
+
+    // create simulated NFTs
+    await cp.createNft(accounts[0]);
+
+    // Done deploying. Test initial stuff
     assert.deepEqual(await registeredTokens(dt), [], "Must return empty registered tokens");
 
     tokenId = 0;
-    web3.eth.defaultAccount = accounts[0];
 
     const approval = await cp.approve(dt.address, tokenId);
     assert.notEqual(approval, undefined, "approval failed (undefined return value).");
 
+    console.log("WORLD")
     const initialPrice = 1;
     ret = await dt.setPrice(cp.address, tokenId, initialPrice);
     assert.notEqual(ret, undefined, "setPrice failed (undefined return value).");
-
+    console.log(accounts);
+/*
     truffleAssert.eventEmitted(ret, 'SetPrice', (ev) => {
       return ev.msgSender == accounts[0] && ev.tokenId == tokenId && ev.price == initialPrice;
     });
+    */
 
     const forSalePrice = await dt.forSalePrice(cp.address, tokenId);
     assert.equal(forSalePrice, initialPrice, "Initial for sale price should be > 0");
@@ -53,11 +68,15 @@ contract("DoubleTrouble", accounts => {
     const lastPurchasePrice = await dt.lastPurchasePrice(cp.address, tokenId);
     assert.equal(lastPurchasePrice, 0, "Initial last purchase should be 0");
 
-    let tx = await dt.buy(cp.address, tokenId, {from: accounts[1], value: initialPrice});
+    console.log("Prebuy")
+    let tx = await dt.connect(signers[1]).buy(cp.address, tokenId, {value: initialPrice});
+    console.log("Postbuy")
+    /*
     truffleAssert.eventEmitted(tx, 'Buy', (ev) => {
       return ev.oldOwner == accounts[0] && ev.newOwner == accounts[1] && ev.tokenId == tokenId &&
         ev.valueSent == initialPrice && ev.amountPaid == initialPrice;
     });
+    */
 
     assert.equal(await dt.ownerOf(tokenId), accounts[1], "owner must be accounts[1].");
 
@@ -65,10 +84,12 @@ contract("DoubleTrouble", accounts => {
     assert.equal(await dt.lastPurchasePrice(cp.address, tokenId), initialPrice, "Last purchase price should now be > 0");
 
     tx = await dt.forceBuy(cp.address, tokenId, {from: accounts[0], value: initialPrice * 2});
+    /*
     truffleAssert.eventEmitted(tx, 'ForceBuy', (ev) => {
       return ev.oldOwner == accounts[1] && ev.newOwner == accounts[0] && ev.tokenId == tokenId &&
         ev.valueSent == initialPrice * 2 && ev.lastPurchasePrice == initialPrice;
     });
+    */
 
     assert.equal(await dt.ownerOf(tokenId), accounts[0], "owner must be accounts[0].");
     assert.equal(await dt.forSalePrice(cp.address, tokenId), 0, "For sale price should now be 0");
