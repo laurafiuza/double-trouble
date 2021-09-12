@@ -3,19 +3,21 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@ethersproject/providers": "^5.4.5",
     "@metamask/onboarding": "^1.0.1",
     "@web3-react/core": "^6.1.9",
     "@web3-react/injected-connector": "^6.0.7",
     "axios": "^0.21.4",
     "bootstrap": "^5.1.0",
     "countdown": "^2.6.0",
+    "ethers": "^5.4.5",
     "lodash": "^4.17.21",
     "react": "16.11.0",
     "react-bootstrap": "^1.6.1",
     "react-dom": "16.11.0",
     "react-router-dom": "^5.2.1",
     "react-scripts": "3.2.0",
+    "styled-components": "^5.3.1",
+    "swr": "^1.0.0",
     "web3": "1.5.2"
   },
   "scripts": {
