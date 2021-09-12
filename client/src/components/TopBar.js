@@ -18,17 +18,17 @@ export function TopBar() {
             <span>DoubleTrouble</span>
           </ToMain>
           <HeaderNavLinks>
-            <HeaderLink activeClassName="active-page" to="/balance">
+            <HeaderLink activeClassName="active-page" to="/all">
               {' '}
-              Balance{' '}
+              All NFTs{' '}
             </HeaderLink>
-            <HeaderLink activeClassName="active-page" to="/prices">
+            <HeaderLink activeClassName="active-page" to="/list">
               {' '}
-              Prices{' '}
+              List for sale{' '}
             </HeaderLink>
-            <HeaderLink activeClassName="active-page" to="/block">
+            <HeaderLink activeClassName="active-page" to="/patrons">
               {' '}
-              Block{' '}
+              Patron Tokens{' '}
             </HeaderLink>
           </HeaderNavLinks>
           <div style={{width: 150, position: 'absolute', right: 50}}>
@@ -41,7 +41,7 @@ export function TopBar() {
                 <Badge style={{width: '100%'}} className="bg-info">{chainId}</Badge>
               </>
             :
-            <Button onClick={activate(injectedConnector)}>Connect with Metamask</Button>
+            <Button onClick={() => activate(injectedConnector)}>Connect</Button>
           }
         </div>
         </HeaderNav>

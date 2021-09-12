@@ -73,27 +73,23 @@ export const Wallet = () => {
   );
 }
 
-export const Connector = () => {
-  const { chainId, account, activate, active } = useWeb3React()
-
-  return (
-    <Page>
-      <GlobalStyle />
-      <BrowserRouter>
-        <TopBar />
-        <Switch>
-          <Route exact path="/" component={Wallet} />
-        </Switch>
-      </BrowserRouter>
-    </Page>
-  )
-}
 
 export const App = () => {
+  const { active } = useWeb3React()
   return (
     <Web3ReactProvider getLibrary={getLibrary}>
       <MetamaskProvider>
-        <Connector />
+        <Page>
+          <GlobalStyle />
+          <BrowserRouter>
+            <TopBar />
+            { active &&
+              <Switch>
+                <Route exact path="/" component={Wallet} />
+              </Switch>
+            }
+          </BrowserRouter>
+        </Page>
       </MetamaskProvider>
     </Web3ReactProvider>
   )
