@@ -10,10 +10,7 @@ export function TopBar() {
       <HeaderContainer>
         <HeaderNav>
           <ToMain href="/">
-            <span>useDapp</span>
-            <ToMainBottom>
-              Ethereum <Handshaking>🤝</Handshaking> React
-            </ToMainBottom>
+            <span>DoubleTrouble</span>
           </ToMain>
           <HeaderNavLinks>
             <HeaderLink activeClassName="active-page" to="/balance">
