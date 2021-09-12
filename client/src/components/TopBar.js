@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom'
 import styled from 'styled-components'
 import { Colors, Shadows, Sizes, Transitions } from '../global/styles'
 import { HeaderContainer } from './base/base'
+import { injectedConnector } from '../App';
 
 export function TopBar() {
   return (
@@ -25,19 +26,9 @@ export function TopBar() {
               {' '}
               Block{' '}
             </HeaderLink>
-            <HeaderLink activeClassName="active-page" to="/tokens">
-              {' '}
-              Tokens{' '}
-            </HeaderLink>
-            <HeaderLink activeClassName="active-page" to="/send">
-              {' '}
-              Send Ether{' '}
-            </HeaderLink>
-            <HeaderLink activeClassName="active-page" to="/transactions">
-              {' '}
-              Transactions{' '}
-            </HeaderLink>
           </HeaderNavLinks>
+          <div style={{width: 150, position: 'absolute', right: 50}}>
+        </div>
         </HeaderNav>
       </HeaderContainer>
     </Header>

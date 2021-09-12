@@ -11,7 +11,7 @@ import { isAddress } from '@ethersproject/address';
 import About from "./About";
 import Find from "./Find";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
-import { Page } from './components/base/base'
+import { Page, MainContent } from './components/base/base'
 import { TopBar } from './components/TopBar'
 import { GlobalStyle } from './global/GlobalStyle'
 
@@ -66,7 +66,11 @@ export const Wallet = () => {
   }, []);
 
 
-  return <div>Wallet on</div>;
+  return (
+    <MainContent>
+      Wallet on
+    </MainContent>
+  );
 }
 
 export const Connector = () => {
