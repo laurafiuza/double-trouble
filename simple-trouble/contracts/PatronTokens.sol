@@ -28,7 +28,7 @@ contract PatronTokens is ERC721URIStorage {
   mapping(address =>  bool) _registeredCollectionsSet;
 
   // Reference to the dt contract that controls this PatronTokens contract
-  address _dt;
+  address public _dt;
 
   constructor(address dtAddr) ERC721("Patron Tokens", "PTRN") {
     _dt = dtAddr;

@@ -18,7 +18,7 @@ contract DoubleTrouble {
   uint256 public _daysForWithdraw;
   uint256 public _dtNumerator;
   uint256 public _dtDenominator;
-  PatronTokens _pt;
+  PatronTokens public _pt;
 
   event Buy(address oldOwner, address newOwner, address collection, uint256 tokenId, uint256 valueSent, uint256 amountPaid);
   event ForceBuy(address oldOwner, address newOwner, address collection, uint256 tokenId, uint256 valueSent, uint256 lastPurchasePrice, uint256 amountPaid);
