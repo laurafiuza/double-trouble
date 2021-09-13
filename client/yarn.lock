@@ -2267,6 +2267,11 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
+"@types/countdown@^0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@types/countdown/-/countdown-0.0.8.tgz#130f9c6654e64b8d8c361378c517bb63ecca13a2"
+  integrity sha512-kpWa+wlrYcvgymkaOIF3i40MnSMRNdv91piNVmJ22Pnd4A3QJXu21ngTzHHnLqKVtCjGWfO0FZKSXb3XiGiTdA==
+
 "@types/eslint@^7.2.6":
   version "7.2.6"
   resolved "https://registry.yarnpkg.com/@types/eslint/-/eslint-7.2.6.tgz#5e9aff555a975596c03a98b59ecd103decc70c3c"
