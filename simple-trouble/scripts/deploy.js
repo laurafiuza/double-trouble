@@ -23,6 +23,7 @@ async function main() {
 
   const cpFactory = await ethers.getContractFactory('CryptoPunks');
   const cp = await cpFactory.deploy();
+  await cp.createNft(accounts[0]);
 
   console.log("CryptoPunks address:", cp.address);
 

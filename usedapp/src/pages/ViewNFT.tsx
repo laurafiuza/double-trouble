@@ -8,7 +8,7 @@ import { Title } from '../typography/Title'
 import GenericNFTContract from '../abi/IERC721Metadata.json'
 
 
-export function ViewNFT(props: {collection: string, tokenId: string}) {
+export function ViewNFT(props: {collection: string, tokenId: number}) {
   const { account, chainId, active } = useEthers()
   const ret = useContractCall({
     abi: new utils.Interface(GenericNFTContract.abi),

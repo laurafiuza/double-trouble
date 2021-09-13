@@ -20,7 +20,7 @@ export function App() {
         <Switch>
           <Route path="/collections/:collection/:tokenId" render={({match}) => {
             return (
-              <ViewNFT collection={match.params.collection} tokenId={match.params.tokenId} />
+              <ViewNFT collection={match.params.collection} tokenId={parseInt(match.params.tokenId)} />
             );
           }} />
           <Route exact path="/" component={About} />
