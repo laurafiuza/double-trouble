@@ -13,7 +13,8 @@ import ImageCard from '../components/ImageCard';
 
 
 export function ViewNFT(props: {collection: string, tokenId: number}) {
-  const { active } = useEthers()
+  const { active, account } = useEthers()
+  console.log(active, account)
   return (
     <MainContent>
       <Container>
@@ -36,33 +37,31 @@ export function ViewNFT(props: {collection: string, tokenId: number}) {
 }
 
 function NFTViewer(props: {collection: string, tokenId: number}) {
-  const tokenURI = useContractCall({
-    abi: new utils.Interface(GenericNFTContract.abi),
-    address: props.collection,
-    method: 'tokenURI',
-    args: [props.tokenId],
-  });
+  const { chainId } = useEthers();
 
-  const collectionName = useContractCall({
-    abi: new utils.Interface(GenericNFTContract.abi),
-    address: props.collection,
-    method: 'name',
-    args: [],
-  });
+  const useNFTCall = (method: string, args: any[]) => {
+    return useContractCall({
+      abi: new utils.Interface(GenericNFTContract.abi),
+      address: props.collection,
+      method: method,
+      args: args,
+    });
+  };
 
-  const collectionSymbol = useContractCall({
-    abi: new utils.Interface(GenericNFTContract.abi),
-    address: props.collection,
-    method: 'symbol',
-    args: [],
-  });
+  const collectionName = useNFTCall('name', []);
+  const collectionSymbol = useNFTCall('symbol', []);
+  const owner = useNFTCall('ownerOf', [props.tokenId]);
+  const tokenURI = useNFTCall('tokenURI', [props.tokenId]);
 
-  const owner = useContractCall({
-    abi: new utils.Interface(GenericNFTContract.abi),
-    address: props.collection,
-    method: 'ownerOf',
-    args: [props.tokenId],
-  });
+  if (!owner) {
+    return (
+      <>
+        <Title>Ops</Title>
+        <div>Could not find token {props.tokenId} in collection {props.collection}. Are you connected to the right Network?</div>
+        <div>Currently connected to chain {chainId}</div>
+      </>
+    );
+  }
 
   return (
     <>
