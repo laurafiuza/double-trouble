@@ -24,7 +24,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 export function ViewNFT(props: {collection: string, tokenId: number}) {
   const { active, account } = useEthers()
-  console.log(active, account)
   return (
     <MainContent>
       <Container>
@@ -46,11 +45,31 @@ export function ViewNFT(props: {collection: string, tokenId: number}) {
   );
 }
 
+// Helpers
 const _useContractCall = (arg: any) => {
   const ret = useContractCall(arg);
   return ret === undefined ? undefined : ret[0];
 }
 
+const bignumMin = (bn1: BigNumber, bn2: BigNumber) =>
+  bn1.gt(bn2) ? bn2 : bn1
+
+const calculateEffectivePrice = (forSalePrice: BigNumber, lastPurchasePrice: BigNumber) => {
+  if (lastPurchasePrice.gt(0) && forSalePrice.gt(0)) {
+    return bignumMin(lastPurchasePrice.mul(2), forSalePrice)
+  } else if (lastPurchasePrice.eq(0) && forSalePrice.gt(0)) {
+    return forSalePrice;
+  } else if (lastPurchasePrice.gt(0) && forSalePrice.eq(0)) {
+    return lastPurchasePrice.mul(2);
+  } else {
+    return BigNumber.from(0);
+  }
+};
+
+/*
+ * Component that shows and allows user to interact with an NFT
+ * both Troublesome or not.
+ **/
 export function NFTViewer(props: {collection: string, tokenId: number}) {
   const { chainId, account, library } = useEthers();
   const dtAddr = useContext(DoubleTroubleContext);
@@ -118,19 +137,6 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
   const countdownToWithdraw = countdown(Date.now() + secondsToWithdraw * 1000);
   const isTroublesome = originalOwner == dtAddr;
   const owner = isTroublesome ? troublesomeOwner : originalOwner;
-  const bignumMin = (bn1: BigNumber, bn2: BigNumber) =>
-    bn1.gt(bn2) ? bn2 : bn1
-  const calculateEffectivePrice = (forSalePrice: BigNumber, lastPurchasePrice: BigNumber) => {
-    if (lastPurchasePrice.gt(0) && forSalePrice.gt(0)) {
-      return bignumMin(lastPurchasePrice.mul(2), forSalePrice)
-    } else if (lastPurchasePrice.eq(0) && forSalePrice.gt(0)) {
-      return forSalePrice;
-    } else if (lastPurchasePrice.gt(0) && forSalePrice.eq(0)) {
-      return lastPurchasePrice.mul(2);
-    } else {
-      return BigNumber.from(0);
-    }
-  };
   const effectivePrice = calculateEffectivePrice(forSalePrice ?? BigNumber.from(0), lastPurchasePrice ?? BigNumber.from(0));
 
   if (!originalOwner) {
@@ -226,16 +232,18 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
           }
         </>
       }
-      {owner != account && forSalePrice > 0 &&
-        <SmallButton disabled={buyState.status == 'Mining'} onClick={buy}>
-          Buy for {utils.formatEther(forSalePrice)} ETH
-        </SmallButton>
-      }
-      {owner != account && lastPurchasePrice > 0 &&
-        <SmallButton disabled={forceBuyState.status == 'Mining'} onClick={forceBuy}>
-          Force Buy for {utils.formatEther(lastPurchasePrice.mul(2))} ETH
-        </SmallButton>
-      }
+      <div style={{display: 'flex'}}>
+        {owner != account && forSalePrice > 0 &&
+          <SmallButton disabled={buyState.status == 'Mining'} onClick={buy}>
+            Buy for {utils.formatEther(forSalePrice)} ETH
+          </SmallButton>
+        }
+        {owner != account && lastPurchasePrice > 0 &&
+          <SmallButton disabled={forceBuyState.status == 'Mining'} onClick={forceBuy}>
+            Force Buy for {utils.formatEther(lastPurchasePrice.mul(2))} ETH
+          </SmallButton>
+        }
+      </div>
     </>
   );
 }
