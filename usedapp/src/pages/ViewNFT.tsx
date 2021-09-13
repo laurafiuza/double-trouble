@@ -1,38 +1,36 @@
 import React from 'react'
-import { useBlockMeta, useBlockNumber, useEthers } from '@usedapp/core'
-import { Container, ContentBlock, ContentRow, MainContent, Section } from '../components/base/base'
+import { useContractCall, useEthers } from '@usedapp/core'
+import { utils } from 'ethers'
+import { Container, ContentBlock, ContentRow, MainContent, Section, SectionRow } from '../components/base/base'
 import { Label } from '../typography/Label'
 import { TextInline } from '../typography/Text'
+import { Title } from '../typography/Title'
+import GenericNFTContract from '../abi/IERC721Metadata.json'
 
-export function ViewNFT(props: {collection: String, tokenId: String}) {
-  const blockNumber = useBlockNumber()
-  const { chainId } = useEthers()
-  const { timestamp, difficulty } = useBlockMeta()
+
+export function ViewNFT(props: {collection: string, tokenId: string}) {
+  const { account, chainId, active } = useEthers()
+  const ret = useContractCall({
+    abi: new utils.Interface(GenericNFTContract.abi),
+    address: props.collection,
+    method: 'tokenURI',
+    args: [props.tokenId],
+  })
+  console.log(ret);
+
   return (
     <MainContent>
       <Container>
         <Section>
+          <SectionRow>
+            <Title>NFT</Title>
+          </SectionRow>
           <ContentBlock>
             <ContentRow>
-              <h1>IMPLEMENT ME</h1>
-              <Label>Chain id:</Label> <TextInline>{chainId}</TextInline>
             </ContentRow>
-            <ContentRow>
-              <Label>Current block:</Label> <TextInline>{blockNumber}</TextInline>
-            </ContentRow>
-            {difficulty && (
-              <ContentRow>
-                <Label>Current difficulty:</Label> <TextInline>{difficulty.toString()}</TextInline>
-              </ContentRow>
-            )}
-            {timestamp && (
-              <ContentRow>
-                <Label>Current block timestamp:</Label> <TextInline>{timestamp.toLocaleString()}</TextInline>
-              </ContentRow>
-            )}
           </ContentBlock>
         </Section>
       </Container>
     </MainContent>
-  )
+  );
 }
