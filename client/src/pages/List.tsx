@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react'
 import { useContractCall, useContractFunction, useEthers } from '@usedapp/core'
 import { Container, ContentBlock, ContentRow, MainContent, Section, SectionRow } from '../components/base/base'
 import GenericNFTContract from '../abi/IERC721Metadata.json'
+import DoubleTroubleContract from '../abi/DoubleTrouble.json'
 import { utils } from 'ethers'
 import { Label } from '../typography/Label'
 import { Text, TextInline } from '../typography/Text'
@@ -13,7 +14,11 @@ import { Button } from '../components/base/Button'
 import { Colors, BorderRad, Transitions } from '../global/styles'
 import { Table, Form, InputGroup, FormControl, Card } from 'react-bootstrap';
 import { Contract } from '@ethersproject/contracts'
+import { BigNumber } from '@ethersproject/bignumber'
 import { DoubleTroubleContext } from '../DoubleTrouble';
+import { Link } from '../components/base/Link'
+import { ShareIcon } from '../components/Transactions/Icons'
+import countdown from 'countdown';
 
 export function List() {
   const { chainId, active, account } = useEthers();
@@ -55,14 +60,20 @@ export function List() {
   )
 }
 
+const _useContractCall = (arg: any) => {
+  const ret = useContractCall(arg);
+  return ret === undefined ? undefined : ret[0];
+}
+
 function NFTViewer(props: {collection: string, tokenId: number}) {
   const { chainId, account, library } = useEthers();
   const dtAddr = useContext(DoubleTroubleContext);
 
   const nftContract = new Contract(props.collection, new utils.Interface(GenericNFTContract.abi), library);
+  const dtContract = new Contract(dtAddr, new utils.Interface(DoubleTroubleContract.abi), library);
 
   const useNFTCall = (method: string, args: any[]) => {
-    return useContractCall({
+    return _useContractCall({
       abi: nftContract.interface,
       address: props.collection,
       method: method,
@@ -70,18 +81,73 @@ function NFTViewer(props: {collection: string, tokenId: number}) {
     });
   };
 
+  const useDTCall = (method: string, args: any[]) => {
+    return _useContractCall({
+      abi: dtContract.interface,
+      address: dtAddr,
+      method: method,
+      args: args,
+    });
+  };
+
+  // Local state
+  const [salePrice, setSalePrice] = useState('1.0');
+
+  // Read from NFT contract
   const collectionName = useNFTCall('name', []);
   const collectionSymbol = useNFTCall('symbol', []);
-  const owner = useNFTCall('ownerOf', [props.tokenId]);
+  const originalOwner = useNFTCall('ownerOf', [props.tokenId]);
   const approved = useNFTCall('getApproved', [props.tokenId]);
   const tokenURI = useNFTCall('tokenURI', [props.tokenId]);
 
-  const { state, send } = useContractFunction(nftContract, 'approve', { transactionName: 'approve' })
-  console.log(state)
-  const approve = () =>
-    send(dtAddr, props.tokenId);
+  // Write to NFT contract
+  const { state: approveState, send: approveSend } = useContractFunction(nftContract, 'approve', { transactionName: 'approve' })
+  const approve = () => {
+    approveSend(dtAddr, props.tokenId);
+  }
 
-  if (!owner) {
+  // Read from DT contract
+  const forSalePrice = useDTCall('forSalePrice', [props.collection, props.tokenId]);
+  const lastPurchasePrice = useDTCall('lastPurchasePrice', [props.collection, props.tokenId]);
+  const secondsToWithdraw = useDTCall('secondsToWithdraw', [props.collection, props.tokenId]);
+  const troublesomeOwner = useDTCall('ownerOf', [props.collection, props.tokenId]);
+
+  // Write to DT contract
+  const { state: setPriceState, send: setPriceSend} = useContractFunction(dtContract, 'setPrice', { transactionName: 'setPrice' })
+  const setPrice = (newPrice: string) => {
+    setPriceSend(props.collection, props.tokenId, utils.parseEther(newPrice))
+  }
+
+  const { state: buyState, send: buySend} = useContractFunction(dtContract, 'buy', { transactionName: 'buy' })
+  const buy = () => {
+    buySend(props.collection, props.tokenId, {value: forSalePrice})
+  }
+
+  const { state: forceBuyState, send: forceBuySend} = useContractFunction(dtContract, 'forceBuy', { transactionName: 'forceBuy' })
+  const forceBuy = () => {
+    forceBuySend(props.collection, props.tokenId, {value: lastPurchasePrice.mul(2)})
+  }
+
+  // Derived variables
+  const countdownToWithdraw = countdown(Date.now() + secondsToWithdraw * 1000);
+  const isTroublesome = originalOwner == dtAddr;
+  const owner = isTroublesome ? troublesomeOwner : originalOwner;
+  const bignumMin = (bn1: BigNumber, bn2: BigNumber) =>
+    bn1.gt(bn2) ? bn2 : bn1
+  const calculateEffectivePrice = (forSalePrice: BigNumber, lastPurchasePrice: BigNumber) => {
+    if (lastPurchasePrice.gt(0) && forSalePrice.gt(0)) {
+      return bignumMin(lastPurchasePrice.mul(2), forSalePrice)
+    } else if (lastPurchasePrice.eq(0) && forSalePrice.gt(0)) {
+      return forSalePrice;
+    } else if (lastPurchasePrice.gt(0) && forSalePrice.eq(0)) {
+      return lastPurchasePrice.mul(2);
+    } else {
+      return BigNumber.from(0);
+    }
+  };
+  const effectivePrice = calculateEffectivePrice(forSalePrice ?? BigNumber.from(0), lastPurchasePrice ?? BigNumber.from(0));
+
+  if (!originalOwner) {
     return (
       <>
         <Title>Ops</Title>
@@ -93,7 +159,17 @@ function NFTViewer(props: {collection: string, tokenId: number}) {
 
   return (
     <>
-      <Title>{collectionName} #{props.tokenId}</Title>
+      <div style={{position: 'relative'}}>
+        <Title>{collectionName} #{props.tokenId}</Title>
+        <LinkWrapper style={{position: 'absolute', right: 0, margin: 0, top: 10}}>
+          <Link href={`https://opensea.io/assets/${props.collection}/${props.tokenId}`} target="_blank" rel="noopener noreferrer">
+            View on OpenSea
+            <LinkIconWrapper>
+              <ShareIcon />
+            </LinkIconWrapper>
+          </Link>
+        </LinkWrapper>
+      </div>
       <ImageCard tokenURI={tokenURI}/>
       <Table striped bordered hover>
         <tbody>
@@ -117,22 +193,46 @@ function NFTViewer(props: {collection: string, tokenId: number}) {
             <td>Owner</td>
             <td>{owner}</td>
           </tr>
-          <tr>
-            <td>Approved</td>
-            <td>{approved}</td>
-          </tr>
+          { effectivePrice && effectivePrice.gt(BigNumber.from(0)) &&
+            <tr>
+              <td>Price</td>
+              <td>{utils.formatEther(effectivePrice)} ETH</td>
+            </tr>
+          }
+          { isTroublesome && countdownToWithdraw &&
+            <tr>
+              <td>Time to withdraw</td>
+              <td>{countdownToWithdraw.toString()}</td>
+            </tr>
+          }
         </tbody>
       </Table>
-      {owner[0] == account &&
+      {owner == account &&
         <>
           <Subtitle style={{color: "green"}}>You are the owner</Subtitle>
-          {approved && dtAddr == approved[0]
-            ?
+          {isTroublesome &&
+            <Text style={{marginBottom: 10}}>Anyone can already purchase this NFT for <strong>{utils.formatEther(effectivePrice)} ETH</strong> in DoubleTrouble. But you can still set a lower price below.</Text>
+          }
+          {(isTroublesome || dtAddr == approved) &&
               <>
-                <Text>Put it up for sale in Double Trouble</Text>
-                <SmallButton onClick={approve}>Put up for sale</SmallButton>
+                <InputGroup className="mb-3">
+                  <InputGroup.Text>Price in ETH</InputGroup.Text>
+                  <FormControl
+                    onChange={(e) => setSalePrice(e.target.value)}  value={salePrice} />
+                </InputGroup>
+                <div style={{display: 'flex'}}>
+                  <SmallButton disabled={setPriceState.status == 'Mining'} onClick={() => setPrice(salePrice)}>
+                    {effectivePrice.eq(0) ? 'Put up for sale' : 'Change price'}
+                  </SmallButton>
+                  {forSalePrice > 0 &&
+                    <SmallButton disabled={setPriceState.status == 'Mining'} onClick={() => setPrice('0')}>
+                      Remove from sale
+                    </SmallButton>
+                  }
+                </div>
               </>
-            :
+          }
+          {!isTroublesome && approved != dtAddr &&
               <>
                 <Text>Approve DoubleTrouble to operate this token before listing it</Text>
                 <SmallButton onClick={approve}>Approve</SmallButton>
@@ -140,10 +240,31 @@ function NFTViewer(props: {collection: string, tokenId: number}) {
           }
         </>
       }
-      <a href={`https://opensea.io/assets/${props.collection}/${props.tokenId}`}>View it on OpenSea</a>
+      {owner != account && forSalePrice > 0 &&
+        <SmallButton disabled={buyState.status == 'Mining'} onClick={buy}>
+          Buy for {utils.formatEther(forSalePrice)} ETH
+        </SmallButton>
+      }
+      {owner != account && lastPurchasePrice > 0 &&
+        <SmallButton disabled={forceBuyState.status == 'Mining'} onClick={forceBuy}>
+          Force Buy for {utils.formatEther(lastPurchasePrice.mul(2))} ETH
+        </SmallButton>
+      }
     </>
   );
 }
+
+const LinkWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+`
+
+const LinkIconWrapper = styled.div`
+  width: 12px;
+  height: 12px;
+`
 
 const LabelRow = styled.div`
   display: flex;
