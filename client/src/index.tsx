@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { ChainId, DAppProvider } from '@usedapp/core'
 import { App } from './App'
+import { DoubleTroubleContext } from './DoubleTrouble'
 
 const config = {
   readOnlyChainId: ChainId.Mainnet,
@@ -17,7 +18,9 @@ const config = {
 ReactDOM.render(
   <React.StrictMode>
     <DAppProvider config={config}>
-      <App />
+      <DoubleTroubleContext.Provider value={'0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9'}> // process.env
+        <App />
+      </DoubleTroubleContext.Provider>
     </DAppProvider>
   </React.StrictMode>,
   document.getElementById('root')

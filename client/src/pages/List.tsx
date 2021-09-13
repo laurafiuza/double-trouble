@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { useContractCall, useEthers } from '@usedapp/core'
+import React, { useContext, useState } from 'react'
+import { useContractCall, useContractFunction, useEthers } from '@usedapp/core'
 import { Container, ContentBlock, ContentRow, MainContent, Section, SectionRow } from '../components/base/base'
 import GenericNFTContract from '../abi/IERC721Metadata.json'
 import { utils } from 'ethers'
@@ -13,7 +13,7 @@ import { Button } from '../components/base/Button'
 import { Colors, BorderRad, Transitions } from '../global/styles'
 import { Table, Form, InputGroup, FormControl, Card } from 'react-bootstrap';
 import { Contract } from '@ethersproject/contracts'
-
+import { DoubleTroubleContext } from '../DoubleTrouble';
 
 export function List() {
   const { chainId, active, account } = useEthers();
@@ -57,6 +57,7 @@ export function List() {
 
 function NFTViewer(props: {collection: string, tokenId: number}) {
   const { chainId, account, library } = useEthers();
+  const dtAddr = useContext(DoubleTroubleContext);
 
   const nftContract = new Contract(props.collection, new utils.Interface(GenericNFTContract.abi), library);
 
@@ -72,10 +73,13 @@ function NFTViewer(props: {collection: string, tokenId: number}) {
   const collectionName = useNFTCall('name', []);
   const collectionSymbol = useNFTCall('symbol', []);
   const owner = useNFTCall('ownerOf', [props.tokenId]);
+  const approved = useNFTCall('getApproved', [props.tokenId]);
   const tokenURI = useNFTCall('tokenURI', [props.tokenId]);
 
+  const { state, send } = useContractFunction(nftContract, 'approve', { transactionName: 'approve' })
+  console.log(state)
   const approve = () =>
-    console.log('bla');
+    send(dtAddr, props.tokenId);
 
   if (!owner) {
     return (
@@ -113,13 +117,27 @@ function NFTViewer(props: {collection: string, tokenId: number}) {
             <td>Owner</td>
             <td>{owner}</td>
           </tr>
+          <tr>
+            <td>Approved</td>
+            <td>{approved}</td>
+          </tr>
         </tbody>
       </Table>
       {owner[0] == account &&
         <>
           <Subtitle style={{color: "green"}}>You are the owner</Subtitle>
-          <Text>Approve DoubleTrouble to operate this token before listing it</Text>
-          <SmallButton onClick={approve}>Approve</SmallButton>
+          {approved && dtAddr == approved[0]
+            ?
+              <>
+                <Text>Put it up for sale in Double Trouble</Text>
+                <SmallButton onClick={approve}>Put up for sale</SmallButton>
+              </>
+            :
+              <>
+                <Text>Approve DoubleTrouble to operate this token before listing it</Text>
+                <SmallButton onClick={approve}>Approve</SmallButton>
+              </>
+          }
         </>
       }
       <a href={`https://opensea.io/assets/${props.collection}/${props.tokenId}`}>View it on OpenSea</a>
