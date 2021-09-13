@@ -54,8 +54,8 @@ export const StatusAnimation = ({ transaction }: StatusAnimationProps) => {
     setShowTransactionStatus(true)
     clearTimeout(timer)
 
-    if (transaction.status != 'Mining') setTimer(setTimeout(() => setShowTransactionStatus(false), 5000))
-  }, [transaction])
+    if (transaction.status !== 'Mining') setTimer(setTimeout(() => setShowTransactionStatus(false), 5000))
+  }, [transaction, timer])
 
   return (
     <AnimationWrapper>
@@ -108,7 +108,7 @@ const InputComponent = ({ ticker, transaction, send }: InputComponentProps) => {
   }
 
   useEffect(() => {
-    if (transaction.status != 'Mining') {
+    if (transaction.status !== 'Mining') {
       setDisabled(false)
       setValue('0')
     }

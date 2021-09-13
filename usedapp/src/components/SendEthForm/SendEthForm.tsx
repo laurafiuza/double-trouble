@@ -34,7 +34,7 @@ const InputComponent = () => {
   }
 
   useEffect(() => {
-    if (state.status != 'Mining') {
+    if (state.status !== 'Mining') {
       setDisabled(false)
       setAmount('0')
       setAddress('')

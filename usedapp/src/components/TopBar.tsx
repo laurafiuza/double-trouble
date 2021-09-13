@@ -11,31 +11,22 @@ export function TopBar() {
         <HeaderNav>
           <ToMain href="/">
             <span>DoubleTrouble</span>
+            <ToMainBottom>
+              NFT <Handshaking>🤝</Handshaking> Exchange
+            </ToMainBottom>
           </ToMain>
           <HeaderNavLinks>
-            <HeaderLink activeClassName="active-page" to="/balance">
+            <HeaderLink activeClassName="active-page" to="/all">
               {' '}
-              Balance{' '}
+              All NFTs{' '}
             </HeaderLink>
-            <HeaderLink activeClassName="active-page" to="/prices">
+            <HeaderLink activeClassName="active-page" to="/list">
               {' '}
-              Prices{' '}
+              List your NFT{' '}
             </HeaderLink>
-            <HeaderLink activeClassName="active-page" to="/block">
+            <HeaderLink activeClassName="active-page" to="/patrons">
               {' '}
-              Block{' '}
-            </HeaderLink>
-            <HeaderLink activeClassName="active-page" to="/tokens">
-              {' '}
-              Tokens{' '}
-            </HeaderLink>
-            <HeaderLink activeClassName="active-page" to="/send">
-              {' '}
-              Send Ether{' '}
-            </HeaderLink>
-            <HeaderLink activeClassName="active-page" to="/transactions">
-              {' '}
-              Transactions{' '}
+              Patron Tokens{' '}
             </HeaderLink>
           </HeaderNavLinks>
         </HeaderNav>

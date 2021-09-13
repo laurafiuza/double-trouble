@@ -8,7 +8,7 @@ import { TextBold } from '../../typography/Text'
 import { TokenIcon } from './TokenIcon'
 
 function getTokenList(chainId?: ChainId) {
-  return uniswapToken.tokens.filter((token) => token.chainId == chainId)
+  return uniswapToken.tokens.filter((token) => token.chainId === chainId)
 }
 
 function useTokensBalance(tokenList: any[], account?: string | null) {

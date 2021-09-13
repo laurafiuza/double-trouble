@@ -1,17 +1,26 @@
 {
-  "include": ["src", "types"],
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "ES2018",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "jsx": "react",
-    "baseUrl": "./",
-    "strict": true,
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "importsNotUsedAsValues": "error"
-  }
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx"
+  },
+  "include": [
+    "src"
+  ]
 }
