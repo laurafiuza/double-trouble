@@ -8,6 +8,10 @@ const config = {
   readOnlyUrls: {
     [ChainId.Mainnet]: 'https://mainnet.infura.io/v3/3165a249c65f4198bf57200109b8fadf',
   },
+  multicallAddresses: {
+    // FIXME should be passed via process.env
+    '31337': '0xdc64a140aa3e981100a9beca4e685f962f0cf6c9'
+  }
 }
 
 ReactDOM.render(
