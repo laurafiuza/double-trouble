@@ -7,11 +7,9 @@ const fs = require("fs");
 const LAST_BLOCK_NUM_FILE = "lastBlockNumber.txt";
 const aws = require("aws-sdk");
 const BUCKET = "double-trouble";
-const SECRET_ACCESS_KEY = "";
-const ACCESS_KEY_ID = "";
 const REGION = "us-west-1";
 aws.config.update({
-  region: REGION, secretAccessKey: SECRET_ACCESS_KEY, accessKeyId: ACCESS_KEY_ID,
+  region: REGION, secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, accessKeyId: process.env.AWS_ACCESS_KEY_ID,
 });
 const s3 = new aws.S3();
 const Web3 = require('web3');
@@ -26,10 +24,10 @@ const orchestratorContractInstance = new web3.eth.Contract(
 
 const { TwitterClient } = require('twitter-api-client')
 const twitterClient = new TwitterClient({
-    apiKey: "",
-    apiSecret: "",
-    accessToken: "",
-    accessTokenSecret: ""
+    apiKey: process.env.TWITTER_API_KEY,
+    apiSecret: process.env.TWITTER_API_KEY_SECRET,
+    accessToken: process.env.TWITTER_ACCESS_TOKEN,
+    accessTokenSecret: process.env.TWITTER_ACCESS_TOKEN,
 })
 
 const tweet = (msg) => {
