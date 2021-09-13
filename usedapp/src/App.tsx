@@ -4,12 +4,11 @@ import { BrowserRouter } from 'react-router-dom'
 import { Page } from './components/base/base'
 import { TopBar } from './components/TopBar'
 import { GlobalStyle } from './global/GlobalStyle'
-import { Balance } from './pages/Balance'
-import { Prices } from './pages/Prices'
-import { Block } from './pages/Block'
-import { Tokens } from './pages/Tokens'
-import { Transactions } from './pages/Transactions'
-import { SendEtherPage } from './pages/SendEtherPage'
+import { About } from './pages/About'
+import { List } from './pages/List'
+import { All } from './pages/All'
+import { Patrons } from './pages/Patrons'
+import { ViewNFT } from './pages/ViewNFT'
 import { NotificationsList } from './components/Transactions/History'
 
 export function App() {
@@ -19,13 +18,16 @@ export function App() {
       <BrowserRouter>
         <TopBar />
         <Switch>
-          <Route exact path="/balance" component={Balance} />
-          <Route exact path="/prices" component={Prices} />
-          <Route exact path="/block" component={Block} />
-          <Route exact path="/tokens" component={Tokens} />
-          <Route exact path="/send" component={SendEtherPage} />
-          <Route exact path="/transactions" component={Transactions} />
-          <Redirect exact from="/" to="/balance" />
+          <Route path="/collections/:collection/:tokenId" render={({match}) => {
+            return (
+              <ViewNFT collection={match.params.collection} tokenId={match.params.tokenId} />
+            );
+          }} />
+          <Route exact path="/" component={About} />
+          <Route exact path="/all" component={All} />
+          <Route exact path="/list" component={List} />
+          <Route exact path="/patrons" component={Patrons} />
+          <Redirect exact from="/" to="/about" />
         </Switch>
       </BrowserRouter>
       <NotificationsList />
