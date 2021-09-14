@@ -30,6 +30,7 @@ interface IERC165 {
 
 // File @openzeppelin/contracts/token/ERC721/IERC721.sol@v4.3.1
 
+
 pragma solidity ^0.8.0;
 
 /**
@@ -172,6 +173,7 @@ interface IERC721 is IERC165 {
 
 // File @openzeppelin/contracts/token/ERC721/IERC721Receiver.sol@v4.3.1
 
+
 pragma solidity ^0.8.0;
 
 /**
@@ -200,6 +202,7 @@ interface IERC721Receiver {
 
 // File @openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol@v4.3.1
 
+
 pragma solidity ^0.8.0;
 
 /**
@@ -225,6 +228,7 @@ interface IERC721Metadata is IERC721 {
 
 
 // File @openzeppelin/contracts/utils/Address.sol@v4.3.1
+
 
 pragma solidity ^0.8.0;
 
@@ -444,6 +448,7 @@ library Address {
 
 // File @openzeppelin/contracts/utils/Context.sol@v4.3.1
 
+
 pragma solidity ^0.8.0;
 
 /**
@@ -468,6 +473,7 @@ abstract contract Context {
 
 
 // File @openzeppelin/contracts/utils/Strings.sol@v4.3.1
+
 
 pragma solidity ^0.8.0;
 
@@ -537,6 +543,7 @@ library Strings {
 
 // File @openzeppelin/contracts/utils/introspection/ERC165.sol@v4.3.1
 
+
 pragma solidity ^0.8.0;
 
 /**
@@ -564,6 +571,7 @@ abstract contract ERC165 is IERC165 {
 
 
 // File @openzeppelin/contracts/token/ERC721/ERC721.sol@v4.3.1
+
 
 pragma solidity ^0.8.0;
 
@@ -976,6 +984,7 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
 
 // File @openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol@v4.3.1
 
+
 pragma solidity ^0.8.0;
 
 /**
@@ -1043,6 +1052,7 @@ abstract contract ERC721URIStorage is ERC721 {
 // File contracts/CryptoPunks.sol
 
 pragma solidity ^0.8.0;
+
 
 contract CryptoPunks is ERC721URIStorage {
   constructor() ERC721("CryptoPunks", "PUNK") {}
@@ -1177,12 +1187,12 @@ library Stringify {
 pragma solidity ^0.8.0;
 
 
-struct TokenInfo {
-   address collection;
-   uint256 tokenId;
-   uint256 lastPurchasePrice;
-   uint256 forSalePrice;
-   uint256 availableToWithdraw;
+
+struct CollectionInfo {
+  address addr;
+  string name;
+  string symbol;
+  address patron;
 }
 
 struct Token {
@@ -1201,45 +1211,67 @@ contract PatronTokens is ERC721URIStorage {
   // Reference to the dt contract that controls this PatronTokens contract
   address public _dt;
 
-  constructor(address dtAddr) ERC721("Patron Tokens", "PTRN") {
+  constructor(address dtAddr) ERC721("DoubleTrouble Patron Tokens", "PTRN") {
     _dt = dtAddr;
   }
 
   function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-    return interfaceId == 0xbeefdead || super.supportsInterface(interfaceId);
+    return interfaceId == 0xdeadbeef || super.supportsInterface(interfaceId);
   }
 
   function registeredTokens() external view returns (Token[] memory) {
     return _registeredTokens;
   }
 
-  function registerToken(address collection, uint256 tokenId, address receiverOfNft) public {
+  function totalSupply() external view returns (uint256) {
+    return _registeredCollections.length;
+  }
+
+  function registerToken(address collection, uint256 tokenId) public {
     require(msg.sender == _dt, "Only the DoubleTrouble contract can call this");
     if (!_registeredTokensSet[collection][tokenId]) {
       _registeredTokensSet[collection][tokenId] = true;
       _registeredTokens.push(Token(collection, tokenId));
-
-      if (!_registeredCollectionsSet[collection]) {
-        _registeredCollectionsSet[collection] = true;
-        _registeredCollections.push(collection);
-
-        // We mint a brand new NFT every time someone adds a new collection to Double Trouble
-        _safeMint(receiverOfNft, _registeredCollections.length - 1);
-      }
     }
   }
 
-  function patronTokenIdForCollection(address collection) public view returns (uint256) {
+  function tryToClaimPatronToken(address collection, address receiverOfNft) public {
+    require(msg.sender == _dt, "Only the DoubleTrouble contract can call this");
+
+    if (!_registeredCollectionsSet[collection]) {
+      _registeredCollectionsSet[collection] = true;
+      _registeredCollections.push(collection);
+
+      // We mint a brand new NFT if this is the first call for this collection
+      _safeMint(receiverOfNft, _registeredCollections.length - 1);
+    }
+  }
+
+  function patronTokenIdForCollection(address collection) public view returns (bool, uint256) {
     for (uint i = 0; i < _registeredCollections.length; i++) {
       if (collection == address(_registeredCollections[i])) {
-        return i;
+        return (true, i);
       }
     }
-    revert("Collection not found");
+    // Collection not found
+    return (false, 0);
   }
 
   function patronOf(address collection) public view returns (address) {
-    return ownerOf(patronTokenIdForCollection(collection));
+    (bool found, uint256 tokenId) = patronTokenIdForCollection(collection);
+    if (!found) {
+      return address(0);
+    }
+    return ownerOf(tokenId);
+  }
+
+  function patronedCollection(uint256 tokenId) public view returns (address) {
+    return _registeredCollections[tokenId];
+  }
+
+  function patronedCollectionInfo(uint256 tokenId) public view returns (CollectionInfo memory) {
+    IERC721Metadata c = IERC721Metadata(_registeredCollections[tokenId]);
+    return CollectionInfo(_registeredCollections[tokenId], c.name(), c.symbol(), ownerOf(tokenId));
   }
 
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
@@ -1296,6 +1328,14 @@ pragma solidity ^0.8.0;
 
 
 
+
+struct TokenInfo {
+   address collection;
+   uint256 tokenId;
+   uint256 lastPurchasePrice;
+   uint256 forSalePrice;
+   uint256 availableToWithdraw;
+}
 
 contract DoubleTrouble {
   // nested mapping that keeps track of who owns the NFTs
@@ -1361,7 +1401,7 @@ contract DoubleTrouble {
   }
 
   function setPrice(address collection, uint256 tokenId, uint256 price) external {
-    _pt.registerToken(collection, tokenId, msg.sender);
+    _pt.registerToken(collection, tokenId);
 
     // Putting up for sale for the first time
     if (_lastPurchasePrices[collection][tokenId] == 0) {
@@ -1379,7 +1419,7 @@ contract DoubleTrouble {
   function buy(address collection, uint256 tokenId) payable external {
     require(_forSalePrices[collection][tokenId] > 0, "NFT is not for sale");
     require(msg.value >= _forSalePrices[collection][tokenId], "Value sent must be at least the for sale price");
-    _pt.registerToken(collection, tokenId, msg.sender);
+    _pt.registerToken(collection, tokenId);
 
     // Make NFT troublesome if this is the first time it's being purchased
     if (_owners[collection][tokenId] == address(0)) {
@@ -1399,7 +1439,7 @@ contract DoubleTrouble {
     require(_lastPurchasePrices[collection][tokenId] > 0, "NFT was not yet purchased within DoubleTrouble");
     uint256 amountToPay = _dtNumerator * _lastPurchasePrices[collection][tokenId] / _dtDenominator;
     require(msg.value >= amountToPay, "Value sent must be at least twice the last purchase price");
-    _pt.registerToken(collection, tokenId, msg.sender);
+    _pt.registerToken(collection, tokenId);
 
     emit ForceBuy(_owners[collection][tokenId], msg.sender, collection, tokenId, msg.value,
                   _lastPurchasePrices[collection][tokenId], amountToPay);
@@ -1408,6 +1448,10 @@ contract DoubleTrouble {
 
   function _completeBuy(address oldOwner, address newOwner, address collection, uint256 tokenId, uint256 amountToPay) internal virtual {
     require(_owners[collection][tokenId] == oldOwner, "old owner must match");
+
+    // If this is the first time someone is buying an item from this collection, seller claims the patron token
+    _pt.tryToClaimPatronToken(collection, oldOwner);
+
     // Change owner, set last purchase price, and remove from sale
     _owners[collection][tokenId] = newOwner;
     _lastPurchasePrices[collection][tokenId] = amountToPay;
