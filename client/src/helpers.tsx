@@ -1,5 +1,8 @@
 import { useContractCall } from '@usedapp/core'
 import { BigNumber } from '@ethersproject/bignumber'
+import { Link } from './components/base/Link'
+import { ShareIcon } from './components/Transactions/Icons'
+import styled from 'styled-components'
 
 
 export const _useContractCall = (arg: any) => {
@@ -21,4 +24,30 @@ export const effectiveNFTPrice = (forSalePrice: BigNumber, lastPurchasePrice: Bi
     return BigNumber.from(0);
   }
 };
+
+
+export const OpenSeaLink = (props: {style?: any, collection: string, tokenId: number}) => {
+  return (
+    <LinkWrapper style={props.style}>
+      <Link href={`https://opensea.io/assets/${props.collection}/${props.tokenId}`} target="_blank" rel="noopener noreferrer">
+        View on OpenSea
+        <LinkIconWrapper>
+          <ShareIcon />
+        </LinkIconWrapper>
+      </Link>
+    </LinkWrapper>
+  );
+}
+
+const LinkWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+`
+
+const LinkIconWrapper = styled.div`
+  width: 12px;
+  height: 12px;
+`
 

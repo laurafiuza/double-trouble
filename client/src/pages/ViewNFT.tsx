@@ -13,14 +13,12 @@ import { Button } from '../components/base/Button'
 import ImageCard from '../components/ImageCard';
 import { BigNumber } from '@ethersproject/bignumber'
 import { DoubleTroubleContext } from '../DoubleTrouble';
-import { Link } from '../components/base/Link'
-import { ShareIcon } from '../components/Transactions/Icons'
 import countdown from 'countdown';
 import GenericNFTContract from '../abi/IERC721Metadata.json'
 import DoubleTroubleContract from '../abi/DoubleTrouble.json'
 import { Contract } from '@ethersproject/contracts'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {_useContractCall, effectiveNFTPrice } from '../helpers';
+import { OpenSeaLink, _useContractCall, effectiveNFTPrice } from '../helpers';
 
 
 export function ViewNFT(props: {collection: string, tokenId: number}) {
@@ -133,14 +131,8 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
     <>
       <div style={{position: 'relative'}}>
         <Title>{collectionName} #{props.tokenId}</Title>
-        <LinkWrapper style={{position: 'absolute', right: 0, margin: 0, top: 10}}>
-          <Link href={`https://opensea.io/assets/${props.collection}/${props.tokenId}`} target="_blank" rel="noopener noreferrer">
-            View on OpenSea
-            <LinkIconWrapper>
-              <ShareIcon />
-            </LinkIconWrapper>
-          </Link>
-        </LinkWrapper>
+        <OpenSeaLink collection={props.collection} tokenId={props.tokenId}
+          style={{position: 'absolute', right: 0, margin: 0, top: 10}} />
       </div>
       <ImageCard tokenURI={tokenURI}/>
       <Table striped bordered hover>
@@ -228,18 +220,6 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
   );
 }
 
-const LinkWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 20px;
-`
-
-const LinkIconWrapper = styled.div`
-  width: 12px;
-  height: 12px;
-`
-
 const LabelRow = styled.div`
   display: flex;
   margin: 32px 0 24px 0;
@@ -312,3 +292,4 @@ const InputRow = styled.div`
     border-color: ${Colors.Black[900]};
   }
 `
+

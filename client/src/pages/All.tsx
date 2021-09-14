@@ -8,7 +8,7 @@ import { Colors, BorderRad, Transitions } from '../global/styles'
 import styled from 'styled-components'
 import { AccountButton } from '../components/account/AccountButton'
 import { useContractCall, useContractCalls, useContractFunction, useEthers } from '@usedapp/core'
-import { _useContractCall, effectiveNFTPrice } from '../helpers';
+import { OpenSeaLink, _useContractCall, effectiveNFTPrice } from '../helpers';
 import { DoubleTroubleContext } from '../DoubleTrouble';
 import DoubleTroubleContract from '../abi/DoubleTrouble.json'
 import GenericNFTContract from '../abi/IERC721Metadata.json'
@@ -57,6 +57,8 @@ export function All() {
                     <TokenTicker>
                     Selling for {utils.formatEther(effectiveNFTPrice(t.forSalePrice, t.lastPurchasePrice))} ETH
                     </TokenTicker>
+                    <OpenSeaLink collection={t.collection} tokenId={t.tokenId}
+                      style={{position: 'absolute', right: 10, marginTop: 0}} />
                   </TokenItem>
                 ))}
             </List>
@@ -78,6 +80,7 @@ const List = styled.ul`
 `
 
 const TokenItem = styled.li`
+  position: relative;
   display: grid;
   grid-template-areas:
     'icon name balance'
