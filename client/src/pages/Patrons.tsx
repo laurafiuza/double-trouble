@@ -46,7 +46,14 @@ export function Patrons() {
       args: [n],
     }
   }));
-  const collections = ['CryptoPunks'];
+  const info = _useContractCalls(patronTokens.map((n: number) => {
+    return {
+      abi: new utils.Interface(PatronTokensContract.abi),
+      address: patronTokensAddr,
+      method: 'patronedCollectionInfo',
+      args: [n],
+    }
+  }));
 
   return (
     <MainContent>
@@ -88,7 +95,7 @@ export function Patrons() {
                       </Link>
                     </TokenName>
                     <TokenCollection>
-                      Collection: {collections[i]}
+                      Collection: {(info[i] ?? {}).name}
                     </TokenCollection>
                     <TokenTicker>
                     Owner: {truncAddr(owners[i] ?? '', 8)} {owners[i] == account && '(you)'}
