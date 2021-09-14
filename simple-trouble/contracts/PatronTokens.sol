@@ -30,7 +30,7 @@ contract PatronTokens is ERC721URIStorage {
   // Reference to the dt contract that controls this PatronTokens contract
   address public _dt;
 
-  constructor(address dtAddr) ERC721("Patron Tokens", "PTRN") {
+  constructor(address dtAddr) ERC721("DoubleTrouble Patron Tokens", "PTRN") {
     _dt = dtAddr;
   }
 
