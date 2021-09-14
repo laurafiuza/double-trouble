@@ -16,6 +16,12 @@ const config = {
 }
 
 const chains = {
+  // Ethereum Mainnet
+  "1": {
+    name: 'Ethereum',
+    dtAddr: "0xf2D21129B6b93A91A726F24BC436D00331B0B338",
+    patronTokensAddr: '0xfdea67b8cd4449f0b1400b856d4715492aacd89b',
+  },
   // Hardhat local
   "31337": {
     name: 'Hardhat',
@@ -25,7 +31,7 @@ const chains = {
 }
 
 function WrappedApp() {
-  const chainId = '31337' // FIXME
+  const chainId = '1' // FIXME
   return  (
     <DoubleTroubleContext.Provider value={{
       dtAddr: (chains[chainId].dtAddr ?? ''),
