@@ -28,8 +28,10 @@ export function All() {
     });
   };
 
-  const allNfts = useDTCall('allKnownTokens', []);
-  const nameForNfts = _useContractCalls((allNfts ?? []).map((t: any) => {
+  const allNfts = (useDTCall('allKnownTokens', []) ?? []).filter((t: any) =>
+    !effectiveNFTPrice(t.forSalePrice, t.lastPurchasePrice).isZero()
+  );
+  const nameForNfts = _useContractCalls((allNfts).map((t: any) => {
     return {
       abi: new utils.Interface(GenericNFTContract.abi),
       address: t.collection,
@@ -37,7 +39,7 @@ export function All() {
       args: [],
     }
   }))
-  const ownerForNfts = _useContractCalls((allNfts ?? []).map((t: any) => {
+  const ownerForNfts = _useContractCalls((allNfts).map((t: any) => {
     return {
       abi: new utils.Interface(GenericNFTContract.abi),
       address: t.collection,
