@@ -135,7 +135,7 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
         <OpenSeaLink collection={props.collection} tokenId={props.tokenId}
           style={{position: 'absolute', right: 0, margin: 0, top: 10}} />
       </div>
-      <ImageCard tokenURI={tokenURI}/>
+      <ImageCard style={{marginBottom: 20}} tokenURI={tokenURI}/>
       <Table striped bordered hover>
         <tbody>
           { collectionName &&

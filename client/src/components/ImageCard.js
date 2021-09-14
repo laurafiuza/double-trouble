@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Card, Spinner } from 'react-bootstrap';
 import axios from 'axios';
+import _ from 'lodash';
 
 class ImageCard extends Component {
   constructor(props) {
@@ -63,7 +64,7 @@ class ImageCard extends Component {
       return <div>Unable to load image. See <a href={this.props.tokenURI}>metadata</a></div>
     }
     return (
-      <Card.Img
+      <Card.Img style={_.extend({maxWidth: 300}, this.props.style)}
         onError={() => this.handleImgError()}
         variant="top"
         src={this.externalCache.image}
