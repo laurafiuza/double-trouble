@@ -42,6 +42,10 @@ contract PatronTokens is ERC721URIStorage {
     return _registeredTokens;
   }
 
+  function totalSupply() external view returns (uint256) {
+    return _registeredCollections.length;
+  }
+
   function registerToken(address collection, uint256 tokenId, address receiverOfNft) public {
     require(msg.sender == _dt, "Only the DoubleTrouble contract can call this");
     if (!_registeredTokensSet[collection][tokenId]) {

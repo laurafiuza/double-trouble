@@ -200,7 +200,7 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
           {!isTroublesome && approved != dtAddr &&
               <>
                 <Text>Approve DoubleTrouble to operate this token before listing it</Text>
-                <SmallButton onClick={approve}>Approve</SmallButton>
+                <SmallButton onClick={approve} disabled={approveState.status == 'Mining'}>Approve</SmallButton>
               </>
           }
         </>
