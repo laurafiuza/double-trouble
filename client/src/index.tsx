@@ -16,15 +16,22 @@ const config = {
   }
 }
 
-const doubleTroubleAddresses = {
+const chains = {
   // Hardhat local
-  "31337": process.env.REACT_APP_DT_ADDR
+  "31337": {
+    name: 'Hardhat',
+    dtAddr: process.env.REACT_APP_DT_ADDR,
+    patronTokensAddr: process.env.REACT_APP_PT_ADDR,
+  }
 }
 
 function WrappedApp() {
-  const { chainId } = useEthers();
+  const chainId = '31337' // FIXME
   return  (
-    <DoubleTroubleContext.Provider value={(chainId && doubleTroubleAddresses['31337']) ?? '0xdeadbeef'}>
+    <DoubleTroubleContext.Provider value={{
+      dtAddr: (chains[chainId].dtAddr ?? ''),
+      patronTokensAddr: (chains[chainId].patronTokensAddr ?? ''),
+    }}>
       <App />
     </DoubleTroubleContext.Provider>
   );

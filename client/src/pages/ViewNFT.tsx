@@ -16,6 +16,7 @@ import { DoubleTroubleContext } from '../DoubleTrouble';
 import countdown from 'countdown';
 import GenericNFTContract from '../abi/IERC721Metadata.json'
 import DoubleTroubleContract from '../abi/DoubleTrouble.json'
+import PatronTokensContract from '../abi/PatronTokens.json'
 import { Contract } from '@ethersproject/contracts'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { OpenSeaLink, _useContractCall, effectiveNFTPrice } from '../helpers';
@@ -50,7 +51,7 @@ export function ViewNFT(props: {collection: string, tokenId: number}) {
  **/
 export function NFTViewer(props: {collection: string, tokenId: number}) {
   const { chainId, account, library, active } = useEthers();
-  const dtAddr = useContext(DoubleTroubleContext);
+  const { dtAddr, patronTokensAddr }  = useContext(DoubleTroubleContext);
 
   const nftContract = new Contract(props.collection, new utils.Interface(GenericNFTContract.abi), library);
   const dtContract = new Contract(dtAddr, new utils.Interface(DoubleTroubleContract.abi), library);
@@ -68,6 +69,15 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
     return _useContractCall({
       abi: dtContract.interface,
       address: dtAddr,
+      method: method,
+      args: args,
+    });
+  };
+
+  const usePatronTokensCall = (method: string, args: any[]) => {
+    return _useContractCall({
+      abi: new utils.Interface(PatronTokensContract.abi),
+      address: patronTokensAddr,
       method: method,
       args: args,
     });
@@ -111,6 +121,10 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
   const forceBuy = () => {
     forceBuySend(props.collection, props.tokenId, {value: lastPurchasePrice.mul(2)})
   }
+
+  // Read from PatronTokens contract
+//  const patron = usePatronTokensCall('patronOf', [props.collection]);
+ // console.log(patron);
 
   // Derived variables
   const countdownToWithdraw = countdown(Date.now() + secondsToWithdraw * 1000);

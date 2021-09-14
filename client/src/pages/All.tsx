@@ -17,7 +17,7 @@ import { Link } from '../components/base/Link'
 
 export function All() {
   const { account } = useEthers();
-  const dtAddr = useContext(DoubleTroubleContext);
+  const { dtAddr } = useContext(DoubleTroubleContext);
 
   const useDTCall = (method: string, args: any[]) => {
     return _useContractCall({
