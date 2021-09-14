@@ -46,33 +46,42 @@ contract PatronTokens is ERC721URIStorage {
     return _registeredCollections.length;
   }
 
-  function registerToken(address collection, uint256 tokenId, address receiverOfNft) public {
+  function registerToken(address collection, uint256 tokenId) public {
     require(msg.sender == _dt, "Only the DoubleTrouble contract can call this");
     if (!_registeredTokensSet[collection][tokenId]) {
       _registeredTokensSet[collection][tokenId] = true;
       _registeredTokens.push(Token(collection, tokenId));
-
-      if (!_registeredCollectionsSet[collection]) {
-        _registeredCollectionsSet[collection] = true;
-        _registeredCollections.push(collection);
-
-        // We mint a brand new NFT every time someone adds a new collection to Double Trouble
-        _safeMint(receiverOfNft, _registeredCollections.length - 1);
-      }
     }
   }
 
-  function patronTokenIdForCollection(address collection) public view returns (uint256) {
+  function tryToClaimPatronToken(address collection, address receiverOfNft) public {
+    require(msg.sender == _dt, "Only the DoubleTrouble contract can call this");
+
+    if (!_registeredCollectionsSet[collection]) {
+      _registeredCollectionsSet[collection] = true;
+      _registeredCollections.push(collection);
+
+      // We mint a brand new NFT if this is the first call for this collection
+      _safeMint(receiverOfNft, _registeredCollections.length - 1);
+    }
+  }
+
+  function patronTokenIdForCollection(address collection) public view returns (bool, uint256) {
     for (uint i = 0; i < _registeredCollections.length; i++) {
       if (collection == address(_registeredCollections[i])) {
-        return i;
+        return (true, i);
       }
     }
-    revert("Collection not found");
+    // Collection not found
+    return (false, 0);
   }
 
   function patronOf(address collection) public view returns (address) {
-    return ownerOf(patronTokenIdForCollection(collection));
+    (bool found, uint256 tokenId) = patronTokenIdForCollection(collection);
+    if (!found) {
+      return address(0);
+    }
+    return ownerOf(tokenId);
   }
 
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {

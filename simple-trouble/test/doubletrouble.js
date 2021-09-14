@@ -188,6 +188,10 @@ describe("DoubleTrouble", () => {
     };
     let gasCost = buyReceipt.effectiveGasPrice.mul(buyReceipt.gasUsed)
 
+    console.log(sellerBalanceBefore);
+    console.log(sellerBalanceAfter);
+    console.log(price);
+    console.log(feePaid);
     assert_almost_equal(sellerBalanceAfter, sellerBalanceBefore.add(price).sub(feePaid), "Balance of accounts[0] must be bigger after buy");
     assert_almost_equal(buyerBalanceAfter, buyerBalanceBefore.sub(price).sub(gasCost), "Balance of accounts[1] must be smaller after buy");
 

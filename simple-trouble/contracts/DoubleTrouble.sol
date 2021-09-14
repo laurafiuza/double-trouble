@@ -71,7 +71,7 @@ contract DoubleTrouble {
   }
 
   function setPrice(address collection, uint256 tokenId, uint256 price) external {
-    _pt.registerToken(collection, tokenId, msg.sender);
+    _pt.registerToken(collection, tokenId);
 
     // Putting up for sale for the first time
     if (_lastPurchasePrices[collection][tokenId] == 0) {
@@ -89,7 +89,7 @@ contract DoubleTrouble {
   function buy(address collection, uint256 tokenId) payable external {
     require(_forSalePrices[collection][tokenId] > 0, "NFT is not for sale");
     require(msg.value >= _forSalePrices[collection][tokenId], "Value sent must be at least the for sale price");
-    _pt.registerToken(collection, tokenId, msg.sender);
+    _pt.registerToken(collection, tokenId);
 
     // Make NFT troublesome if this is the first time it's being purchased
     if (_owners[collection][tokenId] == address(0)) {
@@ -109,7 +109,7 @@ contract DoubleTrouble {
     require(_lastPurchasePrices[collection][tokenId] > 0, "NFT was not yet purchased within DoubleTrouble");
     uint256 amountToPay = _dtNumerator * _lastPurchasePrices[collection][tokenId] / _dtDenominator;
     require(msg.value >= amountToPay, "Value sent must be at least twice the last purchase price");
-    _pt.registerToken(collection, tokenId, msg.sender);
+    _pt.registerToken(collection, tokenId);
 
     emit ForceBuy(_owners[collection][tokenId], msg.sender, collection, tokenId, msg.value,
                   _lastPurchasePrices[collection][tokenId], amountToPay);
@@ -118,6 +118,10 @@ contract DoubleTrouble {
 
   function _completeBuy(address oldOwner, address newOwner, address collection, uint256 tokenId, uint256 amountToPay) internal virtual {
     require(_owners[collection][tokenId] == oldOwner, "old owner must match");
+
+    // If this is the first time someone is buying an item from this collection, seller claims the patron token
+    _pt.tryToClaimPatronToken(collection, oldOwner);
+
     // Change owner, set last purchase price, and remove from sale
     _owners[collection][tokenId] = newOwner;
     _lastPurchasePrices[collection][tokenId] = amountToPay;
