@@ -122,6 +122,12 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
     forceBuySend(props.collection, props.tokenId, {value: lastPurchasePrice.mul(2)})
   }
 
+  const { state: withdrawState, send: withdrawSend} = useContractFunction(dtContract, 'withdraw', { transactionName: 'withdraw' })
+  const withdraw = () => {
+    const fee = lastPurchasePrice.div(65).add(1);
+    withdrawSend(props.collection, props.tokenId, {value: fee})
+  }
+
   // Read from PatronTokens contract
   const patron = usePatronTokensCall('patronOf', [props.collection]);
 
@@ -236,6 +242,11 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
           <SmallButton disabled={forceBuyState.status == 'Mining'} onClick={forceBuy}>
             Force Buy for {utils.formatEther(lastPurchasePrice.mul(2))} ETH
           </SmallButton>
+        }
+        {isTroublesome && owner == account && secondsToWithdraw <= 0 &&
+          <Button disabled={withdrawState.status == 'Mining'} onClick={withdraw} style={{padding: 5, marginTop: 10}}>
+            Withdraw from DoubleTrouble
+          </Button>
         }
       </div>
     </>
