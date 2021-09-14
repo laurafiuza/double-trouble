@@ -1,13 +1,12 @@
 import React, { useContext, useState } from 'react'
-import { useContractCall, useContractFunction, useEthers } from '@usedapp/core'
+import { useContractFunction, useEthers } from '@usedapp/core'
 import { utils } from 'ethers'
 import { Container, ContentBlock, ContentRow, MainContent, Section, SectionRow } from '../components/base/base'
-import { Label } from '../typography/Label'
-import { Text, TextInline } from '../typography/Text'
+import { Text, } from '../typography/Text'
 import { Subtitle, Title } from '../typography/Title'
-import { Spinner, Table, Form, InputGroup, FormControl, Card } from 'react-bootstrap';
+import { Spinner, Table, InputGroup, FormControl, } from 'react-bootstrap';
 import styled from 'styled-components'
-import { Colors, BorderRad, Transitions } from '../global/styles'
+import { Colors, } from '../global/styles'
 import { AccountButton } from '../components/account/AccountButton'
 import { Button } from '../components/base/Button'
 import ImageCard from '../components/ImageCard';
@@ -23,7 +22,7 @@ import { zeroAddr, OpenSeaLink, _useContractCall, effectiveNFTPrice } from '../h
 
 
 export function ViewNFT(props: {collection: string, tokenId: number}) {
-  const { active, account } = useEthers()
+  const { active } = useEthers();
   return (
     <MainContent>
       <Container>
@@ -50,7 +49,7 @@ export function ViewNFT(props: {collection: string, tokenId: number}) {
  * both Troublesome or not.
  **/
 export function NFTViewer(props: {collection: string, tokenId: number}) {
-  const { chainId, account, library, active } = useEthers();
+  const { chainId, account, library, } = useEthers();
   const { dtAddr, patronTokensAddr }  = useContext(DoubleTroubleContext);
 
   const nftContract = new Contract(props.collection, new utils.Interface(GenericNFTContract.abi), library);
@@ -104,7 +103,6 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
   const lastPurchasePrice = useDTCall('lastPurchasePrice', [props.collection, props.tokenId]);
   const secondsToWithdraw = useDTCall('secondsToWithdraw', [props.collection, props.tokenId]);
   const troublesomeOwner = useDTCall('ownerOf', [props.collection, props.tokenId]);
-  const shouldFail = useDTCall('ownerOf', [props.collection, props.tokenId, 'hello']);
 
   // Write to DT contract
   const { state: setPriceState, send: setPriceSend} = useContractFunction(dtContract, 'setPrice', { transactionName: 'setPrice' })
@@ -133,7 +131,7 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
 
   // Derived variables
   const countdownToWithdraw = countdown(Date.now() + secondsToWithdraw * 1000);
-  const isTroublesome = originalOwner == dtAddr;
+  const isTroublesome = originalOwner === dtAddr;
   const owner = isTroublesome ? troublesomeOwner : originalOwner;
   const effectivePrice = effectiveNFTPrice(forSalePrice ?? BigNumber.from(0), lastPurchasePrice ?? BigNumber.from(0));
 
@@ -196,13 +194,13 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
           }
         </tbody>
       </Table>
-      {owner == account &&
+      {owner === account &&
         <>
           <Subtitle style={{color: "green"}}>You are the owner</Subtitle>
           {isTroublesome &&
             <Text style={{marginBottom: 10}}>Anyone can already purchase this NFT for <strong>{utils.formatEther(effectivePrice)} ETH</strong> in DoubleTrouble. But you can still set a lower price below.</Text>
           }
-          {(isTroublesome || dtAddr == approved) &&
+          {(isTroublesome || dtAddr === approved) &&
               <>
                 <InputGroup className="mb-3">
                   <InputGroup.Text>Price in ETH</InputGroup.Text>
@@ -210,41 +208,41 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
                     onChange={(e) => setSalePrice(e.target.value)}  value={salePrice} />
                 </InputGroup>
                 <div style={{display: 'flex'}}>
-                  <SmallButton disabled={setPriceState.status == 'Mining'} onClick={() => setPrice(salePrice)}>
+                  <SmallButton disabled={setPriceState.status === 'Mining'} onClick={() => setPrice(salePrice)}>
                     {effectivePrice.eq(0) ? 'Put up for sale' : 'Change price'}
                   </SmallButton>
                   {forSalePrice > 0 &&
-                    <SmallButton disabled={setPriceState.status == 'Mining'} onClick={() => setPrice('0')}>
+                    <SmallButton disabled={setPriceState.status === 'Mining'} onClick={() => setPrice('0')}>
                       Remove from sale
                     </SmallButton>
                   }
                 </div>
               </>
           }
-          {!isTroublesome && approved != dtAddr &&
+          {!isTroublesome && approved !== dtAddr &&
               <>
                 <Text>Approve DoubleTrouble to operate this token before listing it</Text>
-                <SmallButton style={{marginTop: 10, marginBottom: 10}} onClick={approve} disabled={approveState.status == 'Mining'}>Approve</SmallButton>
+                <SmallButton style={{marginTop: 10, marginBottom: 10}} onClick={approve} disabled={approveState.status === 'Mining'}>Approve</SmallButton>
               </>
           }
-          {patron == zeroAddr &&
+          {patron === zeroAddr &&
             <Text style={{marginTop: 10}}><strong>No Patron.</strong> No one has claimed Patronage for <strong>{collectionName}</strong> yet. Be the first to sell an NFT from this collection in DoubleTrouble and claim your <a style={{textDecoration: 'underline'}} href="/patrons">Patron Token.</a></Text>
           }
         </>
       }
       <div style={{display: 'flex'}}>
-        {owner != account && forSalePrice > 0 &&
-          <SmallButton disabled={buyState.status == 'Mining'} onClick={buy}>
+        {owner !== account && forSalePrice > 0 &&
+          <SmallButton disabled={buyState.status === 'Mining'} onClick={buy}>
             Buy for {utils.formatEther(forSalePrice)} ETH
           </SmallButton>
         }
-        {owner != account && lastPurchasePrice > 0 &&
-          <SmallButton disabled={forceBuyState.status == 'Mining'} onClick={forceBuy}>
+        {owner !== account && lastPurchasePrice > 0 &&
+          <SmallButton disabled={forceBuyState.status === 'Mining'} onClick={forceBuy}>
             Force Buy for {utils.formatEther(lastPurchasePrice.mul(2))} ETH
           </SmallButton>
         }
-        {isTroublesome && owner == account && secondsToWithdraw <= 0 &&
-          <Button disabled={withdrawState.status == 'Mining'} onClick={withdraw} style={{padding: 5, marginTop: 10}}>
+        {isTroublesome && owner === account && secondsToWithdraw <= 0 &&
+          <Button disabled={withdrawState.status === 'Mining'} onClick={withdraw} style={{padding: 5, marginTop: 10}}>
             Withdraw from DoubleTrouble
           </Button>
         }
@@ -253,14 +251,7 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
   );
 }
 
-const LabelRow = styled.div`
-  display: flex;
-  margin: 32px 0 24px 0;
-`
 
-const FormTicker = styled.div`
-  padding: 0 8px;
-`
 
 const SmallButton = styled(Button)`
   display: flex;
@@ -278,51 +269,6 @@ const SmallButton = styled(Button)`
   &:disabled:focus {
     background-color: unset;
     color: unset;
-  }
-`
-
-const Input = styled.input`
-  height: 100%;
-  width: 120px;
-  padding: 0 0 0 24px;
-  border: 0;
-  border-radius: ${BorderRad.m};
-  -moz-appearance: textfield;
-  outline: none;
-
-  &::-webkit-outer-spin-button,
-  &::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-
-  &:-webkit-autofill,
-  &:-webkit-autofill:hover,
-  &:-webkit-autofill:focus,
-  &:-webkit-autofill:active {
-    -webkit-background-clip: text;
-  }
-`
-
-const AddressInput = styled(Input)`
-  width: 401px;
-  padding: 0 0 0 38px;
-`
-
-const InputRow = styled.div`
-  height: 44px;
-  display: flex;
-  margin: 0 auto;
-  color: ${Colors.Gray['600']};
-  align-items: center;
-  border: ${Colors.Gray['300']} 1px solid;
-  border-radius: ${BorderRad.m};
-  overflow: hidden;
-  transition: ${Transitions.all};
-
-  &:hover,
-  &:focus-within {
-    border-color: ${Colors.Black[900]};
   }
 `
 

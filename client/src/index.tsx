@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom'
 import { ChainId, DAppProvider } from '@usedapp/core'
 import { App } from './App'
 import { DoubleTroubleContext } from './DoubleTrouble'
-import { useEthers } from '@usedapp/core'
 
 const config = {
   readOnlyChainId: ChainId.Mainnet,

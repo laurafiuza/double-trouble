@@ -1,14 +1,8 @@
 import React from 'react'
-import { useBlockMeta, useBlockNumber, useEthers } from '@usedapp/core'
 import { Container, ContentBlock, ContentRow, MainContent, Section } from '../components/base/base'
-import { Label } from '../typography/Label'
-import { Text, TextInline } from '../typography/Text'
-import { ListGroup } from "react-bootstrap";
+import { Text, } from '../typography/Text'
 
 export function About() {
-  const blockNumber = useBlockNumber()
-  const { chainId } = useEthers()
-  const { timestamp, difficulty } = useBlockMeta()
   return (
     <MainContent>
       <Container>

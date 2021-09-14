@@ -1,13 +1,12 @@
 import React, {useContext} from 'react'
-import { Container, ContentBlock, ContentRow, MainContent, Section, SectionRow } from '../components/base/base'
+import { Container, ContentBlock,  MainContent, Section, SectionRow } from '../components/base/base'
 import { utils } from 'ethers'
-import { Label } from '../typography/Label'
-import { TextBold, TextInline } from '../typography/Text'
+import { TextBold, } from '../typography/Text'
 import { Title } from '../typography/Title'
-import { Colors, BorderRad, Transitions } from '../global/styles'
+import { Colors, } from '../global/styles'
 import styled from 'styled-components'
 import { AccountButton } from '../components/account/AccountButton'
-import { useContractFunction, useEthers } from '@usedapp/core'
+import { useEthers } from '@usedapp/core'
 import { truncAddr, OpenSeaLink, _useContractCall, _useContractCalls, effectiveNFTPrice } from '../helpers';
 import { DoubleTroubleContext } from '../DoubleTrouble';
 import DoubleTroubleContract from '../abi/DoubleTrouble.json'
@@ -70,7 +69,7 @@ export function All() {
                     Selling for {utils.formatEther(effectiveNFTPrice(t.forSalePrice, t.lastPurchasePrice))} ETH
                     </TokenPrice>
                     <TokenTicker>
-                    Owner: {truncAddr(ownerForNfts[i] ?? '', 8)} {ownerForNfts[i] == account && '(you)'}
+                    Owner: {truncAddr(ownerForNfts[i] ?? '', 8)} {ownerForNfts[i] === account && '(you)'}
                     </TokenTicker>
                     <OpenSeaLink collection={t.collection} tokenId={t.tokenId}
                       style={{gridArea: 'view', marginTop: 0}} />
@@ -115,19 +114,6 @@ const TokenItem = styled.li`
   }
 `
 
-const TokenIconContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  grid-area: icon;
-  width: 48px;
-  height: 48px;
-  padding: 1px;
-  font-size: 36px;
-  line-height: 36px;
-  border: 1px solid ${Colors.Gray[300]};
-  border-radius: 50%;
-`
 
 const TokenName = styled(TextBold)`
   grid-area: name;

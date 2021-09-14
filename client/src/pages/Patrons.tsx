@@ -1,18 +1,17 @@
 import React, {useContext} from 'react'
 import { utils } from 'ethers'
-import { useBlockMeta, useBlockNumber, useEthers } from '@usedapp/core'
+import { useEthers } from '@usedapp/core'
 import { Container, ContentBlock, ContentRow, MainContent, Section, SectionRow } from '../components/base/base'
 import { Title } from '../typography/Title'
-import { Label } from '../typography/Label'
-import { Text, TextBold, TextInline } from '../typography/Text'
+import { Text, TextBold, } from '../typography/Text'
 import PatronTokensContract from '../abi/PatronTokens.json'
 import { DoubleTroubleContext } from '../DoubleTrouble';
 import { AccountButton } from '../components/account/AccountButton'
 import ImageCard from '../components/ImageCard';
 import { Link } from '../components/base/Link'
-import { truncAddr, OpenSeaLink, _useContractCall, _useContractCalls, effectiveNFTPrice } from '../helpers';
+import { truncAddr, OpenSeaLink, _useContractCall, _useContractCalls, } from '../helpers';
 import styled from 'styled-components'
-import { Colors, BorderRad, Transitions } from '../global/styles'
+import { Colors, } from '../global/styles'
 import _ from 'lodash';
 
 export function Patrons() {
@@ -77,7 +76,7 @@ export function Patrons() {
           <hr/>
           <TokensContentBlock>
             <h2>All Patron Tokens</h2>
-            {patronTokens.length == 0 &&
+            {patronTokens.length === 0 &&
               <Text>There aren't any yet</Text>
             }
             <List>
@@ -98,7 +97,7 @@ export function Patrons() {
                       Collection: {(info[i] ?? {}).name}
                     </TokenCollection>
                     <TokenTicker>
-                    Owner: {truncAddr(owners[i] ?? '', 8)} {owners[i] == account && '(you)'}
+                    Owner: {truncAddr(owners[i] ?? '', 8)} {owners[i] === account && '(you)'}
                     </TokenTicker>
                     <OpenSeaLink collection={patronTokensAddr} tokenId={i}
                       style={{gridArea: 'view', marginTop: 0}} />
@@ -160,8 +159,3 @@ const TokenTicker = styled(TextBold)`
   color: ${Colors.Gray[600]};
 `
 
-const TokenPrice = styled(TextBold)`
-  grid-area: price;
-  font-size: 18px;
-  line-height: 32px;
-`
