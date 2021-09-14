@@ -5,7 +5,7 @@ import { Container, ContentBlock, ContentRow, MainContent, Section, SectionRow }
 import { Label } from '../typography/Label'
 import { Text, TextInline } from '../typography/Text'
 import { Subtitle, Title } from '../typography/Title'
-import { Table, Form, InputGroup, FormControl, Card } from 'react-bootstrap';
+import { Spinner, Table, Form, InputGroup, FormControl, Card } from 'react-bootstrap';
 import styled from 'styled-components'
 import { Colors, BorderRad, Transitions } from '../global/styles'
 import { AccountButton } from '../components/account/AccountButton'
@@ -49,7 +49,7 @@ export function ViewNFT(props: {collection: string, tokenId: number}) {
  * both Troublesome or not.
  **/
 export function NFTViewer(props: {collection: string, tokenId: number}) {
-  const { chainId, account, library } = useEthers();
+  const { chainId, account, library, active } = useEthers();
   const dtAddr = useContext(DoubleTroubleContext);
 
   const nftContract = new Contract(props.collection, new utils.Interface(GenericNFTContract.abi), library);
@@ -94,6 +94,7 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
   const lastPurchasePrice = useDTCall('lastPurchasePrice', [props.collection, props.tokenId]);
   const secondsToWithdraw = useDTCall('secondsToWithdraw', [props.collection, props.tokenId]);
   const troublesomeOwner = useDTCall('ownerOf', [props.collection, props.tokenId]);
+  const shouldFail = useDTCall('ownerOf', [props.collection, props.tokenId, 'hello']);
 
   // Write to DT contract
   const { state: setPriceState, send: setPriceSend} = useContractFunction(dtContract, 'setPrice', { transactionName: 'setPrice' })
@@ -120,7 +121,7 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
   if (!originalOwner) {
     return (
       <>
-        <Title>Ops</Title>
+        <Title>Loading...</Title>
         <Text>Could not find token {props.tokenId} in collection {props.collection}. Are you connected to the right Network?</Text>
         <Text>Currently connected to chain {chainId}</Text>
       </>

@@ -1,13 +1,25 @@
-import { useContractCall } from '@usedapp/core'
+import { useContractCall, useContractCalls } from '@usedapp/core'
 import { BigNumber } from '@ethersproject/bignumber'
 import { Link } from './components/base/Link'
 import { ShareIcon } from './components/Transactions/Icons'
 import styled from 'styled-components'
 
+export const truncAddr = (str: string, num: number) => {
+  if (str.length <= num) {
+    return str
+  }
+  return str.slice(0, num) + '...'
+}
 
 export const _useContractCall = (arg: any) => {
   const ret = useContractCall(arg);
   return ret === undefined ? undefined : ret[0];
+}
+
+export const _useContractCalls = (arg: any) => {
+  return useContractCalls(arg).map((ret) =>
+    ret === undefined ? undefined : ret[0]
+  )
 }
 
 export const bignumMin = (bn1: BigNumber, bn2: BigNumber) =>

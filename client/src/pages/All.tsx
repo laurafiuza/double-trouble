@@ -7,11 +7,12 @@ import { Title } from '../typography/Title'
 import { Colors, BorderRad, Transitions } from '../global/styles'
 import styled from 'styled-components'
 import { AccountButton } from '../components/account/AccountButton'
-import { useContractCall, useContractCalls, useContractFunction, useEthers } from '@usedapp/core'
-import { OpenSeaLink, _useContractCall, effectiveNFTPrice } from '../helpers';
+import { useContractFunction, useEthers } from '@usedapp/core'
+import { truncAddr, OpenSeaLink, _useContractCall, _useContractCalls, effectiveNFTPrice } from '../helpers';
 import { DoubleTroubleContext } from '../DoubleTrouble';
 import DoubleTroubleContract from '../abi/DoubleTrouble.json'
 import GenericNFTContract from '../abi/IERC721Metadata.json'
+import { Link } from '../components/base/Link'
 
 
 export function All() {
@@ -27,7 +28,7 @@ export function All() {
   };
 
   const allNfts = useDTCall('allKnownTokens', []);
-  const nameForNfts = useContractCalls((allNfts ?? []).map((t: any) => {
+  const nameForNfts = _useContractCalls((allNfts ?? []).map((t: any) => {
     return {
       abi: new utils.Interface(GenericNFTContract.abi),
       address: t.collection,
@@ -35,8 +36,14 @@ export function All() {
       args: [],
     }
   }))
-  console.log(allNfts)
-  console.log(nameForNfts)
+  const ownerForNfts = _useContractCalls((allNfts ?? []).map((t: any) => {
+    return {
+      abi: new utils.Interface(GenericNFTContract.abi),
+      address: t.collection,
+      method: 'ownerOf',
+      args: [t.tokenId],
+    }
+  }))
 
   return (
     <MainContent>
@@ -52,13 +59,18 @@ export function All() {
                 allNfts.map((t: any, i: number) => (
                   <TokenItem key={`${t.collection}${t.tokenId.toString()}`}>
                     <TokenName>
-                    {nameForNfts[i] ?? t.collection} {t.tokenId.toString()}
+                      <Link href={`/collections/${t.collection}/${t.tokenId}`}>
+                        {nameForNfts[i] ?? t.collection} {t.tokenId.toString()}
+                      </Link>
                     </TokenName>
-                    <TokenTicker>
+                    <TokenPrice>
                     Selling for {utils.formatEther(effectiveNFTPrice(t.forSalePrice, t.lastPurchasePrice))} ETH
+                    </TokenPrice>
+                    <TokenTicker>
+                    Owner: {truncAddr(ownerForNfts[i] ?? '', 8)}
                     </TokenTicker>
                     <OpenSeaLink collection={t.collection} tokenId={t.tokenId}
-                      style={{position: 'absolute', right: 10, marginTop: 0}} />
+                      style={{gridArea: 'view', marginTop: 0}} />
                   </TokenItem>
                 ))}
             </List>
@@ -83,9 +95,9 @@ const TokenItem = styled.li`
   position: relative;
   display: grid;
   grid-template-areas:
-    'icon name balance'
-    'icon ticker balance';
-  grid-template-columns: auto 1fr auto;
+    'name price view'
+    'ticker price view';
+  grid-template-columns: 1fr 2fr auto;
   grid-template-rows: auto auto;
   grid-column-gap: 20px;
   grid-row-gap: 8px;
@@ -123,8 +135,8 @@ const TokenTicker = styled(TextBold)`
   color: ${Colors.Gray[600]};
 `
 
-const TokenBalance = styled(TextBold)`
-  grid-area: balance;
-  font-size: 20px;
+const TokenPrice = styled(TextBold)`
+  grid-area: price;
+  font-size: 18px;
   line-height: 32px;
 `
