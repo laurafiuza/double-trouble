@@ -20,6 +20,7 @@ import GenericNFTContract from '../abi/IERC721Metadata.json'
 import DoubleTroubleContract from '../abi/DoubleTrouble.json'
 import { Contract } from '@ethersproject/contracts'
 import 'bootstrap/dist/css/bootstrap.min.css';
+import {_useContractCall, effectiveNFTPrice } from '../helpers';
 
 
 export function ViewNFT(props: {collection: string, tokenId: number}) {
@@ -44,27 +45,6 @@ export function ViewNFT(props: {collection: string, tokenId: number}) {
     </MainContent>
   );
 }
-
-// Helpers
-const _useContractCall = (arg: any) => {
-  const ret = useContractCall(arg);
-  return ret === undefined ? undefined : ret[0];
-}
-
-const bignumMin = (bn1: BigNumber, bn2: BigNumber) =>
-  bn1.gt(bn2) ? bn2 : bn1
-
-const calculateEffectivePrice = (forSalePrice: BigNumber, lastPurchasePrice: BigNumber) => {
-  if (lastPurchasePrice.gt(0) && forSalePrice.gt(0)) {
-    return bignumMin(lastPurchasePrice.mul(2), forSalePrice)
-  } else if (lastPurchasePrice.eq(0) && forSalePrice.gt(0)) {
-    return forSalePrice;
-  } else if (lastPurchasePrice.gt(0) && forSalePrice.eq(0)) {
-    return lastPurchasePrice.mul(2);
-  } else {
-    return BigNumber.from(0);
-  }
-};
 
 /*
  * Component that shows and allows user to interact with an NFT
@@ -137,7 +117,7 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
   const countdownToWithdraw = countdown(Date.now() + secondsToWithdraw * 1000);
   const isTroublesome = originalOwner == dtAddr;
   const owner = isTroublesome ? troublesomeOwner : originalOwner;
-  const effectivePrice = calculateEffectivePrice(forSalePrice ?? BigNumber.from(0), lastPurchasePrice ?? BigNumber.from(0));
+  const effectivePrice = effectiveNFTPrice(forSalePrice ?? BigNumber.from(0), lastPurchasePrice ?? BigNumber.from(0));
 
   if (!originalOwner) {
     return (
