@@ -22,6 +22,8 @@ export const _useContractCalls = (arg: any) => {
   )
 }
 
+export const zeroAddr = '0x0000000000000000000000000000000000000000';
+
 export const bignumMin = (bn1: BigNumber, bn2: BigNumber) =>
   bn1.gt(bn2) ? bn2 : bn1
 

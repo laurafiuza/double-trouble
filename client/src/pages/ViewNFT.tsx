@@ -19,7 +19,7 @@ import DoubleTroubleContract from '../abi/DoubleTrouble.json'
 import PatronTokensContract from '../abi/PatronTokens.json'
 import { Contract } from '@ethersproject/contracts'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { OpenSeaLink, _useContractCall, effectiveNFTPrice } from '../helpers';
+import { zeroAddr, OpenSeaLink, _useContractCall, effectiveNFTPrice } from '../helpers';
 
 
 export function ViewNFT(props: {collection: string, tokenId: number}) {
@@ -123,8 +123,7 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
   }
 
   // Read from PatronTokens contract
-//  const patron = usePatronTokensCall('patronOf', [props.collection]);
- // console.log(patron);
+  const patron = usePatronTokensCall('patronOf', [props.collection]);
 
   // Derived variables
   const countdownToWithdraw = countdown(Date.now() + secondsToWithdraw * 1000);
@@ -132,10 +131,15 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
   const owner = isTroublesome ? troublesomeOwner : originalOwner;
   const effectivePrice = effectiveNFTPrice(forSalePrice ?? BigNumber.from(0), lastPurchasePrice ?? BigNumber.from(0));
 
+  // loading
+  if (!patron) {
+    return <Spinner animation="border" />
+  }
+
   if (!originalOwner) {
     return (
       <>
-        <Title>Loading...</Title>
+        <Title>Ops</Title>
         <Text>Could not find token {props.tokenId} in collection {props.collection}. Are you connected to the right Network?</Text>
         <Text>Currently connected to chain {chainId}</Text>
       </>
@@ -214,8 +218,11 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
           {!isTroublesome && approved != dtAddr &&
               <>
                 <Text>Approve DoubleTrouble to operate this token before listing it</Text>
-                <SmallButton onClick={approve} disabled={approveState.status == 'Mining'}>Approve</SmallButton>
+                <SmallButton style={{marginTop: 10, marginBottom: 10}} onClick={approve} disabled={approveState.status == 'Mining'}>Approve</SmallButton>
               </>
+          }
+          {patron == zeroAddr &&
+            <Text style={{marginTop: 10}}><strong>No Patron.</strong> No one has claimed Patronage for <strong>{collectionName}</strong> yet. Be the first to sell an NFT from this collection in DoubleTrouble and claim your <a style={{textDecoration: 'underline'}} href="/patrons">Patron Token.</a></Text>
           }
         </>
       }
