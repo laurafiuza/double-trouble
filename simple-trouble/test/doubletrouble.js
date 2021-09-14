@@ -21,7 +21,7 @@ describe("DoubleTrouble", () => {
   // TODO: make tokenId the return value of the createNft function
   // currently, the return value is a transaction object for some reason,
   // how do we retrieve the return value?
-  let cp, dt, nft, tokenId, accounts, signers;
+  let cp, dt, pt, nft, tokenId, accounts, signers;
 
   before(async () => {
     // Deploy contracts
@@ -38,6 +38,10 @@ describe("DoubleTrouble", () => {
     const dtFactory = await ethers.getContractFactory('DoubleTrouble');
     dt = await dtFactory.deploy(ptd.address, 30, 2, 1, 130, accounts[FEE_WALLET]);
 
+    const ptAddr = await dt.patronTokensCollection();
+    pt = await ethers.getContractAt('PatronTokens', ptAddr);
+    assert.equal(pt.address, ptAddr, 'Patron Tokens address must match');
+
     // create simulated NFTs
     await cp.createNft(accounts[0]); // 0, 1, 2
     await cp.createNft(accounts[PATRON]); // 3, 4, 5
@@ -49,6 +53,9 @@ describe("DoubleTrouble", () => {
     const initialPrice = 1;
     await cp.connect(signers[PATRON]).approve(dt.address, 3);
     await dt.connect(signers[PATRON]).setPrice(cp.address, 3, initialPrice);
+    await dt.connect(signers[PATRON + 1]).buy(cp.address, 3, {value: initialPrice})
+
+    assert.equal(accounts[PATRON], await pt.patronOf(cp.address), 'Patron must have been created for CP');
 
     tokenId = 0;
 
@@ -188,10 +195,6 @@ describe("DoubleTrouble", () => {
     };
     let gasCost = buyReceipt.effectiveGasPrice.mul(buyReceipt.gasUsed)
 
-    console.log(sellerBalanceBefore);
-    console.log(sellerBalanceAfter);
-    console.log(price);
-    console.log(feePaid);
     assert_almost_equal(sellerBalanceAfter, sellerBalanceBefore.add(price).sub(feePaid), "Balance of accounts[0] must be bigger after buy");
     assert_almost_equal(buyerBalanceAfter, buyerBalanceBefore.sub(price).sub(gasCost), "Balance of accounts[1] must be smaller after buy");
 
@@ -252,7 +255,7 @@ describe("DoubleTrouble", () => {
 
   it("should return the correct registered tokens in a given collection", async () => {
     let registered = (await registeredTokens(dt)).map(t => { return t.words[0].toNumber() });
-    assert.deepEqual(registered, [0], "Number of registered tokens does not match");
+    assert.deepEqual(registered, [3, 0], "Number of registered tokens does not match");
 
     // Add token 2
     assert.notEqual(await cp.approve(dt.address, 2), undefined, "approval failed (undefined return value).");
@@ -261,24 +264,24 @@ describe("DoubleTrouble", () => {
     assert.notEqual(await dt.setPrice(cp.address, 2, initialPrice), undefined, "setPrice failed");
 
     registered = (await registeredTokens(dt)).map(t => { return t.words[0].toNumber() });
-    assert.deepEqual(registered, [0], "Number of registered tokens does not match");
+    assert.deepEqual(registered, [3, 0], "Number of registered tokens does not match");
 
     await dt.connect(signers[1]).buy(cp.address, 2, {value: initialPrice});
 
     registered = (await registeredTokens(dt)).map(t => { return t.words[0].toNumber() });
-    assert.deepEqual(registered, [0, 2], "Number of registered tokens does not match");
+    assert.deepEqual(registered, [3, 0, 2], "Number of registered tokens does not match");
 
     // Add token 1
     assert.notEqual(await cp.approve(dt.address, 1), undefined, "approval failed (undefined return value).");
     assert.notEqual(await dt.setPrice(cp.address, 1, initialPrice), undefined, "setPrice failed");
 
     registered = (await registeredTokens(dt)).map(t => { return t.words[0].toNumber() });
-    assert.deepEqual(registered, [0, 2], "Number of registered tokens does not match");
+    assert.deepEqual(registered, [3, 0, 2], "Number of registered tokens does not match");
 
     await dt.connect(signers[1]).buy(cp.address, 1, {value: initialPrice});
 
     registered = (await registeredTokens(dt)).map(t => { return t.words[0].toNumber() });
-    assert.deepEqual(registered, [0, 1, 2], "Number of registered tokens does not match");
+    assert.deepEqual(registered, [3, 0, 1, 2], "Number of registered tokens does not match");
 
     assert(await dt.secondsToWithdraw(cp.address, 2) > 0, "Still have some time to Withdraw");
 
@@ -291,13 +294,13 @@ describe("DoubleTrouble", () => {
     await dt.connect(signers[1]).withdraw(cp.address, 2, {value: Math.floor(initialPrice / 65)});
 
     registered = (await registeredTokens(dt)).map(t => { return t.words[0].toNumber() });
-    assert.deepEqual(registered, [0, 1], "Number of registered tokens does not match");
+    assert.deepEqual(registered, [3, 0, 1], "Number of registered tokens does not match");
 
     // Withdraw token 1
     await dt.connect(signers[1]).withdraw(cp.address, 1, {value: Math.floor(initialPrice / 65)});
 
     registered = (await registeredTokens(dt)).map(t => { return t.words[0].toNumber() });
-    assert.deepEqual(registered, [0], "Number of registered tokens does not match");
+    assert.deepEqual(registered, [3, 0], "Number of registered tokens does not match");
   });
 
   it("owner should withdraw NFT after deadline", async () => {
