@@ -53,6 +53,19 @@ export const OpenSeaLink = (props: {style?: any, collection: string, tokenId: nu
   );
 }
 
+export const EtherscanContractLink = (props: {style?: any, contract: string}) => {
+  return (
+    <LinkWrapper style={props.style}>
+      <Link href={`https://etherscan.io/address/${props.contract}`} target="_blank" rel="noopener noreferrer">
+        View Contract on Etherscan
+        <LinkIconWrapper>
+          <ShareIcon />
+        </LinkIconWrapper>
+      </Link>
+    </LinkWrapper>
+  );
+}
+
 const LinkWrapper = styled.div`
   display: flex;
   justify-content: space-between;

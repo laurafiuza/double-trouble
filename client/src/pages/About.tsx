@@ -1,8 +1,11 @@
-import React from 'react'
+import React, {useContext} from 'react'
 import { Container, ContentBlock, ContentRow, MainContent, Section } from '../components/base/base'
 import { Text, } from '../typography/Text'
+import { EtherscanContractLink } from '../helpers'
+import { DoubleTroubleContext } from '../DoubleTrouble';
 
 export function About() {
+  const { dtAddr } = useContext(DoubleTroubleContext);
   return (
     <MainContent>
       <Container>
@@ -32,6 +35,9 @@ export function About() {
     <Text style={{marginTop: 10}}>
               Patronage can change hands. PTRN tokens are also ERC-721 NFTs, so they can be bought and sold in regular NFT exchanges, as well as of course in Double Trouble.
               </Text>
+            </ContentRow>
+            <ContentRow>
+              <EtherscanContractLink style={{position: 'absolute', bottom: 20, right: 20}} contract={dtAddr} />
             </ContentRow>
           </ContentBlock>
         </Section>
