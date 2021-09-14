@@ -5,6 +5,13 @@ import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import "./Libraries.sol";
 import "./PatronTokens.sol";
 
+struct TokenInfo {
+   address collection;
+   uint256 tokenId;
+   uint256 lastPurchasePrice;
+   uint256 forSalePrice;
+   uint256 availableToWithdraw;
+}
 
 // SPDX-License-Identifier: MIT
 contract DoubleTrouble {

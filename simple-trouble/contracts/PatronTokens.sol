@@ -6,12 +6,11 @@ import "./Libraries.sol";
 
 
 // SPDX-License-Identifier: MIT
-struct TokenInfo {
-   address collection;
-   uint256 tokenId;
-   uint256 lastPurchasePrice;
-   uint256 forSalePrice;
-   uint256 availableToWithdraw;
+struct CollectionInfo {
+  address addr;
+  string name;
+  string symbol;
+  address patron;
 }
 
 struct Token {
@@ -35,7 +34,7 @@ contract PatronTokens is ERC721URIStorage {
   }
 
   function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-    return interfaceId == 0xbeefdead || super.supportsInterface(interfaceId);
+    return interfaceId == 0xdeadbeef || super.supportsInterface(interfaceId);
   }
 
   function registeredTokens() external view returns (Token[] memory) {
@@ -82,6 +81,15 @@ contract PatronTokens is ERC721URIStorage {
       return address(0);
     }
     return ownerOf(tokenId);
+  }
+
+  function patronedCollection(uint256 tokenId) public view returns (address) {
+    return _registeredCollections[tokenId];
+  }
+
+  function patronedCollectionInfo(uint256 tokenId) public view returns (CollectionInfo memory) {
+    IERC721Metadata c = IERC721Metadata(_registeredCollections[tokenId]);
+    return CollectionInfo(_registeredCollections[tokenId], c.name(), c.symbol(), ownerOf(tokenId));
   }
 
   function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
