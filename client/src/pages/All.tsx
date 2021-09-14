@@ -16,6 +16,7 @@ import { Link } from '../components/base/Link'
 
 
 export function All() {
+  const { account } = useEthers();
   const dtAddr = useContext(DoubleTroubleContext);
 
   const useDTCall = (method: string, args: any[]) => {
@@ -67,7 +68,7 @@ export function All() {
                     Selling for {utils.formatEther(effectiveNFTPrice(t.forSalePrice, t.lastPurchasePrice))} ETH
                     </TokenPrice>
                     <TokenTicker>
-                    Owner: {truncAddr(ownerForNfts[i] ?? '', 8)}
+                    Owner: {truncAddr(ownerForNfts[i] ?? '', 8)} {ownerForNfts[i] == account && '(you)'}
                     </TokenTicker>
                     <OpenSeaLink collection={t.collection} tokenId={t.tokenId}
                       style={{gridArea: 'view', marginTop: 0}} />
