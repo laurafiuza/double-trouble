@@ -9,7 +9,7 @@ import { NftProvider } from "use-nft"
 const config = {
   readOnlyChainId: ChainId.Mainnet,
   readOnlyUrls: {
-    [ChainId.Mainnet]: 'https://mainnet.infura.io/v3/3165a249c65f4198bf57200109b8fadf',
+    [ChainId.Mainnet]: 'https://eth-mainnet.alchemyapi.io/v2/fkTVf8kXxNZEkz6W1cjHik5rFC1g92D6',
   },
   multicallAddresses: {
     // FIXME should be passed via process.env
@@ -19,7 +19,7 @@ const config = {
 
 // We are using the "ethers" fetcher here.
 const ethersConfig = {
-  provider: getDefaultProvider("homestead"),
+  provider: getDefaultProvider("homestead", {alchemy: 'https://eth-mainnet.alchemyapi.io/v2/fkTVf8kXxNZEkz6W1cjHik5rFC1g92D6'}),
 }
 
 const chains = {
