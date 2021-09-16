@@ -53,7 +53,7 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
   const { chainId, account, library, } = useEthers();
   const { dtAddr, patronTokensAddr }  = useContext(DoubleTroubleContext);
 
-  const { loading, error, nft } = useNft(props.collection, props.tokenId.toString());
+  const { nft } = useNft(props.collection, props.tokenId.toString());
   const nftContract = new Contract(props.collection, new utils.Interface(GenericNFTContract.abi), library);
   const dtContract = new Contract(dtAddr, new utils.Interface(DoubleTroubleContract.abi), library);
 
@@ -92,7 +92,6 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
   const collectionSymbol = useNFTCall('symbol', []);
   const originalOwner = useNFTCall('ownerOf', [props.tokenId]);
   const approved = useNFTCall('getApproved', [props.tokenId]);
-  const tokenURI = useNFTCall('tokenURI', [props.tokenId]);
 
   // Write to NFT contract
   const { state: approveState, send: approveSend } = useContractFunction(nftContract, 'approve', { transactionName: 'approve' })

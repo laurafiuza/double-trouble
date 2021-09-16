@@ -1,6 +1,5 @@
-import React, { Component } from 'react';
-import { Card, Spinner } from 'react-bootstrap';
-import axios from 'axios';
+import React from 'react';
+import { Card } from 'react-bootstrap';
 import _ from 'lodash';
 
 export default function ImageCard(props: {imageURI: string, style: any}) {
