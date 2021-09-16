@@ -16,7 +16,7 @@ export function About() {
             </ContentRow>
             <ContentRow>
               <h2>About</h2>
-              <Text>Double Trouble is an NFT exchange platform with a catch: you can "force buy" any NFT in the platform - i.e. force someone to sell it as long as you're willing to pay 2x what the current owner paid for it.</Text>
+              <Text>Double Trouble is an NFT exchange platform with a catch: you can "force buy" any NFT in the platform - i.e. force someone to sell it as long as you're willing to pay 1.1x what the current owner paid for it.</Text>
     <Text style={{marginTop: 10}}>
                 You can list existing NFTs you own for sale in Double Trouble. Our platform works for any NFT that implements the <a href="https://ethereum.org/en/developers/docs/standards/tokens/erc-721/">ERC-721 interface</a>.
     </Text>
@@ -24,7 +24,7 @@ export function About() {
             <ContentRow>
               <h2>How it works</h2>
               <Text>
-                Once you buy an NFT within DoubleTrouble, the NFT gets locked in escrow for 30 days in the DoubleTrouble contract in order to preserve the 2x force buy functionality. The NFT is still 100% yours. You can still sell it (or someone else can still force buy it) while it's in escrow. But if you want to withdraw the NFT from DoubleTrouble for any utility purposes, you need to wait 30 days after purchasing it.
+                Once you buy an NFT within DoubleTrouble, the NFT gets locked in escrow for 30 days in the DoubleTrouble contract in order to preserve the force buy functionality. The NFT is still 100% yours. You can still sell it (or someone else can still force buy it) while it's in escrow. But if you want to withdraw the NFT from DoubleTrouble for any utility purposes, you need to wait 30 days after purchasing it.
               </Text>
             </ContentRow>
             <ContentRow>

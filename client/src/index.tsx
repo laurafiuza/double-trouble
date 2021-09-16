@@ -26,8 +26,8 @@ const chains = {
   // Ethereum Mainnet
   "1": {
     name: 'Ethereum',
-    dtAddr: "0xf2D21129B6b93A91A726F24BC436D00331B0B338",
-    patronTokensAddr: '0xfdea67b8cd4449f0b1400b856d4715492aacd89b',
+    dtAddr: "0x4C2Bc0d85D42C2Ed65BDd40C78A7b71A5b412648",
+    patronTokensAddr: '0xD8fb428BcE0A7176912869EC169eFd4cEf51335d',
   },
   // Hardhat local
   "31337": {

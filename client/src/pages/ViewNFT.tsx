@@ -18,7 +18,7 @@ import DoubleTroubleContract from '../abi/DoubleTrouble.json'
 import PatronTokensContract from '../abi/PatronTokens.json'
 import { Contract } from '@ethersproject/contracts'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { zeroAddr, OpenSeaLink, _useContractCall, effectiveNFTPrice } from '../helpers';
+import { forceBuyPrice, zeroAddr, OpenSeaLink, _useContractCall, effectiveNFTPrice } from '../helpers';
 import { useNft } from "use-nft"
 
 
@@ -118,7 +118,7 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
 
   const { state: forceBuyState, send: forceBuySend} = useContractFunction(dtContract, 'forceBuy', { transactionName: 'forceBuy' })
   const forceBuy = () => {
-    forceBuySend(props.collection, props.tokenId, {value: lastPurchasePrice.mul(2)})
+    forceBuySend(props.collection, props.tokenId, {value: forceBuyPrice(lastPurchasePrice)})
   }
 
   const { state: withdrawState, send: withdrawSend} = useContractFunction(dtContract, 'withdraw', { transactionName: 'withdraw' })
@@ -245,7 +245,7 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
         }
         {owner !== account && lastPurchasePrice > 0 &&
           <SmallButton disabled={forceBuyState.status === 'Mining'} onClick={forceBuy}>
-            Force Buy for {utils.formatEther(lastPurchasePrice.mul(2))} ETH
+            Force Buy for {utils.formatEther(forceBuyPrice(lastPurchasePrice))} ETH
           </SmallButton>
         }
         {isTroublesome && owner === account && secondsToWithdraw <= 0 &&

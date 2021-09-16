@@ -29,16 +29,22 @@ export const bignumMin = (bn1: BigNumber, bn2: BigNumber) =>
 
 export const effectiveNFTPrice = (forSalePrice: BigNumber, lastPurchasePrice: BigNumber) => {
   if (lastPurchasePrice.gt(0) && forSalePrice.gt(0)) {
-    return bignumMin(lastPurchasePrice.mul(2), forSalePrice)
+    return bignumMin(forceBuyPrice(lastPurchasePrice), forSalePrice)
   } else if (lastPurchasePrice.eq(0) && forSalePrice.gt(0)) {
     return forSalePrice;
   } else if (lastPurchasePrice.gt(0) && forSalePrice.eq(0)) {
-    return lastPurchasePrice.mul(2);
+    return forceBuyPrice(lastPurchasePrice);
   } else {
     return BigNumber.from(0);
   }
 };
 
+export const dtParams = {
+  numerator: 11,
+  denominator: 10,
+}
+
+export const forceBuyPrice = (lastPurchasePrice: BigNumber) => lastPurchasePrice.mul(dtParams.numerator).div(dtParams.denominator);
 
 export const OpenSeaLink = (props: {style?: any, collection: string, tokenId: number}) => {
   return (
