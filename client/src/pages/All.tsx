@@ -94,7 +94,6 @@ const List = styled.ul`
 `
 
 const TokenItem = styled.li`
-  position: relative;
   display: grid;
   grid-template-areas:
     'name price view'
@@ -104,7 +103,6 @@ const TokenItem = styled.li`
   grid-column-gap: 20px;
   grid-row-gap: 8px;
   align-items: center;
-  height: 84px;
   padding: 12px 0;
   border-top: 1px solid transparent;
   border-bottom: 1px solid transparent;

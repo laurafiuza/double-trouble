@@ -3,18 +3,23 @@ import { NavLink } from 'react-router-dom'
 import styled from 'styled-components'
 import { Colors, Shadows, Sizes, Transitions } from '../global/styles'
 import { HeaderContainer } from './base/base'
+import { useMediaQuery } from 'react-responsive'
+
 
 export function TopBar() {
+  const isDesktopOrLaptop = useMediaQuery({query: '(min-width: 800px)'});
   return (
     <Header>
       <HeaderContainer>
         <HeaderNav>
-          <ToMain href="/">
-            <span>DoubleTrouble</span>
-            <ToMainBottom>
-              NFT <Handshaking>🤝</Handshaking> Exchange
-            </ToMainBottom>
-          </ToMain>
+          { isDesktopOrLaptop &&
+            <ToMain href="/">
+              <span>DoubleTrouble</span>
+              <ToMainBottom>
+                NFT <Handshaking>🤝</Handshaking> Exchange
+              </ToMainBottom>
+            </ToMain>
+          }
           <HeaderNavLinks>
             <HeaderLink activeClassName="active-page" to="/all">
               {' '}
