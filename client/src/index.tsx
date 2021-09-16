@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom'
 import { ChainId, DAppProvider } from '@usedapp/core'
 import { App } from './App'
 import { DoubleTroubleContext } from './DoubleTrouble'
+import { getDefaultProvider, } from "ethers"
+import { NftProvider } from "use-nft"
 
 const config = {
   readOnlyChainId: ChainId.Mainnet,
@@ -13,6 +15,11 @@ const config = {
     // FIXME should be passed via process.env
     '31337': process.env.REACT_APP_MULTICALL_ADDR ?? ''
   }
+}
+
+// We are using the "ethers" fetcher here.
+const ethersConfig = {
+  provider: getDefaultProvider("homestead"),
 }
 
 const chains = {
@@ -45,7 +52,11 @@ function WrappedApp() {
 ReactDOM.render(
   <React.StrictMode>
     <DAppProvider config={config}>
-      <WrappedApp />
+      <NftProvider fetcher={["ethers", ethersConfig]} jsonProxy={(url) =>
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
+      }>
+        <WrappedApp />
+      </NftProvider>
     </DAppProvider>
   </React.StrictMode>,
   document.getElementById('root')

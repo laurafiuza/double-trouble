@@ -19,6 +19,7 @@ import PatronTokensContract from '../abi/PatronTokens.json'
 import { Contract } from '@ethersproject/contracts'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { zeroAddr, OpenSeaLink, _useContractCall, effectiveNFTPrice } from '../helpers';
+import { useNft } from "use-nft"
 
 
 export function ViewNFT(props: {collection: string, tokenId: number}) {
@@ -52,6 +53,7 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
   const { chainId, account, library, } = useEthers();
   const { dtAddr, patronTokensAddr }  = useContext(DoubleTroubleContext);
 
+  const { loading, error, nft } = useNft(props.collection, props.tokenId.toString());
   const nftContract = new Contract(props.collection, new utils.Interface(GenericNFTContract.abi), library);
   const dtContract = new Contract(dtAddr, new utils.Interface(DoubleTroubleContract.abi), library);
 
@@ -153,11 +155,11 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
   return (
     <>
       <div style={{position: 'relative'}}>
-        <Title>{collectionName} #{props.tokenId}</Title>
+        <Title>{nft && nft.name}</Title>
         <OpenSeaLink collection={props.collection} tokenId={props.tokenId}
           style={{position: 'absolute', right: 0, margin: 0, top: 10}} />
       </div>
-      <ImageCard style={{marginBottom: 20}} tokenURI={tokenURI}/>
+      <ImageCard style={{marginBottom: 20}} imageURI={nft && nft.image}/>
       <Table striped bordered hover>
         <tbody>
           { collectionName &&
@@ -180,6 +182,12 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
             <td>Owner</td>
             <td>{owner}</td>
           </tr>
+          {nft && nft.description &&
+            <tr>
+              <td>Description</td>
+              <td>{nft.description}</td>
+            </tr>
+          }
           { effectivePrice && effectivePrice.gt(BigNumber.from(0)) &&
             <tr>
               <td>Price</td>
