@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react'
-import { useContractFunction, useEthers } from '@usedapp/core'
+import { useContractFunction, useEthers, useEtherBalance } from '@usedapp/core'
 import { utils } from 'ethers'
 import { Container, ContentBlock, ContentRow, MainContent, Section, SectionRow } from '../components/base/base'
 import { Text, } from '../typography/Text'
@@ -52,6 +52,7 @@ export function ViewNFT(props: {collection: string, tokenId: number}) {
 export function NFTViewer(props: {collection: string, tokenId: number}) {
   const { chainId, account, library, } = useEthers();
   const { dtAddr, patronTokensAddr }  = useContext(DoubleTroubleContext);
+  const userBalance = useEtherBalance(account);
 
   const { nft } = useNft(props.collection, props.tokenId.toString());
   const nftContract = new Contract(props.collection, new utils.Interface(GenericNFTContract.abi), library);
@@ -113,11 +114,19 @@ export function NFTViewer(props: {collection: string, tokenId: number}) {
 
   const { state: buyState, send: buySend} = useContractFunction(dtContract, 'buy', { transactionName: 'buy' })
   const buy = () => {
+    if (forSalePrice.gt(userBalance)) {
+      window.alert('Not enough balance for this purchase')
+      return
+    }
     buySend(props.collection, props.tokenId, {value: forSalePrice})
   }
 
   const { state: forceBuyState, send: forceBuySend} = useContractFunction(dtContract, 'forceBuy', { transactionName: 'forceBuy' })
   const forceBuy = () => {
+    if (forSalePrice.gt(userBalance)) {
+      window.alert('Not enough balance for this purchase')
+      return
+    }
     forceBuySend(props.collection, props.tokenId, {value: forceBuyPrice(lastPurchasePrice)})
   }
 
