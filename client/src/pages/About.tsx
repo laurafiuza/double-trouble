@@ -16,7 +16,7 @@ export function About() {
             </ContentRow>
             <ContentRow>
               <h2>About</h2>
-              <Text>Double Trouble is an NFT exchange platform with a catch: you can "force buy" any NFT in the platform - i.e. force someone to sell it as long as you're willing to pay 1.1x what the current owner paid for it.</Text>
+              <Text>Double Trouble is an Open Source NFT exchange platform with a catch: you can "force buy" any NFT in the platform - i.e. force someone to sell it as long as you're willing to pay 1.1x what the current owner paid for it.</Text>
     <Text style={{marginTop: 10}}>
                 You can list existing NFTs you own for sale in Double Trouble. Our platform works for any NFT that implements the <a href="https://ethereum.org/en/developers/docs/standards/tokens/erc-721/">ERC-721 interface</a>.
     </Text>
